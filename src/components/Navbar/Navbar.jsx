@@ -1,7 +1,7 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../../contexts/ThemeContext';
-import ThemeToggle from '../ThemeToggle/ThemeToggle';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useTheme } from "../../contexts/ThemeContext";
+import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import {
   NavbarContainer,
   NavbarContent,
@@ -16,23 +16,28 @@ import {
   NotificationButton,
   UserButton,
   UserAvatar,
-  UserName
-} from './Navbar.styles';
+  UserName,
+} from "./Navbar.styles";
 
 const Navbar = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
 
   const handleLogout = () => {
-    localStorage.removeItem('techsync-authenticated');
-    navigate('/login');
+    localStorage.removeItem("techsync-authenticated");
+    navigate("/login");
   };
 
   return (
     <NavbarContainer $isDarkMode={isDarkMode}>
       <NavbarContent>
         <LogoSection>
-          <LogoIcon className="material-symbols-outlined" $isDarkMode={isDarkMode}>code</LogoIcon>
+          <LogoIcon
+            className="material-symbols-outlined"
+            $isDarkMode={isDarkMode}
+          >
+            code
+          </LogoIcon>
           <LogoText $isDarkMode={isDarkMode}>TechSync</LogoText>
         </LogoSection>
 
@@ -45,12 +50,18 @@ const Navbar = () => {
 
         <UserSection>
           <ThemeToggle size="small" />
-          
-          <NotificationButton aria-label="Notificações" $isDarkMode={isDarkMode}>
+
+          <NotificationButton
+            aria-label="Notificações"
+            $isDarkMode={isDarkMode}
+          >
             <span className="material-symbols-outlined">notifications</span>
           </NotificationButton>
-
-          <UserButton aria-label="Perfil do usuário - Gabriel" $isDarkMode={isDarkMode}>
+          <UserButton
+            aria-label="Perfil do usuário - Gabriel"
+            $isDarkMode={isDarkMode}
+            onClick={() => navigate("/perfil")}
+          >
             <UserAvatar $isDarkMode={isDarkMode}>G</UserAvatar>
             <UserName $isDarkMode={isDarkMode}>Gabriel</UserName>
           </UserButton>
