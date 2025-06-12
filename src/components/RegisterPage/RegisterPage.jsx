@@ -30,7 +30,6 @@ const RegisterPage = () => {
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     fullName: '',
-    companyName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -74,10 +73,6 @@ const RegisterPage = () => {
 
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Nome completo é obrigatório';
-    }
-
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Nome da empresa é obrigatório';
     }
 
     if (!formData.email) {
@@ -159,18 +154,6 @@ const RegisterPage = () => {
                 $isDarkMode={isDarkMode}
               />
 
-              <Input
-                id="companyName"
-                label="Empresa"
-                type="text"
-                placeholder="Nome da sua empresa"
-                value={formData.companyName}
-                onChange={handleInputChange('companyName')}
-                error={errors.companyName}
-                icon="business"
-                required
-                $isDarkMode={isDarkMode}
-              />
 
               <Input
                 id="email"
