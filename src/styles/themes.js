@@ -47,7 +47,7 @@ export const themes = {
       primaryLight: 'rgba(249, 115, 22, 0.1)',
       primaryShadow: 'rgba(249, 115, 22, 0.2)',
       
-      background: '#f2f2f2',
+      background: '#ffffff',
       backgroundSecondary: '#F8FAFC',
       backgroundTertiary: '#F1F5F9',
       
