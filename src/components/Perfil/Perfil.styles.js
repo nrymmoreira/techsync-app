@@ -16,11 +16,15 @@ export const ProfileContainer = styled.main`
 `;
 
 export const ProfileContent = styled.div`
-  max-width: 1536px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem;
 
   @media (max-width: ${breakpoints.tablet}) {
+    padding: 1.5rem;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
     padding: 1rem;
   }
 `;
@@ -28,11 +32,12 @@ export const ProfileContent = styled.div`
 export const ProfileHeader = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  margin-bottom: 2rem;
+  align-items: center;
+  margin-bottom: 3rem;
+  text-align: center;
 
-  @media (min-width: ${breakpoints.desktop}) {
-    flex-direction: row;
+  @media (max-width: ${breakpoints.mobile}) {
+    margin-bottom: 2rem;
   }
 `;
 
@@ -40,9 +45,10 @@ export const ProfilePictureSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-bottom: 2rem;
 
-  @media (min-width: ${breakpoints.desktop}) {
-    align-items: flex-start;
+  @media (max-width: ${breakpoints.mobile}) {
+    margin-bottom: 1.5rem;
   }
 `;
 
@@ -133,41 +139,52 @@ export const CameraButton = styled.button`
 
 export const ProfileInfo = styled.div`
   text-align: center;
-
-  @media (min-width: ${breakpoints.desktop}) {
-    text-align: left;
-  }
 `;
 
 export const ProfileName = styled.h2`
   font-family: ${fonts.primary};
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
+
+  @media (max-width: ${breakpoints.mobile}) {
+    font-size: 1.25rem;
+  }
 `;
 
 export const ProfileEmail = styled.p`
   font-family: ${fonts.secondary};
-  font-size: 0.875rem;
+  font-size: 1rem;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
+
+  @media (max-width: ${breakpoints.mobile}) {
+    font-size: 0.875rem;
+  }
 `;
 
 export const TabNavigation = styled.div`
-  flex: 1;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
 `;
 
 export const TabList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 2rem;
+  justify-content: center;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 100%;
+    justify-content: center;
+  }
 `;
 
 export const TabButton = styled.button`
@@ -213,8 +230,10 @@ export const TabButton = styled.button`
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    padding: 0.625rem 1.25rem;
+    padding: 0.625rem 1rem;
     font-size: 0.875rem;
+    flex: 1;
+    min-width: 0;
     
     span {
       font-size: 0.875rem;

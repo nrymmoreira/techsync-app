@@ -86,25 +86,25 @@ const Perfil = () => {
               </ProfileEmail>
             </ProfileInfo>
           </ProfilePictureSection>
-
-          <TabNavigation>
-            <TabList>
-              {tabs.map((tab) => (
-                <TabButton
-                  key={tab.id}
-                  $isActive={activeTab === tab.id}
-                  $isDarkMode={isDarkMode}
-                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <span className="material-symbols-outlined">
-                    {tab.icon}
-                  </span>
-                  {tab.label}
-                </TabButton>
-              ))}
-            </TabList>
-          </TabNavigation>
         </ProfileHeader>
+
+        <TabNavigation>
+          <TabList>
+            {tabs.map((tab) => (
+              <TabButton
+                key={tab.id}
+                $isActive={activeTab === tab.id}
+                $isDarkMode={isDarkMode}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                <span className="material-symbols-outlined">
+                  {tab.icon}
+                </span>
+                {tab.label}
+              </TabButton>
+            ))}
+          </TabList>
+        </TabNavigation>
 
         <ContentSection>
           {renderActiveTab()}
