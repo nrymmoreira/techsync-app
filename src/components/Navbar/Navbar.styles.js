@@ -180,6 +180,81 @@ export const NotificationButton = styled.button`
   }
 `;
 
+export const UserButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: 50px;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surface;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
+  }};
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceHover;
+    }};
+    border-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primary;
+    }};
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    gap: 0.5rem;
+    padding: 0.375rem;
+    display: none;
+  }
+`;
+
+export const UserAvatar = styled.div`
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.primary;
+  }};
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.background;
+  }};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: ${fonts.secondary};
+  font-weight: 600;
+  font-size: 0.875rem;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8125rem;
+  }
+`;
+
+export const UserName = styled.span`
+  font-family: ${fonts.secondary};
+  font-weight: 500;
+  font-size: 0.9375rem;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textPrimary;
+  }};
+
+  @media (max-width: ${breakpoints.tablet}) {
+    display: none;
+  }
+  `;
+
 export const MobileMenuButton = styled.button`
   display: none;
   align-items: center;
@@ -242,7 +317,7 @@ export const MobileMenuOverlay = styled.div`
   bottom: 0;
   background: rgba(0, 0, 0, 0.5);
   z-index: 150;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(10px);
 `;
 
 export const MobileMenu = styled.div`

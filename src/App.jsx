@@ -37,14 +37,6 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
-        <Route
-          path="/configuracoes"
-          element={
-            <PrivateRoute>
-              <Configuracoes />
-            </PrivateRoute>
-          }
-        />
       </Routes>
     </>
   );

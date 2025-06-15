@@ -4,7 +4,7 @@ import { fonts, breakpoints } from '../../styles/GlobalStyles';
 
 export const ProfileContainer = styled.main`
   min-height: 100vh;
-  padding-top: 80px;
+  padding: 100px 3rem 3rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.background;
@@ -13,48 +13,72 @@ export const ProfileContainer = styled.main`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
+
+   @media (max-width: ${breakpoints.mobile}) {
+    padding: 80px 1rem 40px; 
+  }
+;
 `;
 
 export const ProfileContent = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4rem;
+  width: 100%;
+  align-items: flex-start;
+  position: relative;
+  padding-left: 18%;
 
   @media (max-width: ${breakpoints.tablet}) {
-    padding: 1.5rem;
+    padding-left: 0;
+    padding-right: 0;
+    justify-items: center;
+    gap: 0;
+  
   }
 
-  @media (max-width: ${breakpoints.mobile}) {
-    padding: 1rem;
+
+  @media (max-width: ${breakpoints.tablet}) {
+    padding-left: 0;
+    padding-right: 0;
   }
+
+;
 `;
 
 export const ProfileHeader = styled.div`
+  position: fixed;
+  max-width: 18%;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 3rem;
-  text-align: center;
+  justify-items: flex-start;
+  flex-direction: row;
+  gap: 2rem;
+  margin-bottom: 2rem;
 
-  @media (max-width: ${breakpoints.mobile}) {
-    margin-bottom: 2rem;
+  @media (max-width: ${breakpoints.tablet}) {
+    justify-content: center;
+    position: relative;
+    width: 100%;
+    flex-wrap: wrap;
   }
+;
 `;
 
 export const ProfilePictureSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 2rem;
 
-  @media (max-width: ${breakpoints.mobile}) {
-    margin-bottom: 1.5rem;
+  @media (min-width: ${breakpoints.desktop}) {
+    align-items: center;
   }
+;
 `;
 
 export const ProfilePictureContainer = styled.div`
   position: relative;
   margin-bottom: 1rem;
+;
 `;
 
 export const ProfilePicture = styled.div`
@@ -78,6 +102,7 @@ export const ProfilePicture = styled.div`
     width: 10rem;
     height: 10rem;
   }
+;
 `;
 
 export const ProfilePictureGradient = styled.div`
@@ -97,6 +122,7 @@ export const ProfilePictureGradient = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
+;
 `;
 
 export const CameraButton = styled.button`
@@ -135,56 +161,67 @@ export const CameraButton = styled.button`
   span {
     font-size: 1.25rem;
   }
+;
 `;
 
 export const ProfileInfo = styled.div`
   text-align: center;
+
+  @media (min-width: ${breakpoints.desktop}) {
+    text-align: center;
+  }
+;
 `;
 
 export const ProfileName = styled.h2`
   font-family: ${fonts.primary};
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: 600;
   margin-bottom: 0.25rem;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
-
-  @media (max-width: ${breakpoints.mobile}) {
-    font-size: 1.25rem;
-  }
+;
 `;
 
 export const ProfileEmail = styled.p`
   font-family: ${fonts.secondary};
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
-
-  @media (max-width: ${breakpoints.mobile}) {
-    font-size: 0.875rem;
-  }
+;
 `;
 
 export const TabNavigation = styled.div`
+  width: 100%;
   display: flex;
-  justify-content: center;
-  margin-bottom: 2rem;
-`;
-
-export const TabList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
   justify-content: center;
 
   @media (max-width: ${breakpoints.mobile}) {
     width: 100%;
+    display: flex;
     justify-content: center;
   }
+;
+`;
+
+
+export const TabList = styled.div`
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+  }
+;
 `;
 
 export const TabButton = styled.button`
@@ -230,17 +267,17 @@ export const TabButton = styled.button`
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    padding: 0.625rem 1rem;
+    padding: 0.625rem 1.25rem;
     font-size: 0.875rem;
-    flex: 1;
-    min-width: 0;
-    
+    width: 100%;    
     span {
       font-size: 0.875rem;
     }
   }
+;
 `;
 
 export const ContentSection = styled.div`
-  /* O conteúdo será renderizado pelos componentes filhos */
+  width: 100%;
+;
 `;

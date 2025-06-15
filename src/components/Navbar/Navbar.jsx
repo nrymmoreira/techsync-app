@@ -14,6 +14,9 @@ import {
   NavText,
   UserSection,
   NotificationButton,
+  UserButton,
+  UserAvatar,
+  UserName,
   MobileMenuButton,
   MobileMenu,
   MobileMenuItem,
@@ -44,12 +47,6 @@ const Navbar = () => {
       label: 'Perfil',
       icon: 'person',
       path: '/perfil'
-    },
-    {
-      id: 'settings',
-      label: 'Configurações',
-      icon: 'settings',
-      path: '/configuracoes'
     },
     {
       id: 'logout',
@@ -110,6 +107,15 @@ const Navbar = () => {
             >
               <span className="material-symbols-outlined">notifications</span>
             </NotificationButton>
+
+            <UserButton
+              aria-label="Perfil do usuário - Gabriel"
+             $isDarkMode={isDarkMode}
+              onClick={() => navigate("/perfil")}
+            >
+              <UserAvatar $isDarkMode={isDarkMode}>G</UserAvatar>
+              <UserName $isDarkMode={isDarkMode}>Gabriel</UserName>
+            </UserButton>
 
             <MobileMenuButton
               onClick={toggleMobileMenu}
