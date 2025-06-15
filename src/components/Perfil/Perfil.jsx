@@ -211,21 +211,142 @@ const Perfil = () => {
             </ContentSection>
           )}
 
-          {activeTab === "dados-empresa" && (
-            <ContentSection $isDarkMode={isDarkMode}>
-              <SectionTitle $isDarkMode={isDarkMode}>
-                Dados da Empresa
-              </SectionTitle>
-              <PlaceholderSection $isDarkMode={isDarkMode}>
-                <PlaceholderContent>
-                  <PlaceholderIcon>
-                    <Building2 size={48} />
-                  </PlaceholderIcon>
-                  <PlaceholderText>Seção em desenvolvimento</PlaceholderText>
-                </PlaceholderContent>
-              </PlaceholderSection>
-            </ContentSection>
-          )}
+              {activeTab === "dados-empresa" && (
+      <ContentSection $isDarkMode={isDarkMode}>
+        <SectionTitle $isDarkMode={isDarkMode}>Dados da Empresa</SectionTitle>
+
+        <FormGrid>
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Nome da empresa</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.nomeEmpresa}
+              onChange={(e) => handleInputChange("nomeEmpresa", e.target.value)}
+              placeholder="TechDev Solutions"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>CNPJ</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.cnpj}
+              onChange={(e) => handleInputChange("cnpj", e.target.value)}
+              placeholder="12.345.678/0001-90"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Telefone</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.telefoneEmpresa}
+              onChange={(e) => handleInputChange("telefoneEmpresa", e.target.value)}
+              placeholder="(11) 3456-7890"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Site</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.site}
+              onChange={(e) => handleInputChange("site", e.target.value)}
+              placeholder="www.techdevsolutions.com.br"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>CEP</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.cep}
+              onChange={(e) => handleInputChange("cep", e.target.value)}
+              placeholder="07024-167"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Endereço</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.endereco}
+              onChange={(e) => handleInputChange("endereco", e.target.value)}
+              placeholder="Av. Paulista"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Número</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.numero}
+              onChange={(e) => handleInputChange("numero", e.target.value)}
+              placeholder="1000"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Complemento</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.complemento}
+              onChange={(e) => handleInputChange("complemento", e.target.value)}
+              placeholder="Sala 1003"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Bairro</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.bairro}
+              onChange={(e) => handleInputChange("bairro", e.target.value)}
+              placeholder="Bela Vista"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Cidade</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.cidade}
+              onChange={(e) => handleInputChange("cidade", e.target.value)}
+              placeholder="São Paulo"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+
+          <FormField>
+            <FormLabel $isDarkMode={isDarkMode}>Estado</FormLabel>
+            <FormInput
+              type="text"
+              value={formData.estado}
+              onChange={(e) => handleInputChange("estado", e.target.value)}
+              placeholder="São Paulo"
+              $isDarkMode={isDarkMode}
+            />
+          </FormField>
+        </FormGrid>
+
+        <SaveButtonContainer>
+          <SaveButton $isDarkMode={isDarkMode} onClick={handleSaveChanges}>
+            <FileText size={18} />
+            Salvar alterações
+          </SaveButton>
+        </SaveButtonContainer>
+      </ContentSection>
+    )}
+
  {activeTab === 'configuracoes' && (
           <ContentSection $isDarkMode={isDarkMode}>
             <SectionTitle $isDarkMode={isDarkMode}>Configurações</SectionTitle>
