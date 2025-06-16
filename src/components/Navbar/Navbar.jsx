@@ -17,6 +17,8 @@ import {
   UserButton,
   UserAvatar,
   UserName,
+  UserDropdown,
+  UserDropdownItem,
   MobileMenuButton,
   MobileMenu,
   MobileMenuItem,
@@ -28,11 +30,13 @@ const Navbar = () => {
   const location = useLocation();
   const { isDarkMode } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem("techsync-authenticated");
     navigate("/login");
     setIsMobileMenuOpen(false);
+    setIsUserDropdownOpen(false);
   };
 
   const menuItems = [
@@ -65,12 +69,25 @@ const Navbar = () => {
     setIsMobileMenuOpen(false);
   };
 
+  const handleUserDropdownClick = (action) => {
+    if (action === 'profile') {
+      navigate('/perfil');
+    } else if (action === 'logout') {
+      handleLogout();
+    }
+    setIsUserDropdownOpen(false);
+  };
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   const closeMobileMenu = () => {
     setIsMobileMenuOpen(false);
+  };
+
+  const toggleUserDropdown = () => {
+    setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
   return (
@@ -108,14 +125,39 @@ const Navbar = () => {
               <span className="material-symbols-outlined">notifications</span>
             </NotificationButton>
 
-            <UserButton
-              aria-label="Perfil do usuário - Gabriel"
-             $isDarkMode={isDarkMode}
-              onClick={() => navigate("/perfil")}
-            >
-              <UserAvatar $isDarkMode={isDarkMode}>G</UserAvatar>
-              <UserName $isDarkMode={isDarkMode}>Gabriel</UserName>
-            </UserButton>
+            <div style={{ position: 'relative' }}>
+              <UserButton
+                aria-label="Perfil do usuário - Gabriel"
+                $isDarkMode={isDarkMode}
+                onClick={toggleUserDropdown}
+              >
+                <UserAvatar $isDarkMode={isDarkMode}>G</UserAvatar>
+                <UserName $isDarkMode={isDarkMode}>Gabriel</UserName>
+                <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                  {isUserDropdownOpen ? 'expand_less' : 'expand_more'}
+                </span>
+              </UserButton>
+
+              {isUserDropdownOpen && (
+                <UserDropdown $isDarkMode={isDarkMode}>
+                  <UserDropdownItem
+                    onClick={() => handleUserDropdownClick('profile')}
+                    $isDarkMode={isDarkMode}
+                  >
+                    <span className="material-symbols-outlined">person</span>
+                    Meu Perfil
+                  </UserDropdownItem>
+                  <UserDropdownItem
+                    onClick={() => handleUserDropdownClick('logout')}
+                    $isDarkMode={isDarkMode}
+                    $isLogout={true}
+                  >
+                    <span className="material-symbols-outlined">logout</span>
+                    Sair
+                  </UserDropdownItem>
+                </UserDropdown>
+              )}
+            </div>
 
             <MobileMenuButton
               onClick={toggleMobileMenu}

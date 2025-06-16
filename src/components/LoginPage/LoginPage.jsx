@@ -5,7 +5,6 @@ import Logo from '../Logo/Logo';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
 import Checkbox from '../Checkbox/Checkbox';
-import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import {
   LoginContainer,
   ContentWrapper,
@@ -20,8 +19,7 @@ import {
   ForgotPasswordLink,
   LoginFooter,
   FooterText,
-  FooterLink,
-  ThemeToggleContainer
+  FooterLink
 } from './LoginPage.styles';
 
 const LoginPage = () => {
@@ -85,10 +83,6 @@ const LoginPage = () => {
 
   return (
     <LoginContainer $isDarkMode={isDarkMode}>
-      <ThemeToggleContainer>
-        <ThemeToggle size="medium" />
-      </ThemeToggleContainer>
-      
       <ContentWrapper>
         <TextSection>
           <Logo size="small" />

@@ -6,7 +6,6 @@ import Button from '../Button/Button';
 import Input from '../Input/Input';
 import Checkbox from '../Checkbox/Checkbox';
 import Modal from '../Modal/Modal';
-import ThemeToggle from '../ThemeToggle/ThemeToggle';
 import {
   RegisterContainer,
   ContentWrapper,
@@ -21,8 +20,7 @@ import {
   RegisterFooter,
   FooterText,
   FooterLink,
-  TermsLink,
-  ThemeToggleContainer
+  TermsLink
 } from './RegisterPage.styles';
 
 const RegisterPage = () => {
@@ -114,10 +112,6 @@ const RegisterPage = () => {
 
   return (
     <RegisterContainer $isDarkMode={isDarkMode}>
-      <ThemeToggleContainer>
-        <ThemeToggle size="medium" />
-      </ThemeToggleContainer>
-      
       <ContentWrapper>
         <TextSection>
           <Logo size="small"/>
@@ -153,7 +147,6 @@ const RegisterPage = () => {
                 required
                 $isDarkMode={isDarkMode}
               />
-
 
               <Input
                 id="email"

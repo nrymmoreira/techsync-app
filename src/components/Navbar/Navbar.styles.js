@@ -50,10 +50,7 @@ export const LogoSection = styled.div`
 
 export const LogoIcon = styled.span`
   font-size: 1.75rem;
-  color: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primary;
-  }};
+  color: #F97316;
 `;
 
 export const LogoText = styled.span`
@@ -90,7 +87,7 @@ export const NavItem = styled.div`
   transition: all 0.3s ease;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return props.$active ? theme.colors.primary : 'transparent';
+    return props.$active ? '#F97316' : 'transparent';
   }};
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
@@ -100,7 +97,7 @@ export const NavItem = styled.div`
   &:hover {
     background: ${props => {
       const theme = getTheme(props.$isDarkMode);
-      return props.$active ? theme.colors.primaryHover : theme.colors.surfaceHover;
+      return props.$active ? '#ea6a0a' : theme.colors.surfaceHover;
     }};
     color: ${props => {
       const theme = getTheme(props.$isDarkMode);
@@ -155,14 +152,8 @@ export const NotificationButton = styled.button`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.surfaceHover;
     }};
-    border-color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
-    color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
+    border-color: #F97316;
+    color: #F97316;
     transform: translateY(-1px);
   }
 
@@ -201,10 +192,7 @@ export const UserButton = styled.button`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.surfaceHover;
     }};
-    border-color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
+    border-color: #F97316;
     transform: translateY(-1px);
   }
 
@@ -219,10 +207,7 @@ export const UserAvatar = styled.div`
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primary;
-  }};
+  background: #F97316;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.background;
@@ -253,7 +238,72 @@ export const UserName = styled.span`
   @media (max-width: ${breakpoints.tablet}) {
     display: none;
   }
-  `;
+`;
+
+export const UserDropdown = styled.div`
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surface;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
+  }};
+  border-radius: 12px;
+  padding: 0.5rem;
+  min-width: 180px;
+  box-shadow: 0 8px 32px ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.shadow;
+  }};
+  z-index: 200;
+  animation: slideIn 0.2s ease-out;
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+export const UserDropdownItem = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return props.$isLogout ? theme.colors.error : theme.colors.textPrimary;
+  }};
+  font-family: ${fonts.secondary};
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-align: left;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return props.$isLogout ? 'rgba(239, 68, 68, 0.1)' : theme.colors.surfaceHover;
+    }};
+  }
+
+  span {
+    font-size: 1.125rem;
+  }
+`;
 
 export const MobileMenuButton = styled.button`
   display: none;
@@ -281,14 +331,8 @@ export const MobileMenuButton = styled.button`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.surfaceHover;
     }};
-    border-color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
-    color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
+    border-color: #F97316;
+    color: #F97316;
   }
 
   span {

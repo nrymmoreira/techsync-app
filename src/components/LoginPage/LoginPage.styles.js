@@ -25,18 +25,6 @@ export const LoginContainer = styled.main`
   }
 `;
 
-export const ThemeToggleContainer = styled.div`
-  position: fixed;
-  top: 2rem;
-  right: 2rem;
-  z-index: 10;
-
-  @media (max-width: ${breakpoints.mobile}) {
-    top: 1rem;
-    right: 1rem;
-  }
-`;
-
 export const ContentWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -127,10 +115,11 @@ export const MainTitle = styled.h1`
 `;
 
 export const HighlightText = styled.span`
-  color: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primary;
-  }};
+  color: #F97316;
+  background: linear-gradient(135deg, #F97316, #ea6a0a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 `;
 
 export const Description = styled.p`
@@ -213,10 +202,7 @@ export const FormDescription = styled.p`
 export const ForgotPasswordLink = styled.button`
   background: none;
   border: none;
-  color: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primary;
-  }};
+  color: #F97316;
   font-family: ${fonts.secondary};
   font-size: 0.875rem;
   cursor: pointer;
@@ -225,17 +211,11 @@ export const ForgotPasswordLink = styled.button`
 
   &:hover {
     text-decoration: underline;
-    color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primaryHover;
-    }};
+    color: #ea6a0a;
   }
 
   &:focus-visible {
-    outline: 2px solid ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
+    outline: 2px solid #F97316;
     outline-offset: 2px;
     border-radius: 2px;
   }
@@ -271,10 +251,7 @@ export const FooterText = styled.p`
 export const FooterLink = styled.button`
   background: none;
   border: none;
-  color: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primary;
-  }};
+  color: #F97316;
   font-family: ${fonts.secondary};
   font-size: inherit;
   cursor: pointer;
@@ -283,17 +260,11 @@ export const FooterLink = styled.button`
 
   &:hover {
     text-decoration: underline;
-    color: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primaryHover;
-    }};
+    color: #ea6a0a;
   }
 
   &:focus-visible {
-    outline: 2px solid ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primary;
-    }};
+    outline: 2px solid #F97316;
     outline-offset: 2px;
     border-radius: 2px;
   }
