@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTheme } from '../../contexts/ThemeContext';
+import { useLocation } from 'react-router-dom';
 import Navbar from "../Navbar/Navbar";
 import PersonalDataForm from './PersonalDataForm/PersonalDataForm';
 import CompanyDataForm from './CompanyDataForm/CompanyDataForm';
@@ -24,7 +25,17 @@ import {
 
 const Perfil = () => {
   const { isDarkMode } = useTheme();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
+
+  // Verificar se há uma tab específica na URL
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabFromUrl = urlParams.get('tab');
+    if (tabFromUrl) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [location]);
 
   const tabs = [
     { 

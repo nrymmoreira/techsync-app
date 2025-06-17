@@ -35,7 +35,8 @@ const HomePage = () => {
 
   const handleCompanySetup = () => {
     setShowCompanyModal(false);
-    console.log('Navigate to company setup page');
+    // Navegar para o perfil com a aba de dados da empresa aberta
+    navigate('/perfil?tab=dados-empresa');
   };
 
   const features = [
@@ -104,6 +105,7 @@ const HomePage = () => {
         isOpen={showCompanyModal}
         onClose={() => setShowCompanyModal(false)}
         title="Configure sua Empresa"
+        $isDarkMode={isDarkMode}
       >
         <div style={{ textAlign: 'center', padding: '1rem 0' }}>
           <p style={{ marginBottom: '2rem', lineHeight: '1.6' }}>
@@ -115,6 +117,7 @@ const HomePage = () => {
             size="large"
             onClick={handleCompanySetup}
             style={{ width: '100%' }}
+            $isDarkMode={isDarkMode}
           >
             Configurar Empresa
           </Button>

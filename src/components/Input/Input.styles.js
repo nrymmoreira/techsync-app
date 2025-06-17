@@ -105,6 +105,29 @@ export const InputField = styled.input`
     }
   }
 
+  /* Força a cor do texto em todos os estados */
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus,
+  &:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.input.background;
+    }} inset !important;
+    -webkit-text-fill-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textPrimary;
+    }} !important;
+    color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textPrimary;
+    }} !important;
+    caret-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textPrimary;
+    }} !important;
+  }
+
   @media (max-width: ${breakpoints.mobile}) {
     font-size: 0.9375rem;
     padding: ${props => props.$hasIcon ? '0.75rem 0.875rem 0.75rem 2.75rem' : '0.75rem 0.875rem'};

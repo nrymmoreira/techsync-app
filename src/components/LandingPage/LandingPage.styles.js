@@ -2,29 +2,6 @@ import styled, { keyframes } from 'styled-components';
 import { getTheme } from '../../styles/themes';
 import { fonts, breakpoints } from '../../styles/GlobalStyles';
 
-const morphingGradient = keyframes`
-  0% {
-    background: radial-gradient(circle at 20% 50%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
-  }
-  33% {
-    background: radial-gradient(circle at 60% 30%, rgba(249, 115, 22, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 30% 70%, rgba(249, 115, 22, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at 70% 60%, rgba(0, 0, 0, 0.08) 0%, transparent 50%);
-  }
-  66% {
-    background: radial-gradient(circle at 80% 80%, rgba(249, 115, 22, 0.06) 0%, transparent 50%),
-                radial-gradient(circle at 20% 30%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 50% 20%, rgba(0, 0, 0, 0.12) 0%, transparent 50%);
-  }
-  100% {
-    background: radial-gradient(circle at 20% 50%, rgba(249, 115, 22, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(249, 115, 22, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, rgba(0, 0, 0, 0.1) 0%, transparent 50%);
-  }
-`;
-
 const fadeInUp = keyframes`
   from {
     opacity: 0;
@@ -53,17 +30,6 @@ export const LandingContainer = styled.main`
   }};
   position: relative;
   overflow-x: hidden;
-`;
-
-export const AnimatedBackground = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 0;
-  animation: ${morphingGradient} 15s ease-in-out infinite;
-  pointer-events: none;
 `;
 
 export const HeroSection = styled.section`
@@ -209,10 +175,13 @@ export const FeaturesSection = styled.section`
   padding: 6rem 2rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.backgroundSecondary;
+    return theme.colors.background;
   }};
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: ${breakpoints.tablet}) {
     padding: 4rem 1.5rem;
@@ -385,6 +354,9 @@ export const ValuesSection = styled.section`
   }};
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: ${breakpoints.tablet}) {
     padding: 4rem 1.5rem;
@@ -547,10 +519,13 @@ export const BrandSection = styled.section`
   padding: 6rem 2rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.backgroundSecondary;
+    return theme.colors.background;
   }};
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: ${breakpoints.tablet}) {
     padding: 4rem 1.5rem;
@@ -658,6 +633,9 @@ export const MissionSection = styled.section`
   }};
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 
   @media (max-width: ${breakpoints.tablet}) {
     padding: 4rem 1.5rem;

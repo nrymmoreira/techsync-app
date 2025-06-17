@@ -35,8 +35,7 @@ import {
   MissionSection,
   MissionContent,
   MissionText,
-  MissionHighlight,
-  AnimatedBackground
+  MissionHighlight
 } from './LandingPage.styles';
 
 const LandingPage = () => {
@@ -86,8 +85,6 @@ const LandingPage = () => {
 
   return (
     <LandingContainer $isDarkMode={isDarkMode}>
-      <AnimatedBackground />
-      
       <HeroSection>
         <ContentContainer>
           <Logo size="large" />
