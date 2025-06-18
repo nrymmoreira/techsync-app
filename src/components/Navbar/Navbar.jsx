@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
+import { authService } from "../../services/api";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import {
   NavbarContainer,
@@ -32,11 +33,18 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("techsync-authenticated");
-    navigate("/login");
-    setIsMobileMenuOpen(false);
-    setIsUserDropdownOpen(false);
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      navigate("/login");
+    } catch (error) {
+      console.error('Erro ao fazer logout:', error);
+      // Mesmo com erro, redirecionar para login
+      navigate("/login");
+    } finally {
+      setIsMobileMenuOpen(false);
+      setIsUserDropdownOpen(false);
+    }
   };
 
   const menuItems = [
@@ -90,6 +98,11 @@ const Navbar = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
+  // Obter dados do usuário
+  const currentUser = authService.getCurrentUser();
+  const userName = currentUser?.name || 'Usuário';
+  const userInitial = userName.charAt(0).toUpperCase();
+
   return (
     <>
       <NavbarContainer $isDarkMode={isDarkMode}>
@@ -127,12 +140,12 @@ const Navbar = () => {
 
             <div style={{ position: 'relative' }}>
               <UserButton
-                aria-label="Perfil do usuário - Gabriel"
+                aria-label={`Perfil do usuário - ${userName}`}
                 $isDarkMode={isDarkMode}
                 onClick={toggleUserDropdown}
               >
-                <UserAvatar $isDarkMode={isDarkMode}>G</UserAvatar>
-                <UserName $isDarkMode={isDarkMode}>Gabriel</UserName>
+                <UserAvatar $isDarkMode={isDarkMode}>{userInitial}</UserAvatar>
+                <UserName $isDarkMode={isDarkMode}>{userName}</UserName>
                 <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
                   {isUserDropdownOpen ? 'expand_less' : 'expand_more'}
                 </span>

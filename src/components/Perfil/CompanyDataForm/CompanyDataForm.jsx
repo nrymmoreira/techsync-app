@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { userService, cepService } from '../../../services/api';
 import Input from '../../Input/Input';
 import Button from '../../Button/Button';
 import {
@@ -8,16 +9,17 @@ import {
   FormGrid,
   SaveButtonContainer,
   LoadingMessage,
-  ErrorMessage
+  ErrorMessage,
+  SuccessMessage
 } from './CompanyDataForm.styles';
 
 const CompanyDataForm = () => {
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
-    nomeEmpresa: "TechDev Solutions",
-    cnpj: "12.345.678/0001-90",
-    telefoneEmpresa: "(11) 3456-7890",
-    site: "www.techdevsolutions.com.br",
+    nomeEmpresa: "",
+    cnpj: "",
+    telefoneEmpresa: "",
+    site: "",
     cep: "",
     endereco: "",
     numero: "",
@@ -29,6 +31,9 @@ const CompanyDataForm = () => {
 
   const [errors, setErrors] = useState({});
   const [isLoadingCep, setIsLoadingCep] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [apiError, setApiError] = useState('');
 
   const validateCNPJ = (cnpj) => {
     const cleanCNPJ = cnpj.replace(/[^\d]/g, '');
@@ -83,20 +88,14 @@ const CompanyDataForm = () => {
     setErrors(prev => ({ ...prev, cep: '' }));
 
     try {
-      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
-      
-      if (!response.ok) {
-        throw new Error('CEP não encontrado');
-      }
-
-      const data = await response.json();
+      const addressData = await cepService.fetchAddress(cep);
       
       setFormData(prev => ({
         ...prev,
-        endereco: data.street || '',
-        bairro: data.neighborhood || '',
-        cidade: data.city || '',
-        estado: data.state || ''
+        endereco: addressData.street || '',
+        bairro: addressData.neighborhood || '',
+        cidade: addressData.city || '',
+        estado: addressData.state || ''
       }));
 
       // Limpar erros relacionados ao endereço
@@ -111,7 +110,7 @@ const CompanyDataForm = () => {
     } catch (error) {
       setErrors(prev => ({ 
         ...prev, 
-        cep: error.message === 'CEP não encontrado' ? 'CEP não encontrado' : 'Erro ao buscar CEP' 
+        cep: error.message
       }));
     } finally {
       setIsLoadingCep(false);
@@ -125,6 +124,10 @@ const CompanyDataForm = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+
+    // Limpar mensagens
+    if (successMessage) setSuccessMessage('');
+    if (apiError) setApiError('');
 
     // Buscar endereço automaticamente quando CEP for preenchido
     if (field === 'cep' && value.replace(/[^\d]/g, '').length === 8) {
@@ -193,11 +196,22 @@ const CompanyDataForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSaveChanges = () => {
-    if (validateForm()) {
-      console.log("Saving company data:", formData);
-      // Aqui você implementaria a lógica de salvamento
-      alert('Dados da empresa salvos com sucesso!');
+  const handleSaveChanges = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSaving(true);
+    setApiError('');
+    setSuccessMessage('');
+
+    try {
+      await userService.updateCompanyData(formData);
+      setSuccessMessage('Dados da empresa salvos com sucesso!');
+    } catch (error) {
+      setApiError(error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -206,6 +220,20 @@ const CompanyDataForm = () => {
       <SectionTitle $isDarkMode={isDarkMode}>
         Dados da Empresa
       </SectionTitle>
+
+      {apiError && (
+        <ErrorMessage $isDarkMode={isDarkMode}>
+          <span className="material-symbols-outlined">error</span>
+          {apiError}
+        </ErrorMessage>
+      )}
+
+      {successMessage && (
+        <SuccessMessage $isDarkMode={isDarkMode}>
+          <span className="material-symbols-outlined">check_circle</span>
+          {successMessage}
+        </SuccessMessage>
+      )}
 
       <FormGrid>
         <Input
@@ -218,6 +246,7 @@ const CompanyDataForm = () => {
           placeholder="TechDev Solutions"
           icon="business"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -231,6 +260,7 @@ const CompanyDataForm = () => {
           placeholder="12.345.678/0001-90"
           icon="badge"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -243,6 +273,7 @@ const CompanyDataForm = () => {
           error={errors.telefoneEmpresa}
           placeholder="(11) 3456-7890"
           icon="phone"
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -255,6 +286,7 @@ const CompanyDataForm = () => {
           error={errors.site}
           placeholder="www.techdevsolutions.com.br"
           icon="language"
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -268,6 +300,7 @@ const CompanyDataForm = () => {
           placeholder="01234-567"
           icon="location_on"
           required
+          disabled={isSaving || isLoadingCep}
           $isDarkMode={isDarkMode}
         />
 
@@ -281,7 +314,7 @@ const CompanyDataForm = () => {
           placeholder="Av. Paulista"
           icon="home"
           required
-          disabled={isLoadingCep}
+          disabled={isSaving || isLoadingCep}
           $isDarkMode={isDarkMode}
         />
 
@@ -295,6 +328,7 @@ const CompanyDataForm = () => {
           placeholder="1000"
           icon="tag"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -307,6 +341,7 @@ const CompanyDataForm = () => {
           error={errors.complemento}
           placeholder="Sala 1003"
           icon="apartment"
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -320,7 +355,7 @@ const CompanyDataForm = () => {
           placeholder="Bela Vista"
           icon="location_city"
           required
-          disabled={isLoadingCep}
+          disabled={isSaving || isLoadingCep}
           $isDarkMode={isDarkMode}
         />
 
@@ -334,7 +369,7 @@ const CompanyDataForm = () => {
           placeholder="São Paulo"
           icon="location_city"
           required
-          disabled={isLoadingCep}
+          disabled={isSaving || isLoadingCep}
           $isDarkMode={isDarkMode}
         />
 
@@ -348,7 +383,7 @@ const CompanyDataForm = () => {
           placeholder="São Paulo"
           icon="map"
           required
-          disabled={isLoadingCep}
+          disabled={isSaving || isLoadingCep}
           $isDarkMode={isDarkMode}
         />
       </FormGrid>
@@ -364,12 +399,12 @@ const CompanyDataForm = () => {
         <Button
           variant="primary"
           size="medium"
-          icon="save"
+          icon={isSaving ? "hourglass_empty" : "save"}
           onClick={handleSaveChanges}
-          disabled={isLoadingCep}
+          disabled={isLoadingCep || isSaving}
           $isDarkMode={isDarkMode}
         >
-          Salvar alterações
+          {isSaving ? 'Salvando...' : 'Salvar alterações'}
         </Button>
       </SaveButtonContainer>
     </FormContainer>

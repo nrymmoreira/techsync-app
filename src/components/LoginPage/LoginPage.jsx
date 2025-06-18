@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { authService } from '../../services/api';
 import Logo from '../Logo/Logo';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
@@ -19,11 +20,13 @@ import {
   ForgotPasswordLink,
   LoginFooter,
   FooterText,
-  FooterLink
+  FooterLink,
+  ErrorMessage,
+  LoadingSpinner
 } from './LoginPage.styles';
 
 const LoginPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     email: '',
@@ -32,6 +35,8 @@ const LoginPage = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
 
   const handleInputChange = (field) => (event) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
@@ -46,6 +51,11 @@ const LoginPage = () => {
         ...prev,
         [field]: ''
       }));
+    }
+
+    // Limpar erro da API
+    if (apiError) {
+      setApiError('');
     }
   };
 
@@ -66,13 +76,30 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (validateForm()) {
-      // Simulate successful login
-      localStorage.setItem('techsync-authenticated', 'true');
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setApiError('');
+
+    try {
+      await authService.login(formData.email, formData.password);
+      
+      // Verificar se é primeiro login para mostrar modal da empresa
+      const user = authService.getCurrentUser();
+      if (user && !user.hasCompanyData) {
+        localStorage.setItem('techsync-from-registration', 'true');
+      }
+      
       navigate('/home');
+    } catch (error) {
+      setApiError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -105,6 +132,13 @@ const LoginPage = () => {
               Entre com seus dados para acessar sua conta
             </FormDescription>
 
+            {apiError && (
+              <ErrorMessage $isDarkMode={isDarkMode}>
+                <span className="material-symbols-outlined">error</span>
+                {apiError}
+              </ErrorMessage>
+            )}
+
             <form onSubmit={handleSubmit} noValidate>
               <Input
                 id="email"
@@ -116,6 +150,7 @@ const LoginPage = () => {
                 error={errors.email}
                 icon="mail"
                 required
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               />
 
@@ -129,6 +164,7 @@ const LoginPage = () => {
                 error={errors.password}
                 icon="lock"
                 required
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               />
 
@@ -137,12 +173,13 @@ const LoginPage = () => {
                   id="rememberMe"
                   checked={formData.rememberMe}
                   onChange={handleInputChange('rememberMe')}
+                  disabled={isLoading}
                   $isDarkMode={isDarkMode}
                 >
                   Lembrar de mim
                 </Checkbox>
 
-                <ForgotPasswordLink onClick={handleForgotPassword} $isDarkMode={isDarkMode}>
+                <ForgotPasswordLink onClick={handleForgotPassword} $isDarkMode={isDarkMode} disabled={isLoading}>
                   Esqueceu a senha?
                 </ForgotPasswordLink>
               </div>
@@ -152,16 +189,24 @@ const LoginPage = () => {
                 variant="primary" 
                 size="large"
                 style={{ width: '100%', marginBottom: '1.5rem' }}
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               >
-                Entrar
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner className="material-symbols-outlined">hourglass_empty</LoadingSpinner>
+                    Entrando...
+                  </>
+                ) : (
+                  'Entrar'
+                )}
               </Button>
             </form>
 
             <LoginFooter>
               <FooterText $isDarkMode={isDarkMode}>
                 Não tem uma conta?{' '}
-                <FooterLink onClick={() => navigate('/cadastro')} $isDarkMode={isDarkMode}>
+                <FooterLink onClick={() => navigate('/cadastro')} $isDarkMode={isDarkMode} disabled={isLoading}>
                   Criar conta
                 </FooterLink>
               </FooterText>

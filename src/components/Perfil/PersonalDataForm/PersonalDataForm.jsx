@@ -1,24 +1,61 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
+import { userService, authService } from '../../../services/api';
 import Input from '../../Input/Input';
 import Button from '../../Button/Button';
 import {
   FormContainer,
   SectionTitle,
   FormGrid,
-  SaveButtonContainer
+  SaveButtonContainer,
+  ErrorMessage,
+  SuccessMessage
 } from './PersonalDataForm.styles';
 
 const PersonalDataForm = () => {
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
-    nomeCompleto: "Gabriel Silva",
-    email: "gabriel@gmail.com",
-    telefone: "(11)98765-4321",
-    cpf: "000.000.000-00",
+    nomeCompleto: "",
+    email: "",
+    telefone: "",
+    cpf: "",
   });
 
   const [errors, setErrors] = useState({});
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [apiError, setApiError] = useState('');
+
+  // Carregar dados do usuário ao montar o componente
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const userData = await userService.getProfile();
+        setFormData({
+          nomeCompleto: userData.name || "",
+          email: userData.email || "",
+          telefone: userData.phone || "",
+          cpf: userData.cpf || "",
+        });
+      } catch (error) {
+        console.error('Erro ao carregar dados do usuário:', error);
+        // Se falhar, usar dados do localStorage como fallback
+        const currentUser = authService.getCurrentUser();
+        if (currentUser) {
+          setFormData(prev => ({
+            ...prev,
+            nomeCompleto: currentUser.name || "",
+            email: currentUser.email || "",
+          }));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const validateCPF = (cpf) => {
     const cleanCPF = cpf.replace(/[^\d]/g, '');
@@ -98,21 +135,83 @@ const PersonalDataForm = () => {
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
+
+    // Limpar mensagens
+    if (successMessage) setSuccessMessage('');
+    if (apiError) setApiError('');
   };
 
-  const handleSaveChanges = () => {
-    if (validateForm()) {
-      console.log("Saving personal data:", formData);
-      // Aqui você implementaria a lógica de salvamento
-      alert('Dados pessoais salvos com sucesso!');
+  const handleSaveChanges = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSaving(true);
+    setApiError('');
+    setSuccessMessage('');
+
+    try {
+      await userService.updatePersonalData({
+        name: formData.nomeCompleto,
+        email: formData.email,
+        phone: formData.telefone,
+        cpf: formData.cpf
+      });
+      
+      setSuccessMessage('Dados pessoais salvos com sucesso!');
+      
+      // Atualizar dados do usuário no localStorage
+      const currentUser = authService.getCurrentUser();
+      if (currentUser) {
+        const updatedUser = {
+          ...currentUser,
+          name: formData.nomeCompleto,
+          email: formData.email
+        };
+        localStorage.setItem('techsync-user', JSON.stringify(updatedUser));
+      }
+    } catch (error) {
+      setApiError(error.message);
+    } finally {
+      setIsSaving(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <FormContainer $isDarkMode={isDarkMode}>
+        <SectionTitle $isDarkMode={isDarkMode}>
+          Informações Pessoais
+        </SectionTitle>
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <span className="material-symbols-outlined" style={{ fontSize: '2rem', animation: 'spin 1s linear infinite' }}>
+            hourglass_empty
+          </span>
+          <p>Carregando dados...</p>
+        </div>
+      </FormContainer>
+    );
+  }
 
   return (
     <FormContainer $isDarkMode={isDarkMode}>
       <SectionTitle $isDarkMode={isDarkMode}>
         Informações Pessoais
       </SectionTitle>
+
+      {apiError && (
+        <ErrorMessage $isDarkMode={isDarkMode}>
+          <span className="material-symbols-outlined">error</span>
+          {apiError}
+        </ErrorMessage>
+      )}
+
+      {successMessage && (
+        <SuccessMessage $isDarkMode={isDarkMode}>
+          <span className="material-symbols-outlined">check_circle</span>
+          {successMessage}
+        </SuccessMessage>
+      )}
 
       <FormGrid>
         <Input
@@ -125,6 +224,7 @@ const PersonalDataForm = () => {
           placeholder="Digite seu nome completo"
           icon="person"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -138,6 +238,7 @@ const PersonalDataForm = () => {
           placeholder="Digite seu email"
           icon="mail"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -151,6 +252,7 @@ const PersonalDataForm = () => {
           placeholder="(11) 99999-9999"
           icon="phone"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
 
@@ -164,6 +266,7 @@ const PersonalDataForm = () => {
           placeholder="000.000.000-00"
           icon="badge"
           required
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         />
       </FormGrid>
@@ -172,11 +275,12 @@ const PersonalDataForm = () => {
         <Button
           variant="primary"
           size="medium"
-          icon="save"
+          icon={isSaving ? "hourglass_empty" : "save"}
           onClick={handleSaveChanges}
+          disabled={isSaving}
           $isDarkMode={isDarkMode}
         >
-          Salvar alterações
+          {isSaving ? 'Salvando...' : 'Salvar alterações'}
         </Button>
       </SaveButtonContainer>
     </FormContainer>

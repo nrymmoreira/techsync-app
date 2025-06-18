@@ -1,6 +1,15 @@
-import styled from 'styled-components';
+import styled, { keyframes } from 'styled-components';
 import { getTheme } from '../../styles/themes';
 import { fonts, breakpoints } from '../../styles/GlobalStyles';
+
+const spin = keyframes`
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+`;
 
 export const RegisterContainer = styled.main`
   min-height: 100vh;
@@ -206,6 +215,39 @@ export const FormDescription = styled.p`
   }
 `;
 
+export const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.5rem;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return `${theme.colors.error}15`;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.error;
+  }};
+  border-radius: 8px;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.error;
+  }};
+  font-family: ${fonts.secondary};
+  font-size: 0.875rem;
+  line-height: 1.4;
+
+  span {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+`;
+
+export const LoadingSpinner = styled.span`
+  animation: ${spin} 1s linear infinite;
+`;
+
 export const RegisterFooter = styled.div`
   text-align: center;
   padding-top: 1rem;
@@ -239,7 +281,7 @@ export const FooterLink = styled.button`
   text-decoration: none;
   transition: all 0.3s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     text-decoration: underline;
     color: #ea6a0a;
   }
@@ -248,6 +290,11 @@ export const FooterLink = styled.button`
     outline: 2px solid #F97316;
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;
 
@@ -262,7 +309,7 @@ export const TermsLink = styled.button`
   padding: 0;
   transition: color 0.3s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     color: #ea6a0a;
   }
 
@@ -270,5 +317,10 @@ export const TermsLink = styled.button`
     outline: 2px solid #F97316;
     outline-offset: 2px;
     border-radius: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 `;

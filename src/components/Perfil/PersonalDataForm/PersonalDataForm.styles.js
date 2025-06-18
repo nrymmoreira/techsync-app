@@ -41,6 +41,62 @@ export const FormGrid = styled.div`
   }
 `;
 
+export const ErrorMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem 0;
+  padding: 0.75rem 1rem;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return `${theme.colors.error}15`;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.error;
+  }};
+  border-radius: 0.5rem;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.error;
+  }};
+  font-family: ${fonts.secondary};
+  font-size: 0.875rem;
+
+  span {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+`;
+
+export const SuccessMessage = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem 0;
+  padding: 0.75rem 1rem;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return `${theme.colors.success}15`;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.success;
+  }};
+  border-radius: 0.5rem;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.success;
+  }};
+  font-family: ${fonts.secondary};
+  font-size: 0.875rem;
+
+  span {
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+`;
+
 export const SaveButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { authService } from '../../services/api';
 import Logo from '../Logo/Logo';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
@@ -20,7 +21,9 @@ import {
   RegisterFooter,
   FooterText,
   FooterLink,
-  TermsLink
+  TermsLink,
+  ErrorMessage,
+  LoadingSpinner
 } from './RegisterPage.styles';
 
 const RegisterPage = () => {
@@ -35,6 +38,8 @@ const RegisterPage = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
@@ -51,6 +56,11 @@ const RegisterPage = () => {
         ...prev,
         [field]: ''
       }));
+    }
+
+    // Limpar erro da API
+    if (apiError) {
+      setApiError('');
     }
   };
 
@@ -71,6 +81,8 @@ const RegisterPage = () => {
 
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Nome completo é obrigatório';
+    } else if (formData.fullName.trim().split(' ').length < 2) {
+      newErrors.fullName = 'Digite seu nome completo';
     }
 
     if (!formData.email) {
@@ -99,14 +111,23 @@ const RegisterPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (validateForm()) {
-      // Simulate successful registration
-      localStorage.setItem('techsync-authenticated', 'true');
-      localStorage.setItem('techsync-from-registration', 'true');
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+    setApiError('');
+
+    try {
+      await authService.register(formData);
       navigate('/home');
+    } catch (error) {
+      setApiError(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -134,6 +155,13 @@ const RegisterPage = () => {
               Preencha os dados abaixo para começar sua jornada
             </FormDescription>
 
+            {apiError && (
+              <ErrorMessage $isDarkMode={isDarkMode}>
+                <span className="material-symbols-outlined">error</span>
+                {apiError}
+              </ErrorMessage>
+            )}
+
             <form onSubmit={handleSubmit} noValidate>
               <Input
                 id="fullName"
@@ -145,6 +173,7 @@ const RegisterPage = () => {
                 error={errors.fullName}
                 icon="person"
                 required
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               />
 
@@ -158,6 +187,7 @@ const RegisterPage = () => {
                 error={errors.email}
                 icon="mail"
                 required
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               />
 
@@ -172,6 +202,7 @@ const RegisterPage = () => {
                 icon="lock"
                 showPasswordRequirements={true}
                 required
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               />
 
@@ -185,6 +216,7 @@ const RegisterPage = () => {
                 error={errors.confirmPassword}
                 icon="lock"
                 required
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               />
 
@@ -192,15 +224,16 @@ const RegisterPage = () => {
                 id="acceptTerms"
                 checked={formData.acceptTerms}
                 onChange={handleInputChange('acceptTerms')}
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               >
                 <span>
                   Eu concordo com os{' '}
-                  <TermsLink onClick={() => setShowTermsModal(true)} $isDarkMode={isDarkMode}>
+                  <TermsLink onClick={() => setShowTermsModal(true)} $isDarkMode={isDarkMode} disabled={isLoading}>
                   Termos de Serviço
                   </TermsLink>{' '}
                   e{' '}
-                  <TermsLink onClick={() => setShowPrivacyModal(true)} $isDarkMode={isDarkMode}>
+                  <TermsLink onClick={() => setShowPrivacyModal(true)} $isDarkMode={isDarkMode} disabled={isLoading}>
                   Política de Privacidade
                   </TermsLink>
                 </span>
@@ -221,16 +254,24 @@ const RegisterPage = () => {
                 variant="primary" 
                 size="large"
                 style={{ width: '100%', marginBottom: '1.5rem' }}
+                disabled={isLoading}
                 $isDarkMode={isDarkMode}
               >
-                Criar conta
+                {isLoading ? (
+                  <>
+                    <LoadingSpinner className="material-symbols-outlined">hourglass_empty</LoadingSpinner>
+                    Criando conta...
+                  </>
+                ) : (
+                  'Criar conta'
+                )}
               </Button>
             </form>
 
             <RegisterFooter>
               <FooterText $isDarkMode={isDarkMode}>
                 Já tem uma conta?{' '}
-                <FooterLink onClick={() => navigate('/login')} $isDarkMode={isDarkMode}>
+                <FooterLink onClick={() => navigate('/login')} $isDarkMode={isDarkMode} disabled={isLoading}>
                   Entrar
                 </FooterLink>
               </FooterText>
