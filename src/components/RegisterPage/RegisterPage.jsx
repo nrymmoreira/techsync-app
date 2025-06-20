@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { authService } from '../../services/api'; // Ajuste o caminho conforme necessário
 import Logo from '../Logo/Logo';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
@@ -33,8 +34,9 @@ const RegisterPage = () => {
     confirmPassword: '',
     acceptTerms: false
   });
-
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
@@ -45,7 +47,6 @@ const RegisterPage = () => {
       [field]: value
     }));
     
-    // Limpar erro quando usuário começar a digitar
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -62,7 +63,6 @@ const RegisterPage = () => {
       number: /\d/.test(password),
       symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password)
     };
-
     return Object.values(requirements).every(req => req);
   };
 
@@ -99,15 +99,31 @@ const RegisterPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (validateForm()) {
-      // Simulate successful registration
-      localStorage.setItem('techsync-authenticated', 'true');
-      localStorage.setItem('techsync-from-registration', 'true');
-      navigate('/home');
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      await authService.register({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password
+      });
+      setShowSuccessModal(true);
+    } catch (error) {
+      setErrors({ api: error.message });
+    } finally {
+      setIsLoading(false);
     }
+  };
+
+  const handleSuccessModalClose = () => {
+    setShowSuccessModal(false);
+    navigate('/login');
   };
 
   return (
@@ -134,6 +150,16 @@ const RegisterPage = () => {
               Preencha os dados abaixo para começar sua jornada
             </FormDescription>
 
+            {errors.api && (
+              <div style={{ 
+                color: '#ef4444', 
+                fontSize: '0.8125rem', 
+                marginBottom: '1rem' 
+              }}>
+                {errors.api}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} noValidate>
               <Input
                 id="fullName"
@@ -146,6 +172,7 @@ const RegisterPage = () => {
                 icon="person"
                 required
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               />
 
               <Input
@@ -159,6 +186,7 @@ const RegisterPage = () => {
                 icon="mail"
                 required
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               />
 
               <Input
@@ -173,6 +201,7 @@ const RegisterPage = () => {
                 showPasswordRequirements={true}
                 required
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               />
 
               <Input
@@ -186,6 +215,7 @@ const RegisterPage = () => {
                 icon="lock"
                 required
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               />
 
               <Checkbox
@@ -193,15 +223,16 @@ const RegisterPage = () => {
                 checked={formData.acceptTerms}
                 onChange={handleInputChange('acceptTerms')}
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               >
                 <span>
                   Eu concordo com os{' '}
                   <TermsLink onClick={() => setShowTermsModal(true)} $isDarkMode={isDarkMode}>
-                  Termos de Serviço
+                    Termos de Serviço
                   </TermsLink>{' '}
                   e{' '}
                   <TermsLink onClick={() => setShowPrivacyModal(true)} $isDarkMode={isDarkMode}>
-                  Política de Privacidade
+                    Política de Privacidade
                   </TermsLink>
                 </span>
               </Checkbox>
@@ -222,8 +253,9 @@ const RegisterPage = () => {
                 size="large"
                 style={{ width: '100%', marginBottom: '1.5rem' }}
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               >
-                Criar conta
+                {isLoading ? 'Carregando...' : 'Criar conta'}
               </Button>
             </form>
 
@@ -245,7 +277,29 @@ const RegisterPage = () => {
         title="Termos de Serviço"
         $isDarkMode={isDarkMode}
       >
-        <p>Os termos de serviço serão adicionados em breve.</p>
+        <p>Bem-vindo ao TechSync! Ao utilizar nossa plataforma, você concorda com os seguintes Termos de Serviço. Por favor, leia atentamente.</p>
+
+        <h3>1. Aceitação dos Termos</h3>
+        <p>Ao acessar ou usar o TechSync, você declara que leu, entendeu e concorda em cumprir estes Termos de Serviço e nossa Política de Privacidade. Se você não concordar com estes termos, não utilize nossa plataforma.</p>
+
+        <h3>2. Uso da Plataforma</h3>
+        <ul>
+          <li><strong>Elegibilidade</strong>: Você deve ter pelo menos 18 anos ou a idade legal em sua jurisdição para usar o TechSync.</li>
+          <li><strong>Conta de Usuário</strong>: Você é responsável por manter a confidencialidade de sua conta e senha, bem como por todas as atividades realizadas sob sua conta.</li>
+          <li><strong>Conduta Proibida</strong>: É proibido usar o TechSync para atividades ilegais, fraudulentas ou que violem os direitos de terceiros. Isso inclui, mas não se limita a, envio de spam, hacking ou disseminação de conteúdo ofensivo.</li>
+        </ul>
+
+        <h3>3. Propriedade Intelectual</h3>
+        <p>Todo o conteúdo, design, logotipos e tecnologia do TechSync são protegidos por direitos autorais e outras leis de propriedade intelectual. Você não pode copiar, modificar ou distribuir nosso conteúdo sem autorização expressa.</p>
+
+        <h3>4. Limitação de Responsabilidade</h3>
+        <p>O TechSync é fornecido "como está", sem garantias de qualquer tipo. Não nos responsabilizamos por danos diretos, indiretos ou incidentais decorrentes do uso da plataforma.</p>
+
+        <h3>5. Alterações nos Termos</h3>
+        <p>Podemos atualizar estes Termos de Serviço periodicamente. Notificaremos você sobre mudanças significativas por e-mail ou por meio de um aviso em nossa plataforma. O uso contínuo após as alterações implica aceitação dos novos termos.</p>
+
+        <h3>6. Contato</h3>
+        <p>Se você tiver dúvidas sobre estes Termos de Serviço, entre em contato conosco em <a href="mailto:suporte@techsync.com">suporte@techsync.com</a>.</p>
       </Modal>
 
       <Modal
@@ -254,7 +308,67 @@ const RegisterPage = () => {
         title="Política de Privacidade"
         $isDarkMode={isDarkMode}
       >
-        <p>A política de privacidade será adicionados em breve.</p>
+        <p>No TechSync, valorizamos sua privacidade e estamos comprometidos em proteger suas informações pessoais. Esta Política de Privacidade explica como coletamos, usamos e protegemos seus dados.</p>
+
+        <h3>1. Informações que Coletamos</h3>
+        <ul>
+          <li><strong>Dados de Cadastro</strong>: Nome, e-mail e senha fornecidos durante o registro.</li>
+          <li><strong>Dados de Uso</strong>: Informações sobre como você interage com a plataforma, como páginas visitadas e ações realizadas.</li>
+          <li><strong>Dados Técnicos</strong>: Endereço IP, tipo de navegador, dispositivo e sistema operacional.</li>
+        </ul>
+
+        <h3>2. Como Usamos Suas Informações</h3>
+        <p>Utilizamos seus dados para:</p>
+        <ul>
+          <li>Fornecer e melhorar os serviços do TechSync.</li>
+          <li>Personalizar sua experiência na plataforma.</li>
+          <li>Enviar comunicações, como atualizações e notificações.</li>
+          <li>Garantir a segurança e prevenir fraudes.</li>
+        </ul>
+
+        <h3>3. Compartilhamento de Dados</h3>
+        <p>Não vendemos nem compartilhamos seus dados pessoais com terceiros, exceto:</p>
+        <ul>
+          <li>Com sua permissão explícita.</li>
+          <li>Para cumprir obrigações legais.</li>
+          <li>Com provedores de serviços que nos auxiliam (ex.: hospedagem, análises), sob acordos de confidencialidade.</li>
+        </ul>
+
+        <h3>4. Segurança dos Dados</h3>
+        <p>Implementamos medidas de segurança, como criptografia e controles de acesso, para proteger seus dados. No entanto, nenhum sistema é 100% seguro, e não garantimos segurança absoluta.</p>
+
+        <h3>5. Seus Direitos</h3>
+        <p>Você tem direito a:</p>
+        <ul>
+          <li>Acessar, corrigir ou excluir seus dados pessoais.</li>
+          <li>Solicitar a portabilidade de seus dados.</li>
+          <li>Optar por não receber comunicações de marketing.</li>
+        </ul>
+        <p>Para exercer esses direitos, entre em contato em <a href="mailto:suporte@techsync.com">suporte@techsync.com</a>.</p>
+
+        <h3>6. Alterações na Política</h3>
+        <p>Podemos atualizar esta Política de Privacidade periodicamente. Notificaremos você sobre mudanças significativas por e-mail ou por meio de um aviso na plataforma.</p>
+
+        <h3>7. Contato</h3>
+        <p>Se você tiver dúvidas sobre esta Política de Privacidade, entre em contato conosco em <a href="mailto:suporte@techsync.com">suporte@techsync.com</a>.</p>
+      </Modal>
+
+      <Modal
+        isOpen={showSuccessModal}
+        onClose={handleSuccessModalClose}
+        title="Cadastro Concluído"
+        $isDarkMode={isDarkMode}
+      >
+        <p>Cadastro realizado com sucesso! Você será redirecionado para a página de login.</p>
+        <Button
+          variant="primary"
+          size="medium"
+          onClick={handleSuccessModalClose}
+          $isDarkMode={isDarkMode}
+          style={{ marginTop: '1rem' }}
+        >
+          OK
+        </Button>
       </Modal>
     </RegisterContainer>
   );

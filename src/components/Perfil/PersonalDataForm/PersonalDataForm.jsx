@@ -12,10 +12,10 @@ import {
 const PersonalDataForm = () => {
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
-    nomeCompleto: "Gabriel Silva",
-    email: "gabriel@gmail.com",
-    telefone: "(11)98765-4321",
-    cpf: "000.000.000-00",
+    nomeCompleto: "Narayana Moreira",
+    email: "narayanamoreira27@gmail.com",
+    telefone: "",
+    cpf: "",
   });
 
   const [errors, setErrors] = useState({});

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
+import { authService } from '../../services/api'; // Ajuste o caminho conforme necessário
 import Logo from '../Logo/Logo';
 import Button from '../Button/Button';
 import Input from '../Input/Input';
@@ -23,15 +24,15 @@ import {
 } from './LoginPage.styles';
 
 const LoginPage = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     rememberMe: false
   });
-
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (field) => (event) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
@@ -40,7 +41,6 @@ const LoginPage = () => {
       [field]: value
     }));
     
-    // Limpar erro quando usuário começar a digitar
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -66,19 +66,27 @@ const LoginPage = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     
-    if (validateForm()) {
-      // Simulate successful login
-      localStorage.setItem('techsync-authenticated', 'true');
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    setErrors({});
+
+    try {
+      await authService.login(formData.email, formData.password);
       navigate('/home');
+    } catch (error) {
+      setErrors({ api: error.message });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleForgotPassword = () => {
     console.log('Esqueceu a senha');
-    // Implementar lógica de recuperação de senha
+    // Implementar lógica de recuperação de senha no futuro
   };
 
   return (
@@ -105,6 +113,16 @@ const LoginPage = () => {
               Entre com seus dados para acessar sua conta
             </FormDescription>
 
+            {errors.api && (
+              <div style={{ 
+                color: '#ef4444', 
+                fontSize: '0.8125rem', 
+                marginBottom: '1rem' 
+              }}>
+                {errors.api}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} noValidate>
               <Input
                 id="email"
@@ -117,6 +135,7 @@ const LoginPage = () => {
                 icon="mail"
                 required
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               />
 
               <Input
@@ -130,6 +149,7 @@ const LoginPage = () => {
                 icon="lock"
                 required
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               />
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -138,6 +158,7 @@ const LoginPage = () => {
                   checked={formData.rememberMe}
                   onChange={handleInputChange('rememberMe')}
                   $isDarkMode={isDarkMode}
+                  disabled={isLoading}
                 >
                   Lembrar de mim
                 </Checkbox>
@@ -153,8 +174,9 @@ const LoginPage = () => {
                 size="large"
                 style={{ width: '100%', marginBottom: '1.5rem' }}
                 $isDarkMode={isDarkMode}
+                disabled={isLoading}
               >
-                Entrar
+                {isLoading ? 'Carregando...' : 'Entrar'}
               </Button>
             </form>
 

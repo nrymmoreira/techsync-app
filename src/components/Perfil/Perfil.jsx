@@ -90,10 +90,10 @@ const Perfil = () => {
             </ProfilePictureContainer>
             <ProfileInfo>
               <ProfileName $isDarkMode={isDarkMode}>
-                Gabriel Silva
+                Narayana Moreira
               </ProfileName>
               <ProfileEmail $isDarkMode={isDarkMode}>
-                gabriel@email.com
+                narayanamoreira27@email.com
               </ProfileEmail>
             </ProfileInfo>
           </ProfilePictureSection>

@@ -54,7 +54,7 @@ export const InputField = styled.input`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
-  transition: all 0.3s ease;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 
   &::placeholder {
     color: ${props => {
@@ -105,12 +105,16 @@ export const InputField = styled.input`
     }
   }
 
-  /* Força a cor do texto em todos os estados */
+  /* Autofill styles */
   &:-webkit-autofill,
   &:-webkit-autofill:hover,
   &:-webkit-autofill:focus,
   &:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px ${props => {
+    background: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.input.background;
+    }} !important;
+    box-shadow: 0 0 0 1000px ${props => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.input.background;
     }} inset !important;
@@ -126,6 +130,7 @@ export const InputField = styled.input`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.textPrimary;
     }} !important;
+    transition: background-color 5000s ease-in-out 0s !important;
   }
 
   @media (max-width: ${breakpoints.mobile}) {

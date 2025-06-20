@@ -131,8 +131,8 @@ const Navbar = () => {
                 $isDarkMode={isDarkMode}
                 onClick={toggleUserDropdown}
               >
-                <UserAvatar $isDarkMode={isDarkMode}>G</UserAvatar>
-                <UserName $isDarkMode={isDarkMode}>Gabriel</UserName>
+                <UserAvatar $isDarkMode={isDarkMode}>N</UserAvatar>
+                <UserName $isDarkMode={isDarkMode}>Narayana</UserName>
                 <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
                   {isUserDropdownOpen ? 'expand_less' : 'expand_more'}
                 </span>
