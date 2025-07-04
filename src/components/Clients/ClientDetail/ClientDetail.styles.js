@@ -313,7 +313,10 @@ export const ContactDetails = styled.div`
   display: flex;
   gap: 1rem;
   font-size: 0.875rem;
-  color: inherit;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textSecondary;
+  }};
 
   div {
     display: flex;
@@ -431,6 +434,14 @@ export const TabButton = styled.button`
 
 export const TabContent = styled.div`
   padding: 1.5rem;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surface;
+  }};
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textPrimary;
+  }};
 `;
 
 export const ProjectsGrid = styled.div`

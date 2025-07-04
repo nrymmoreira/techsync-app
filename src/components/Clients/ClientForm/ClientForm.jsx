@@ -53,28 +53,22 @@ const ClientForm = () => {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingCep, setIsLoadingCep] = useState(false);
 
   useEffect(() => {
     if (isEditing) {
-      // Simular carregamento dos dados do cliente
-      setIsLoading(true);
-      setTimeout(() => {
-        // Mock data - substituir pela API real
-        setFormData({
-          name: 'TechNova Solutions',
-          cnpj: '12.345.678/0001-90',
-          phone: '(11) 98765-4321',
-          email: 'contato@technova.com',
-          address: 'Av. Paulista, 1000, São Paulo - SP',
-          observations: 'Cliente desde 2021. Preferência por reuniões nas segundas-feiras pela manhã.'
-        });
-        setContacts([
-          { id: 1, name: 'João Silva', role: 'CEO', phone: '(11) 98765-4321', email: 'joao@technova.com' },
-          { id: 2, name: 'Maria Oliveira', role: 'CTO', phone: '(11) 97654-3210', email: 'maria@technova.com' }
-        ]);
-        setIsLoading(false);
-      }, 1000);
+      // Mock data - substituir pela API real
+      setFormData({
+        name: 'TechNova Solutions',
+        cnpj: '12.345.678/0001-90',
+        phone: '(11) 98765-4321',
+        email: 'contato@technova.com',
+        address: 'Av. Paulista, 1000, São Paulo - SP',
+        observations: 'Cliente desde 2021. Preferência por reuniões nas segundas-feiras pela manhã.'
+      });
+      setContacts([
+        { id: 1, name: 'João Silva', role: 'CEO', phone: '(11) 98765-4321', email: 'joao@technova.com' },
+        { id: 2, name: 'Maria Oliveira', role: 'CTO', phone: '(11) 97654-3210', email: 'maria@technova.com' }
+      ]);
     }
   }, [isEditing]);
 
@@ -144,6 +138,21 @@ const ClientForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  const validateContactForm = () => {
+    const contactErrors = {};
+
+    if (newContact.email && !validateEmail(newContact.email)) {
+      contactErrors.contactEmail = 'Email inválido';
+    }
+
+    if (newContact.phone && !validatePhone(newContact.phone)) {
+      contactErrors.contactPhone = 'Telefone inválido';
+    }
+
+    setErrors(prev => ({ ...prev, ...contactErrors }));
+    return Object.keys(contactErrors).length === 0;
+  };
+
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
@@ -154,10 +163,14 @@ const ClientForm = () => {
 
   const handleContactChange = (field, value) => {
     setNewContact(prev => ({ ...prev, [field]: value }));
+    
+    if (errors[`contact${field.charAt(0).toUpperCase() + field.slice(1)}`]) {
+      setErrors(prev => ({ ...prev, [`contact${field.charAt(0).toUpperCase() + field.slice(1)}`]: '' }));
+    }
   };
 
   const addContact = () => {
-    if (newContact.name.trim() && newContact.role.trim()) {
+    if (newContact.name.trim() && newContact.role.trim() && validateContactForm()) {
       setContacts(prev => [...prev, { 
         id: Date.now(), 
         ...newContact 
@@ -193,21 +206,6 @@ const ClientForm = () => {
   const handleCancel = () => {
     navigate('/clientes');
   };
-
-  if (isEditing && isLoading) {
-    return (
-      <FormContainer $isDarkMode={isDarkMode}>
-        <Navbar />
-        <FormContent>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', animation: 'spin 1s linear infinite' }}>
-              hourglass_empty
-            </span>
-          </div>
-        </FormContent>
-      </FormContainer>
-    );
-  }
 
   return (
     <FormContainer $isDarkMode={isDarkMode}>
@@ -378,6 +376,7 @@ const ClientForm = () => {
                 type="tel"
                 value={newContact.phone}
                 onChange={(e) => handleContactChange('phone', e.target.value)}
+                error={errors.contactPhone}
                 placeholder="(00) 00000-0000"
                 icon="phone"
                 $isDarkMode={isDarkMode}
@@ -390,6 +389,7 @@ const ClientForm = () => {
                 type="email"
                 value={newContact.email}
                 onChange={(e) => handleContactChange('email', e.target.value)}
+                error={errors.contactEmail}
                 placeholder="email@exemplo.com"
                 icon="mail"
                 $isDarkMode={isDarkMode}

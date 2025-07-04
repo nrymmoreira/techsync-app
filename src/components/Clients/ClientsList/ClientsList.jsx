@@ -14,6 +14,7 @@ import {
   FiltersSection,
   SearchInput,
   FilterDropdown,
+  TableContainer,
   ClientsTable,
   TableHeader,
   TableHeaderCell,
@@ -42,7 +43,6 @@ const ClientsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortFilter, setSortFilter] = useState('recent');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [isLoading, setIsLoading] = useState(true);
 
   // Mock data - substituir pela API real
   const mockClients = [
@@ -116,12 +116,8 @@ const ClientsList = () => {
   ];
 
   useEffect(() => {
-    // Simular carregamento da API
-    setTimeout(() => {
-      setClients(mockClients);
-      setFilteredClients(mockClients);
-      setIsLoading(false);
-    }, 1000);
+    setClients(mockClients);
+    setFilteredClients(mockClients);
   }, []);
 
   useEffect(() => {
@@ -177,21 +173,6 @@ const ClientsList = () => {
       setClients(prev => prev.filter(client => client.id !== clientId));
     }
   };
-
-  if (isLoading) {
-    return (
-      <ClientsContainer $isDarkMode={isDarkMode}>
-        <Navbar />
-        <ClientsContent>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', animation: 'spin 1s linear infinite' }}>
-              hourglass_empty
-            </span>
-          </div>
-        </ClientsContent>
-      </ClientsContainer>
-    );
-  }
 
   return (
     <ClientsContainer $isDarkMode={isDarkMode}>
@@ -277,97 +258,99 @@ const ClientsList = () => {
             )}
           </EmptyState>
         ) : (
-          <ClientsTable $isDarkMode={isDarkMode}>
-            <TableHeader>
-              <tr>
-                <TableHeaderCell $isDarkMode={isDarkMode}>
-                  Nome
-                  <span className="material-symbols-outlined">unfold_more</span>
-                </TableHeaderCell>
-                <TableHeaderCell $isDarkMode={isDarkMode}>CNPJ</TableHeaderCell>
-                <TableHeaderCell $isDarkMode={isDarkMode}>Contato</TableHeaderCell>
-                <TableHeaderCell $isDarkMode={isDarkMode}>
-                  Status
-                  <span className="material-symbols-outlined">unfold_more</span>
-                </TableHeaderCell>
-                <TableHeaderCell $isDarkMode={isDarkMode}>
-                  Último contato
-                  <span className="material-symbols-outlined">unfold_more</span>
-                </TableHeaderCell>
-                <TableHeaderCell $isDarkMode={isDarkMode}>Ações</TableHeaderCell>
-              </tr>
-            </TableHeader>
-            <TableBody>
-              {filteredClients.map((client) => (
-                <ClientRow
-                  key={client.id}
-                  onClick={() => handleClientClick(client.id)}
-                  $isDarkMode={isDarkMode}
-                >
-                  <td>
-                    <ClientInfo>
-                      <ClientAvatar $isDarkMode={isDarkMode}>
-                        {getClientInitial(client.name)}
-                      </ClientAvatar>
-                      <ClientName $isDarkMode={isDarkMode}>
-                        {client.name}
-                      </ClientName>
-                    </ClientInfo>
-                  </td>
-                  <td>
-                    <span style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                      {client.cnpj}
-                    </span>
-                  </td>
-                  <td>
-                    <ClientContact $isDarkMode={isDarkMode}>
-                      <div>{client.phone}</div>
-                      <div>{client.email}</div>
-                    </ClientContact>
-                  </td>
-                  <td>
-                    {client.activeProjects > 0 ? (
-                      <StatusBadge $status="active" $isDarkMode={isDarkMode}>
-                        <ProjectsCount>
-                          {client.activeProjects}
-                        </ProjectsCount>
-                        projeto{client.activeProjects > 1 ? 's' : ''} ativo{client.activeProjects > 1 ? 's' : ''}
-                      </StatusBadge>
-                    ) : (
-                      <StatusBadge $status="inactive" $isDarkMode={isDarkMode}>
-                        Sem projetos ativos
-                      </StatusBadge>
-                    )}
-                  </td>
-                  <td>
-                    <LastContactDate $isDarkMode={isDarkMode}>
-                      <span className="material-symbols-outlined">schedule</span>
-                      {formatDate(client.lastContact)}
-                    </LastContactDate>
-                  </td>
-                  <td>
-                    <ActionsMenu>
-                      <ActionButton
-                        onClick={(e) => handleEditClient(client.id, e)}
-                        $isDarkMode={isDarkMode}
-                        title="Editar cliente"
-                      >
-                        <span className="material-symbols-outlined">edit</span>
-                      </ActionButton>
-                      <ActionButton
-                        onClick={(e) => handleDeleteClient(client.id, e)}
-                        $isDarkMode={isDarkMode}
-                        $isDelete={true}
-                        title="Excluir cliente"
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </ActionButton>
-                    </ActionsMenu>
-                  </td>
-                </ClientRow>
-              ))}
-            </TableBody>
-          </ClientsTable>
+          <TableContainer>
+            <ClientsTable $isDarkMode={isDarkMode}>
+              <TableHeader $isDarkMode={isDarkMode}>
+                <tr>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>
+                    Nome
+                    <span className="material-symbols-outlined">unfold_more</span>
+                  </TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>CNPJ</TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>Contato</TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>
+                    Status
+                    <span className="material-symbols-outlined">unfold_more</span>
+                  </TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>
+                    Último contato
+                    <span className="material-symbols-outlined">unfold_more</span>
+                  </TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>Ações</TableHeaderCell>
+                </tr>
+              </TableHeader>
+              <TableBody>
+                {filteredClients.map((client) => (
+                  <ClientRow
+                    key={client.id}
+                    onClick={() => handleClientClick(client.id)}
+                    $isDarkMode={isDarkMode}
+                  >
+                    <td>
+                      <ClientInfo>
+                        <ClientAvatar $isDarkMode={isDarkMode}>
+                          {getClientInitial(client.name)}
+                        </ClientAvatar>
+                        <ClientName $isDarkMode={isDarkMode}>
+                          {client.name}
+                        </ClientName>
+                      </ClientInfo>
+                    </td>
+                    <td>
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
+                        {client.cnpj}
+                      </span>
+                    </td>
+                    <td>
+                      <ClientContact $isDarkMode={isDarkMode}>
+                        <div>{client.phone}</div>
+                        <div>{client.email}</div>
+                      </ClientContact>
+                    </td>
+                    <td>
+                      {client.activeProjects > 0 ? (
+                        <StatusBadge $status="active" $isDarkMode={isDarkMode}>
+                          <ProjectsCount>
+                            {client.activeProjects}
+                          </ProjectsCount>
+                          projeto{client.activeProjects > 1 ? 's' : ''} ativo{client.activeProjects > 1 ? 's' : ''}
+                        </StatusBadge>
+                      ) : (
+                        <StatusBadge $status="inactive" $isDarkMode={isDarkMode}>
+                          Sem projetos ativos
+                        </StatusBadge>
+                      )}
+                    </td>
+                    <td>
+                      <LastContactDate $isDarkMode={isDarkMode}>
+                        <span className="material-symbols-outlined">schedule</span>
+                        {formatDate(client.lastContact)}
+                      </LastContactDate>
+                    </td>
+                    <td>
+                      <ActionsMenu>
+                        <ActionButton
+                          onClick={(e) => handleEditClient(client.id, e)}
+                          $isDarkMode={isDarkMode}
+                          title="Editar cliente"
+                        >
+                          <span className="material-symbols-outlined">edit</span>
+                        </ActionButton>
+                        <ActionButton
+                          onClick={(e) => handleDeleteClient(client.id, e)}
+                          $isDarkMode={isDarkMode}
+                          $isDelete={true}
+                          title="Excluir cliente"
+                        >
+                          <span className="material-symbols-outlined">delete</span>
+                        </ActionButton>
+                      </ActionsMenu>
+                    </td>
+                  </ClientRow>
+                ))}
+              </TableBody>
+            </ClientsTable>
+          </TableContainer>
         )}
       </ClientsContent>
     </ClientsContainer>

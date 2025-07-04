@@ -191,22 +191,33 @@ export const FilterDropdown = styled.select`
   }
 `;
 
+export const TableContainer = styled.div`
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
+  }};
+
+  @media (max-width: ${breakpoints.mobile}) {
+    margin: 0 -1rem;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+`;
+
 export const ClientsTable = styled.table`
   width: 100%;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
-  border-radius: 12px;
-  overflow: hidden;
   border-collapse: collapse;
+  min-width: 800px;
 
-  @media (max-width: ${breakpoints.tablet}) {
-    font-size: 0.875rem;
+  @media (max-width: ${breakpoints.mobile}) {
+    min-width: 700px;
   }
 `;
 
@@ -214,6 +225,10 @@ export const TableHeader = styled.thead`
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceHover;
+  }};
+  border-bottom: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
   }};
 `;
 
@@ -227,16 +242,9 @@ export const TableHeaderCell = styled.th`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
-  border-bottom: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
   position: relative;
   cursor: pointer;
   transition: color 0.3s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 
   &:hover {
     color: ${props => {
@@ -248,6 +256,7 @@ export const TableHeaderCell = styled.th`
   span {
     font-size: 1rem;
     opacity: 0.5;
+    margin-left: 0.25rem;
   }
 
   @media (max-width: ${breakpoints.tablet}) {
@@ -280,6 +289,10 @@ export const ClientRow = styled.tr`
   td {
     padding: 1rem;
     vertical-align: middle;
+    color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textPrimary;
+    }};
 
     @media (max-width: ${breakpoints.tablet}) {
       padding: 0.75rem 0.5rem;

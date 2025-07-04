@@ -57,7 +57,6 @@ const ClientDetail = () => {
   const { isDarkMode } = useTheme();
   const [client, setClient] = useState(null);
   const [activeTab, setActiveTab] = useState('projects');
-  const [isLoading, setIsLoading] = useState(true);
 
   // Mock data - substituir pela API real
   const mockClient = {
@@ -109,11 +108,7 @@ const ClientDetail = () => {
   };
 
   useEffect(() => {
-    // Simular carregamento da API
-    setTimeout(() => {
-      setClient(mockClient);
-      setIsLoading(false);
-    }, 1000);
+    setClient(mockClient);
   }, [id]);
 
   const getClientInitial = (name) => {
@@ -139,21 +134,6 @@ const ClientDetail = () => {
         return 'info';
     }
   };
-
-  if (isLoading) {
-    return (
-      <DetailContainer $isDarkMode={isDarkMode}>
-        <Navbar />
-        <DetailContent>
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '400px' }}>
-            <span className="material-symbols-outlined" style={{ fontSize: '3rem', animation: 'spin 1s linear infinite' }}>
-              hourglass_empty
-            </span>
-          </div>
-        </DetailContent>
-      </DetailContainer>
-    );
-  }
 
   if (!client) {
     return (
@@ -274,7 +254,7 @@ const ClientDetail = () => {
           </ObservationsSection>
         )}
 
-        <TabsSection>
+        <TabsSection $isDarkMode={isDarkMode}>
           <TabsList>
             <TabButton
               $isActive={activeTab === 'projects'}
@@ -299,7 +279,7 @@ const ClientDetail = () => {
             </TabButton>
           </TabsList>
 
-          <TabContent>
+          <TabContent $isDarkMode={isDarkMode}>
             {activeTab === 'projects' && (
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
