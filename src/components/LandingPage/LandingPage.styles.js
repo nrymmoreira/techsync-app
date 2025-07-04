@@ -239,7 +239,7 @@ export const SectionSubtitle = styled.p`
 
 export const FeatureGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;

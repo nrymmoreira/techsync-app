@@ -19,23 +19,12 @@ import {
   FeatureIcon,
   FeatureTitle,
   FeatureDescription,
-  ValuesSection,
-  ValuesContainer,
-  ValuesTitle,
-  ValuesDescription,
-  ValuesVisualization,
-  ValueCircle,
-  ValueLabel,
   BrandSection,
   BrandGrid,
   BrandCard,
   BrandCardIcon,
   BrandCardTitle,
-  BrandCardDescription,
-  MissionSection,
-  MissionContent,
-  MissionText,
-  MissionHighlight
+  BrandCardDescription
 } from './LandingPage.styles';
 
 const LandingPage = () => {
@@ -151,35 +140,6 @@ const LandingPage = () => {
         </ContentContainer>
       </FeaturesSection>
 
-      <ValuesSection $isDarkMode={isDarkMode}>
-        <ContentContainer>
-          <ValuesContainer>
-            <div>
-              <ValuesTitle $isDarkMode={isDarkMode}>
-                Nossos Valores Fundamentais
-              </ValuesTitle>
-              <ValuesDescription $isDarkMode={isDarkMode}>
-                Como exploradores que desafiam os limites do cosmos, nossa plataforma 
-                é construída sobre três pilares fundamentais que guiam cada decisão e 
-                cada linha de código.
-              </ValuesDescription>
-            </div>
-            
-            <ValuesVisualization>
-              <ValueCircle $position="top" $isDarkMode={isDarkMode}>
-                <ValueLabel $isDarkMode={isDarkMode}>Autonomia</ValueLabel>
-              </ValueCircle>
-              <ValueCircle $position="bottom-left" $isDarkMode={isDarkMode}>
-                <ValueLabel $isDarkMode={isDarkMode}>Evolução</ValueLabel>
-              </ValueCircle>
-              <ValueCircle $position="bottom-right" $isDarkMode={isDarkMode}>
-                <ValueLabel $isDarkMode={isDarkMode}>Organização</ValueLabel>
-              </ValueCircle>
-            </ValuesVisualization>
-          </ValuesContainer>
-        </ContentContainer>
-      </ValuesSection>
-
       <BrandSection $isDarkMode={isDarkMode}>
         <ContentContainer>
           <SectionTitle $isDarkMode={isDarkMode}>
@@ -206,27 +166,6 @@ const LandingPage = () => {
         </ContentContainer>
       </BrandSection>
 
-      <MissionSection $isDarkMode={isDarkMode}>
-        <ContentContainer>
-          <MissionContent>
-            <SectionTitle $isDarkMode={isDarkMode}>
-              Nossa Missão
-            </SectionTitle>
-            <MissionText $isDarkMode={isDarkMode}>
-              Transformar a complexidade da gestão em uma experiência fluida e intuitiva, 
-              permitindo que profissionais foquem no que realmente importa: 
-              <MissionHighlight $isDarkMode={isDarkMode}> criar, inovar e evoluir</MissionHighlight>.
-            </MissionText>
-            <MissionText $isDarkMode={isDarkMode}>
-              O futuro pertence àqueles que dominam a arte da gestão. TechSync é a 
-              ferramenta que os levará até lá.
-            </MissionText>
-            <MissionHighlight $isDarkMode={isDarkMode} style={{ fontSize: '1.25rem', marginTop: '2rem' }}>
-              Bem-vindo ao próximo nível da produtividade. Bem-vindo ao futuro.
-            </MissionHighlight>
-          </MissionContent>
-        </ContentContainer>
-      </MissionSection>
     </LandingContainer>
   );
 };
