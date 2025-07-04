@@ -255,7 +255,7 @@ const ClientDetail = () => {
         )}
 
         <TabsSection $isDarkMode={isDarkMode}>
-          <TabsList>
+          <TabsList $isDarkMode={isDarkMode}>
             <TabButton
               $isActive={activeTab === 'projects'}
               $isDarkMode={isDarkMode}

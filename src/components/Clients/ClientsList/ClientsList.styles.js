@@ -102,7 +102,7 @@ export const FiltersSection = styled.div`
   }
 `;
 
-export const SearchInput = styled.input`
+export const SearchInput = styled.input<{ $isDarkMode: boolean }>`
   flex: 1;
   padding: 0.75rem 1rem;
   padding-left: 3rem;
@@ -122,10 +122,12 @@ export const SearchInput = styled.input`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
   transition: all 0.3s ease;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23${props => {
+
+  background-image: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.textSecondary.replace('#', '');
-  }}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E");
+    const color = theme.colors.textSecondary.replace('#', '');
+    return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E")`;
+  }};
   background-repeat: no-repeat;
   background-position: 1rem center;
 
@@ -152,6 +154,7 @@ export const SearchInput = styled.input`
     width: 100%;
   }
 `;
+
 
 export const FilterDropdown = styled.select`
   padding: 0.75rem 1rem;
