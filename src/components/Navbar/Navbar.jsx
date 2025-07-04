@@ -47,6 +47,12 @@ const Navbar = () => {
       path: '/home'
     },
     {
+      id: 'clients',
+      label: 'Clientes',
+      icon: 'group',
+      path: '/clientes'
+    },
+    {
       id: 'profile',
       label: 'Perfil',
       icon: 'person',
@@ -112,6 +118,14 @@ const Navbar = () => {
             >
               <NavIcon className="material-symbols-outlined">dashboard</NavIcon>
               <NavText>Home</NavText>
+            </NavItem>
+            <NavItem 
+              $active={location.pathname.startsWith('/clientes')} 
+              $isDarkMode={isDarkMode}
+              onClick={() => navigate('/clientes')}
+            >
+              <NavIcon className="material-symbols-outlined">group</NavIcon>
+              <NavText>Clientes</NavText>
             </NavItem>
           </NavSection>
 

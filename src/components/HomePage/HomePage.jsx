@@ -45,7 +45,7 @@ const HomePage = () => {
       icon: 'group',
       title: 'Gerenciar Clientes',
       description: 'Acesse e gerencie seus seus clientes e históricos de interações.',
-      action: () => console.log('Navigate to clients')
+      action: () => navigate('/clientes')
     },
     {
       id: 'budgets',
@@ -92,8 +92,12 @@ const HomePage = () => {
                 </CardIcon>
                 <CardTitle $isDarkMode={isDarkMode}>{feature.title}</CardTitle>
                 <CardDescription $isDarkMode={isDarkMode}>{feature.description}</CardDescription>
-                <CardButton onClick={feature.action} $isDarkMode={isDarkMode}>
-                  Em breve
+                <CardButton 
+                  onClick={feature.action} 
+                  $isDarkMode={isDarkMode}
+                  $isActive={feature.id === 'clients'}
+                >
+                  {feature.id === 'clients' ? 'Acessar' : 'Em breve'}
                 </CardButton>
               </FeatureCard>
             ))}

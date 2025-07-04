@@ -234,28 +234,33 @@ export const CardButton = styled.button`
   padding: 0.875rem 1.5rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceHover;
+    return props.$isActive ? theme.colors.primary : theme.colors.surfaceHover;
   }};
   border: 1px solid ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
+    return props.$isActive ? theme.colors.primary : theme.colors.surfaceBorder;
   }};
   border-radius: 8px;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.textSecondary;
+    return props.$isActive ? 'white' : theme.colors.textSecondary;
   }};
   font-family: ${fonts.secondary};
   font-weight: 500;
   font-size: 0.9375rem;
-  cursor: not-allowed;
+  cursor: ${props => props.$isActive ? 'pointer' : 'not-allowed'};
   transition: all 0.3s ease;
-  opacity: 0.7;
+  opacity: ${props => props.$isActive ? 1 : 0.7};
 
   &:hover {
     background: ${props => {
       const theme = getTheme(props.$isDarkMode);
-      return theme.colors.surface;
+      return props.$isActive ? theme.colors.primaryHover : theme.colors.surface;
+    }};
+    transform: ${props => props.$isActive ? 'translateY(-2px)' : 'none'};
+    box-shadow: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return props.$isActive ? `0 4px 15px ${theme.colors.primaryShadow}` : 'none';
     }};
   }
 

@@ -9,6 +9,9 @@ import RegisterPage from "./components/RegisterPage/RegisterPage";
 import HomePage from "./components/HomePage/HomePage";
 import Perfil from "./components/Perfil/Perfil";
 import Configuracoes from "./components/Configuracoes/Configuracoes";
+import ClientsList from "./components/Clients/ClientsList/ClientsList";
+import ClientForm from "./components/Clients/ClientForm/ClientForm";
+import ClientDetail from "./components/Clients/ClientDetail/ClientDetail";
 
 const AppContent = () => {
   const { isDarkMode } = useTheme();
@@ -34,6 +37,38 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <Perfil />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/clientes"
+          element={
+            <PrivateRoute>
+              <ClientsList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/clientes/novo"
+          element={
+            <PrivateRoute>
+              <ClientForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/clientes/:id"
+          element={
+            <PrivateRoute>
+              <ClientDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/clientes/:id/editar"
+          element={
+            <PrivateRoute>
+              <ClientForm />
             </PrivateRoute>
           }
         />
