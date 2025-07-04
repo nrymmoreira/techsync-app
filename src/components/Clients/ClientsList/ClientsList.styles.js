@@ -174,6 +174,19 @@ export const FilterDropdown = styled.select`
   transition: all 0.3s ease;
   min-width: 150px;
 
+  /* Estilização das opções */
+  option {
+    background: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surface;
+    }};
+    color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textPrimary;
+    }};
+    padding: 0.5rem;
+  }
+
   &:focus {
     outline: none;
     border-color: ${props => {
@@ -240,7 +253,7 @@ export const TableHeaderCell = styled.th`
   font-size: 0.875rem;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.textSecondary;
+    return theme.colors.textPrimary;
   }};
   position: relative;
   cursor: pointer;
@@ -249,7 +262,7 @@ export const TableHeaderCell = styled.th`
   &:hover {
     color: ${props => {
       const theme = getTheme(props.$isDarkMode);
-      return theme.colors.textPrimary;
+      return theme.colors.primary;
     }};
   }
 
