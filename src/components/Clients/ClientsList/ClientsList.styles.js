@@ -102,7 +102,7 @@ export const FiltersSection = styled.div`
   }
 `;
 
-export const SearchInput = styled.input<{ $isDarkMode: boolean }>`
+export const SearchInput = styled.input`
   flex: 1;
   padding: 0.75rem 1rem;
   padding-left: 3rem;
