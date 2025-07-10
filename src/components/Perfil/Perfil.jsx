@@ -94,6 +94,10 @@ const Perfil = () => {
   };
 
   const getProfileName = () => {
+    // Se tem empresa cadastrada, mostra o nome da empresa, senão mostra o nome do usuário
+    if (currentUser?.empresa?.nomeEmpresa) {
+      return currentUser.empresa.nomeEmpresa;
+    }
     return currentUser ? currentUser.nome : 'Carregando...';
   };
 
@@ -102,6 +106,10 @@ const Perfil = () => {
   };
 
   const getProfilePictureInitial = () => {
+    // Se tem empresa cadastrada, usa a inicial da empresa, senão usa a do usuário
+    if (currentUser?.empresa?.nomeEmpresa) {
+      return currentUser.empresa.nomeEmpresa.charAt(0).toUpperCase();
+    }
     return currentUser && currentUser.nome ? currentUser.nome.charAt(0).toUpperCase() : '?';
   };
 

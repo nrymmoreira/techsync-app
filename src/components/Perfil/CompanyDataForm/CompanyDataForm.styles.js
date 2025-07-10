@@ -90,6 +90,69 @@ export const ErrorMessage = styled.div`
   font-size: 0.875rem;
 `;
 
+export const CurrencySelect = styled.select`
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.input.background;
+  }};
+  border: 2px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    if (props.$hasError) return theme.colors.input.borderError;
+    return theme.colors.input.border;
+  }};
+  border-radius: 8px;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textPrimary;
+  }};
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.input.borderFocus;
+    }};
+    background: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.input.backgroundFocus;
+    }};
+    box-shadow: 0 0 0 3px ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primaryLight;
+    }};
+  }
+
+  &:hover:not(:focus) {
+    border-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.input.borderHover;
+    }};
+  }
+
+  option {
+    background: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surface;
+    }};
+    color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textPrimary;
+    }};
+    padding: 0.5rem;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    font-size: 0.9375rem;
+    padding: 0.75rem 0.875rem;
+  }
+`;
+
 export const SaveButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
