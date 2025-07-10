@@ -186,6 +186,26 @@ const ClientDetail = () => {
             >
               Editar Cliente
             </Button>
+            <Button
+              variant="ghost"
+              size="medium"
+              icon="delete"
+              onClick={() => {
+                if (window.confirm('Tem certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) {
+                  console.log('Excluir cliente:', id);
+                  // Aqui você implementaria a lógica de exclusão
+                  navigate('/clientes');
+                }
+              }}
+              $isDarkMode={isDarkMode}
+              style={{ 
+                backgroundColor: '#ef4444',
+                color: 'white',
+                borderColor: '#ef4444'
+              }}
+            >
+              Excluir Cliente
+            </Button>
           </HeaderActions>
         </DetailHeader>
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
+import Select from '../../Select/Select';
 import {
   ClientsContainer,
   ClientsContent,
@@ -13,7 +14,6 @@ import {
   HeaderActions,
   FiltersSection,
   SearchInput,
-  FilterDropdown,
   TableContainer,
   ClientsTable,
   TableHeader,
@@ -26,9 +26,6 @@ import {
   ClientContact,
   StatusBadge,
   ProjectsCount,
-  LastContactDate,
-  ActionsMenu,
-  ActionButton,
   EmptyState,
   EmptyStateIcon,
   EmptyStateTitle,
@@ -43,6 +40,18 @@ const ClientsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortFilter, setSortFilter] = useState('recent');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  const sortOptions = [
+    { value: 'recent', label: 'Mais recentes' },
+    { value: 'name', label: 'Nome A-Z' },
+    { value: 'projects', label: 'Mais projetos' }
+  ];
+
+  const statusOptions = [
+    { value: 'all', label: 'Todos' },
+    { value: 'active', label: 'Ativos' },
+    { value: 'inactive', label: 'Inativos' }
+  ];
 
   // Mock data - substituir pela API real
   const mockClients = [
@@ -209,25 +218,23 @@ const ClientsList = () => {
             $isDarkMode={isDarkMode}
           />
           
-          <FilterDropdown
+          <Select
+            id="sortFilter"
             value={sortFilter}
             onChange={(e) => setSortFilter(e.target.value)}
+            options={sortOptions}
+            placeholder="Ordenar por"
             $isDarkMode={isDarkMode}
-          >
-            <option value="recent">Mais recentes</option>
-            <option value="name">Nome A-Z</option>
-            <option value="projects">Mais projetos</option>
-          </FilterDropdown>
+          />
 
-          <FilterDropdown
+          <Select
+            id="statusFilter"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            options={statusOptions}
+            placeholder="Filtrar por status"
             $isDarkMode={isDarkMode}
-          >
-            <option value="all">Todos</option>
-            <option value="active">Ativos</option>
-            <option value="inactive">Inativos</option>
-          </FilterDropdown>
+          />
         </FiltersSection>
 
         {filteredClients.length === 0 ? (
@@ -267,16 +274,10 @@ const ClientsList = () => {
                     <span className="material-symbols-outlined">unfold_more</span>
                   </TableHeaderCell>
                   <TableHeaderCell $isDarkMode={isDarkMode}>CNPJ</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Contato</TableHeaderCell>
                   <TableHeaderCell $isDarkMode={isDarkMode}>
                     Status
                     <span className="material-symbols-outlined">unfold_more</span>
                   </TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>
-                    Último contato
-                    <span className="material-symbols-outlined">unfold_more</span>
-                  </TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Ações</TableHeaderCell>
                 </tr>
               </TableHeader>
               <TableBody>
@@ -302,12 +303,6 @@ const ClientsList = () => {
                       </span>
                     </td>
                     <td>
-                      <ClientContact $isDarkMode={isDarkMode}>
-                        <div>{client.phone}</div>
-                        <div>{client.email}</div>
-                      </ClientContact>
-                    </td>
-                    <td>
                       {client.activeProjects > 0 ? (
                         <StatusBadge $status="active" $isDarkMode={isDarkMode}>
                           <ProjectsCount>
@@ -320,31 +315,6 @@ const ClientsList = () => {
                           Sem projetos ativos
                         </StatusBadge>
                       )}
-                    </td>
-                    <td>
-                      <LastContactDate $isDarkMode={isDarkMode}>
-                        <span className="material-symbols-outlined">schedule</span>
-                        {formatDate(client.lastContact)}
-                      </LastContactDate>
-                    </td>
-                    <td>
-                      <ActionsMenu>
-                        <ActionButton
-                          onClick={(e) => handleEditClient(client.id, e)}
-                          $isDarkMode={isDarkMode}
-                          title="Editar cliente"
-                        >
-                          <span className="material-symbols-outlined">edit</span>
-                        </ActionButton>
-                        <ActionButton
-                          onClick={(e) => handleDeleteClient(client.id, e)}
-                          $isDarkMode={isDarkMode}
-                          $isDelete={true}
-                          title="Excluir cliente"
-                        >
-                          <span className="material-symbols-outlined">delete</span>
-                        </ActionButton>
-                      </ActionsMenu>
                     </td>
                   </ClientRow>
                 ))}

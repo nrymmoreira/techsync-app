@@ -3,6 +3,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import Input from '../../Input/Input';
 import Button from '../../Button/Button';
 import Modal from '../../Modal/Modal';
+import Select from '../../Select/Select';
 import { authService } from '../../../services/api';
 import {
   FormContainer,
@@ -10,8 +11,7 @@ import {
   FormGrid,
   SaveButtonContainer,
   LoadingMessage,
-  ErrorMessage,
-  CurrencySelect
+  ErrorMessage
 } from './CompanyDataForm.styles';
 
 const CompanyDataForm = ({ currentUser, onUpdateUser }) => {
@@ -21,6 +21,13 @@ const CompanyDataForm = ({ currentUser, onUpdateUser }) => {
     cnpj: "",
     currency: "BRL"
   });
+
+  const currencyOptions = [
+    { value: 'BRL', label: 'Real Brasileiro (BRL)' },
+    { value: 'USD', label: 'Dólar Americano (USD)' },
+    { value: 'EUR', label: 'Euro (EUR)' },
+    { value: 'GBP', label: 'Libra Esterlina (GBP)' }
+  ];
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -229,44 +236,18 @@ const CompanyDataForm = ({ currentUser, onUpdateUser }) => {
           disabled={isLoading}
         />
 
-        <div>
-          <label htmlFor="currency" style={{ 
-            display: 'block',
-            fontFamily: 'Inter, sans-serif',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            color: isDarkMode ? '#F5F5F5' : '#1E293B',
-            marginBottom: '0.5rem'
-          }}>
-            Moeda <span style={{ color: '#F97316' }}>*</span>
-          </label>
-          <CurrencySelect
-            id="currency"
-            value={formData.currency}
-            onChange={(e) => handleInputChange("currency", e.target.value)}
-            $isDarkMode={isDarkMode}
-            $hasError={!!errors.currency}
-            disabled={isLoading}
-          >
-            <option value="BRL">Real Brasileiro (BRL)</option>
-            <option value="USD">Dólar Americano (USD)</option>
-            <option value="EUR">Euro (EUR)</option>
-            <option value="GBP">Libra Esterlina (GBP)</option>
-          </CurrencySelect>
-          {errors.currency && (
-            <div style={{ 
-              marginTop: '0.5rem',
-              fontSize: '0.8125rem',
-              color: '#ef4444',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.375rem'
-            }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>error</span>
-              {errors.currency}
-            </div>
-          )}
-        </div>
+        <Select
+          id="currency"
+          label="Moeda"
+          value={formData.currency}
+          onChange={(e) => handleInputChange("currency", e.target.value)}
+          options={currencyOptions}
+          error={errors.currency}
+          placeholder="Selecione a moeda"
+          required
+          $isDarkMode={isDarkMode}
+          disabled={isLoading}
+        />
       </FormGrid>
 
       <SaveButtonContainer>
