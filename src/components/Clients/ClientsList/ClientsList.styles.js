@@ -93,7 +93,8 @@ export const FiltersSection = styled.div`
   align-items: center;
 
   @media (max-width: ${breakpoints.tablet}) {
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 0.75rem;
   }
 
   @media (max-width: ${breakpoints.mobile}) {
@@ -103,7 +104,8 @@ export const FiltersSection = styled.div`
 `;
 
 export const SearchInput = styled.input`
-  flex: 1;
+  flex: 2;
+  min-width: 400px;
   padding: 0.75rem 1rem;
   padding-left: 3rem;
   background: ${props => {
@@ -152,6 +154,7 @@ export const SearchInput = styled.input`
 
   @media (max-width: ${breakpoints.mobile}) {
     width: 100%;
+    min-width: unset;
   }
 `;
 
@@ -327,6 +330,10 @@ export const ClientContact = styled.div`
   }
 
   @media (max-width: ${breakpoints.tablet}) {
+    min-width: 300px;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
     font-size: 0.8125rem;
   }
 `;

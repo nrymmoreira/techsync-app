@@ -131,9 +131,15 @@ const ClientsList = () => {
 
   useEffect(() => {
     let filtered = clients.filter(client => {
-      const matchesSearch = client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           client.cnpj.includes(searchTerm) ||
-                           client.email.toLowerCase().includes(searchTerm.toLowerCase());
+      const searchLower = searchTerm.toLowerCase().trim();
+      
+      if (!searchLower) return true;
+      
+      const matchesName = client.name.toLowerCase().includes(searchLower);
+      const matchesCNPJ = client.cnpj.replace(/[^\d]/g, '').includes(searchLower.replace(/[^\d]/g, ''));
+      const matchesEmail = client.email.toLowerCase().includes(searchLower);
+      
+      const matchesSearch = matchesName || matchesCNPJ || matchesEmail;
       
       const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
       
@@ -212,7 +218,7 @@ const ClientsList = () => {
         <FiltersSection>
           <SearchInput
             type="text"
-            placeholder="Buscar por nome ou CNPJ..."
+            placeholder="Buscar por nome, CNPJ ou email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             $isDarkMode={isDarkMode}

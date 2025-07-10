@@ -3,11 +3,14 @@ import { getTheme } from '../../styles/themes';
 import { fonts, breakpoints } from '../../styles/GlobalStyles';
 
 export const SelectContainer = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 0;
   width: 100%;
+  min-width: 180px;
+  flex-shrink: 0;
 
   @media (max-width: ${breakpoints.mobile}) {
-    margin-bottom: 1.25rem;
+    margin-bottom: 0;
+    min-width: unset;
   }
 `;
 
