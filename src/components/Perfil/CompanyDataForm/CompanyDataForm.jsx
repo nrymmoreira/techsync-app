@@ -16,15 +16,6 @@ const CompanyDataForm = () => {
   const [formData, setFormData] = useState({
     nomeEmpresa: "",
     cnpj: "",
-    telefoneEmpresa: "",
-    site: "",
-    cep: "",
-    endereco: "",
-    numero: "",
-    complemento: "",
-    bairro: "",
-    cidade: "",
-    estado: ""
   });
 
   const [errors, setErrors] = useState({});
@@ -60,81 +51,6 @@ const CompanyDataForm = () => {
     return parseInt(cleanCNPJ.charAt(13)) === digit;
   };
 
-  const validateURL = (url) => {
-    if (!url) return true; // URL é opcional
-    const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/;
-    return urlPattern.test(url);
-  };
-
-  const validatePhone = (phone) => {
-    const cleanPhone = phone.replace(/[^\d]/g, '');
-    return cleanPhone.length >= 10 && cleanPhone.length <= 11;
-  };
-
-  const fetchAddressByCep = async (cep) => {
-    const cleanCep = cep.replace(/[^\d]/g, '');
-    
-    if (cleanCep.length !== 8) {
-      setErrors(prev => ({ ...prev, cep: 'CEP deve ter 8 dígitos' }));
-      return;
-    }
-
-    setIsLoadingCep(true);
-    setErrors(prev => ({ ...prev, cep: '' }));
-
-    try {
-      const response = await fetch(`https://brasilapi.com.br/api/cep/v1/${cleanCep}`);
-      
-      if (!response.ok) {
-        throw new Error('CEP não encontrado');
-      }
-
-      const data = await response.json();
-      
-      setFormData(prev => ({
-        ...prev,
-        endereco: data.street || '',
-        bairro: data.neighborhood || '',
-        cidade: data.city || '',
-        estado: data.state || ''
-      }));
-
-      // Limpar erros relacionados ao endereço
-      setErrors(prev => ({
-        ...prev,
-        endereco: '',
-        bairro: '',
-        cidade: '',
-        estado: ''
-      }));
-
-    } catch (error) {
-      setErrors(prev => ({ 
-        ...prev, 
-        cep: error.message === 'CEP não encontrado' ? 'CEP não encontrado' : 'Erro ao buscar CEP' 
-      }));
-    } finally {
-      setIsLoadingCep(false);
-    }
-  };
-
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-    
-    // Limpar erro quando usuário começar a digitar
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-
-    // Buscar endereço automaticamente quando CEP for preenchido
-    if (field === 'cep' && value.replace(/[^\d]/g, '').length === 8) {
-      fetchAddressByCep(value);
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-
     // Nome da empresa
     if (!formData.nomeEmpresa.trim()) {
       newErrors.nomeEmpresa = 'Nome da empresa é obrigatório';
@@ -146,51 +62,6 @@ const CompanyDataForm = () => {
     } else if (!validateCNPJ(formData.cnpj)) {
       newErrors.cnpj = 'CNPJ inválido';
     }
-
-    // Telefone
-    if (formData.telefoneEmpresa && !validatePhone(formData.telefoneEmpresa)) {
-      newErrors.telefoneEmpresa = 'Telefone inválido';
-    }
-
-    // Site
-    if (formData.site && !validateURL(formData.site)) {
-      newErrors.site = 'URL inválida';
-    }
-
-    // CEP
-    if (!formData.cep.trim()) {
-      newErrors.cep = 'CEP é obrigatório';
-    } else if (formData.cep.replace(/[^\d]/g, '').length !== 8) {
-      newErrors.cep = 'CEP deve ter 8 dígitos';
-    }
-
-    // Endereço
-    if (!formData.endereco.trim()) {
-      newErrors.endereco = 'Endereço é obrigatório';
-    }
-
-    // Número
-    if (!formData.numero.trim()) {
-      newErrors.numero = 'Número é obrigatório';
-    }
-
-    // Bairro
-    if (!formData.bairro.trim()) {
-      newErrors.bairro = 'Bairro é obrigatório';
-    }
-
-    // Cidade
-    if (!formData.cidade.trim()) {
-      newErrors.cidade = 'Cidade é obrigatória';
-    }
-
-    // Estado
-    if (!formData.estado.trim()) {
-      newErrors.estado = 'Estado é obrigatório';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleSaveChanges = () => {
@@ -231,124 +102,6 @@ const CompanyDataForm = () => {
           placeholder="12.345.678/0001-90"
           icon="badge"
           required
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="telefoneEmpresa"
-          label="Telefone"
-          type="tel"
-          value={formData.telefoneEmpresa}
-          onChange={(e) => handleInputChange("telefoneEmpresa", e.target.value)}
-          error={errors.telefoneEmpresa}
-          placeholder="(11) 3456-7890"
-          icon="phone"
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="site"
-          label="Site"
-          type="url"
-          value={formData.site}
-          onChange={(e) => handleInputChange("site", e.target.value)}
-          error={errors.site}
-          placeholder="www.techdevsolutions.com.br"
-          icon="language"
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="cep"
-          label="CEP"
-          type="text"
-          value={formData.cep}
-          onChange={(e) => handleInputChange("cep", e.target.value)}
-          error={errors.cep}
-          placeholder="01234-567"
-          icon="location_on"
-          required
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="endereco"
-          label="Endereço"
-          type="text"
-          value={formData.endereco}
-          onChange={(e) => handleInputChange("endereco", e.target.value)}
-          error={errors.endereco}
-          placeholder="Av. Paulista"
-          icon="home"
-          required
-          disabled={isLoadingCep}
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="numero"
-          label="Número"
-          type="text"
-          value={formData.numero}
-          onChange={(e) => handleInputChange("numero", e.target.value)}
-          error={errors.numero}
-          placeholder="1000"
-          icon="tag"
-          required
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="complemento"
-          label="Complemento"
-          type="text"
-          value={formData.complemento}
-          onChange={(e) => handleInputChange("complemento", e.target.value)}
-          error={errors.complemento}
-          placeholder="Sala 1003"
-          icon="apartment"
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="bairro"
-          label="Bairro"
-          type="text"
-          value={formData.bairro}
-          onChange={(e) => handleInputChange("bairro", e.target.value)}
-          error={errors.bairro}
-          placeholder="Bela Vista"
-          icon="location_city"
-          required
-          disabled={isLoadingCep}
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="cidade"
-          label="Cidade"
-          type="text"
-          value={formData.cidade}
-          onChange={(e) => handleInputChange("cidade", e.target.value)}
-          error={errors.cidade}
-          placeholder="São Paulo"
-          icon="location_city"
-          required
-          disabled={isLoadingCep}
-          $isDarkMode={isDarkMode}
-        />
-
-        <Input
-          id="estado"
-          label="Estado"
-          type="text"
-          value={formData.estado}
-          onChange={(e) => handleInputChange("estado", e.target.value)}
-          error={errors.estado}
-          placeholder="São Paulo"
-          icon="map"
-          required
-          disabled={isLoadingCep}
           $isDarkMode={isDarkMode}
         />
       </FormGrid>

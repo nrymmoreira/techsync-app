@@ -109,9 +109,9 @@ const RegisterPage = () => {
 
     try {
       await authService.register({
-        fullName: formData.fullName,
+        nome: formData.fullName,
         email: formData.email,
-        password: formData.password
+        senha: formData.password
       });
       setShowSuccessModal(true);
     } catch (error) {

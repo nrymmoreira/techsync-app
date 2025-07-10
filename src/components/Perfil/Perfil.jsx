@@ -1,3 +1,4 @@
+// src/components/pages/Perfil/Perfil.jsx
 import React, { useState, useEffect } from "react";
 import { useTheme } from '../../contexts/ThemeContext';
 import { useLocation } from 'react-router-dom';
@@ -27,8 +28,31 @@ const Perfil = () => {
   const { isDarkMode } = useTheme();
   const location = useLocation();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Verificar se há uma tab específica na URL
+  const loadUserFromLocalStorage = () => {
+    const storedUser = localStorage.getItem('techsync-user');
+    if (storedUser) {
+      try {
+        setCurrentUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Erro ao fazer parse dos dados do usuário do localStorage:", e);
+      }
+    } else {
+        setCurrentUser(null);
+    }
+  };
+
+  useEffect(() => {
+    loadUserFromLocalStorage();
+  }, []);
+
+  const handleUserUpdate = (updatedUserData) => {
+    setCurrentUser(updatedUserData);
+  
+    loadUserFromLocalStorage();
+  };
+
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromUrl = urlParams.get('tab');
@@ -38,10 +62,10 @@ const Perfil = () => {
   }, [location]);
 
   const tabs = [
-    { 
-      id: "dados-pessoais", 
-      label: "Dados Pessoais", 
-      icon: "person" 
+    {
+      id: "dados-pessoais",
+      label: "Dados Pessoais",
+      icon: "person"
     },
     {
       id: "dados-empresa",
@@ -58,14 +82,27 @@ const Perfil = () => {
   const renderActiveTab = () => {
     switch (activeTab) {
       case "dados-pessoais":
-        return <PersonalDataForm />;
+        return <PersonalDataForm currentUser={currentUser} onUpdateSuccess={handleUserUpdate} />;
       case "dados-empresa":
-        return <CompanyDataForm />;
+        // Passa currentUser e a função para atualizar o usuário
+        return <CompanyDataForm currentUser={currentUser} onUpdateUser={handleUserUpdate} />;
       case "configuracoes":
         return <SettingsForm />;
       default:
-        return <PersonalDataForm />;
+        return <PersonalDataForm currentUser={currentUser} onUpdateSuccess={handleUserUpdate} />;
     }
+  };
+
+  const getProfileName = () => {
+    return currentUser ? currentUser.nome : 'Carregando...';
+  };
+
+  const getProfileEmail = () => {
+    return currentUser ? currentUser.email : 'carregando@email.com';
+  };
+
+  const getProfilePictureInitial = () => {
+    return currentUser && currentUser.nome ? currentUser.nome.charAt(0).toUpperCase() : '?';
   };
 
   return (
@@ -77,8 +114,8 @@ const Perfil = () => {
             <ProfilePictureContainer>
               <ProfilePicture $isDarkMode={isDarkMode}>
                 <ProfilePictureGradient $isDarkMode={isDarkMode}>
-                  <span className="material-symbols-outlined" style={{ fontSize: '3rem' }}>
-                    person
+                  <span style={{ fontSize: '3rem', fontWeight: 'bold' }}>
+                    {getProfilePictureInitial()}
                   </span>
                 </ProfilePictureGradient>
               </ProfilePicture>
@@ -90,10 +127,10 @@ const Perfil = () => {
             </ProfilePictureContainer>
             <ProfileInfo>
               <ProfileName $isDarkMode={isDarkMode}>
-                Narayana Moreira
+                {getProfileName()}
               </ProfileName>
               <ProfileEmail $isDarkMode={isDarkMode}>
-                narayanamoreira27@email.com
+                {getProfileEmail()}
               </ProfileEmail>
             </ProfileInfo>
           </ProfilePictureSection>
@@ -105,15 +142,15 @@ const Perfil = () => {
               {tabs.map((tab) => (
                <TabButton
                  key={tab.id}
-                  $isActive={activeTab === tab.id}
-                  $isDarkMode={isDarkMode}
+                 $isActive={activeTab === tab.id}
+                 $isDarkMode={isDarkMode}
                  onClick={() => setActiveTab(tab.id)}
-                >
-                  <span className="material-symbols-outlined">
-                    {tab.icon}
-                  </span>
-                  {tab.label}
-                </TabButton>
+               >
+                 <span className="material-symbols-outlined">
+                   {tab.icon}
+                 </span>
+                 {tab.label}
+               </TabButton>
               ))}
             </TabList>
           </TabNavigation>

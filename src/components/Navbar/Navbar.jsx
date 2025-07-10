@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Adicione useEffect
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTheme } from "../../contexts/ThemeContext";
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
@@ -31,9 +31,28 @@ const Navbar = () => {
   const { isDarkMode } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
+  // --- Adicionado para armazenar os dados do usuário
+  const [user, setUser] = useState(null);
+
+  // Carrega os dados do usuário do localStorage ao montar o componente
+  useEffect(() => {
+    const storedUser = localStorage.getItem('techsync-user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error("Erro ao fazer parse dos dados do usuário do localStorage:", e);
+        // Opcional: Se os dados estiverem corrompidos, desloga o usuário
+        handleLogout();
+      }
+    }
+  }, []); // O array vazio garante que o useEffect rode apenas uma vez ao montar
 
   const handleLogout = () => {
+    localStorage.removeItem("techsync-token"); // Remova o token também
     localStorage.removeItem("techsync-authenticated");
+    localStorage.removeItem("techsync-user"); // Remova os dados do usuário
+    setUser(null); // Limpa o estado do usuário
     navigate("/login");
     setIsMobileMenuOpen(false);
     setIsUserDropdownOpen(false);
@@ -96,6 +115,16 @@ const Navbar = () => {
     setIsUserDropdownOpen(!isUserDropdownOpen);
   };
 
+  // --- Funções para obter dados do usuário
+  const getUserName = () => {
+    return user ? user.nome : 'Usuário'; // Retorna o nome do usuário ou um padrão
+  };
+
+  const getUserAvatarInitial = () => {
+    return user && user.nome ? user.nome.charAt(0).toUpperCase() : 'U'; // Pega a primeira letra do nome
+  };
+  // -----------------------------------
+
   return (
     <>
       <NavbarContainer $isDarkMode={isDarkMode}>
@@ -111,16 +140,16 @@ const Navbar = () => {
           </LogoSection>
 
           <NavSection>
-            <NavItem 
-              $active={location.pathname === '/home'} 
+            <NavItem
+              $active={location.pathname === '/home'}
               $isDarkMode={isDarkMode}
               onClick={() => navigate('/home')}
             >
               <NavIcon className="material-symbols-outlined">dashboard</NavIcon>
               <NavText>Home</NavText>
             </NavItem>
-            <NavItem 
-              $active={location.pathname.startsWith('/clientes')} 
+            <NavItem
+              $active={location.pathname.startsWith('/clientes')}
               $isDarkMode={isDarkMode}
               onClick={() => navigate('/clientes')}
             >
@@ -141,12 +170,12 @@ const Navbar = () => {
 
             <div style={{ position: 'relative' }}>
               <UserButton
-                aria-label="Perfil do usuário - Gabriel"
+                aria-label={`Perfil do usuário - ${getUserName()}`} // Usa o nome dinâmico
                 $isDarkMode={isDarkMode}
                 onClick={toggleUserDropdown}
               >
-                <UserAvatar $isDarkMode={isDarkMode}>N</UserAvatar>
-                <UserName $isDarkMode={isDarkMode}>Narayana</UserName>
+                <UserAvatar $isDarkMode={isDarkMode}>{getUserAvatarInitial()}</UserAvatar> {/* Usa a inicial dinâmica */}
+                <UserName $isDarkMode={isDarkMode}>{getUserName()}</UserName> {/* Usa o nome dinâmico */}
                 <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
                   {isUserDropdownOpen ? 'expand_less' : 'expand_more'}
                 </span>
