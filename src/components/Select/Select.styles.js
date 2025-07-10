@@ -110,11 +110,12 @@ export const SelectIcon = styled.span`
   }};
   transition: transform 0.3s ease;
   transform: ${props => props.$isOpen ? 'rotate(180deg)' : 'rotate(0deg)'};
-  margin-left: 0.5rem;
+  margin-left: 0.75rem;
   flex-shrink: 0;
 
   @media (max-width: ${breakpoints.mobile}) {
     font-size: 1.125rem;
+    margin-left: 0.5rem;
   }
 `;
 
@@ -134,13 +135,14 @@ export const SelectDropdown = styled.div`
   }};
   border-radius: 8px;
   margin-top: 0.25rem;
-  box-shadow: 0 8px 32px ${props => {
+  box-shadow: 0 4px 20px ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.shadow;
   }};
   max-height: 200px;
   overflow-y: auto;
   animation: slideDown 0.2s ease-out;
+  backdrop-filter: none;
 
   @keyframes slideDown {
     from {

@@ -10,12 +10,16 @@ export const NavbarContainer = styled.nav`
   z-index: 100;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return `${theme.colors.background}CC`;
+    return theme.colors.background;
   }};
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
   border-bottom: 1px solid ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceBorder;
+  }};
+  box-shadow: 0 2px 8px ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.shadow;
   }};
 `;
 
@@ -255,12 +259,13 @@ export const UserDropdown = styled.div`
   border-radius: 12px;
   padding: 0.5rem;
   min-width: 180px;
-  box-shadow: 0 8px 32px ${props => {
+  box-shadow: 0 4px 20px ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.shadow;
   }};
   z-index: 200;
   animation: slideIn 0.2s ease-out;
+  backdrop-filter: none;
 
   @keyframes slideIn {
     from {
@@ -380,11 +385,12 @@ export const MobileMenu = styled.div`
   border-radius: 12px;
   padding: 0.5rem;
   min-width: 200px;
-  box-shadow: 0 8px 32px ${props => {
+  box-shadow: 0 4px 20px ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.shadow;
   }};
   animation: slideIn 0.2s ease-out;
+  backdrop-filter: none;
 
   @keyframes slideIn {
     from {
