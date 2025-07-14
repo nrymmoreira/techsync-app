@@ -156,6 +156,14 @@ const Navbar = () => {
               <NavIcon className="material-symbols-outlined">group</NavIcon>
               <NavText>Clientes</NavText>
             </NavItem>
+            <NavItem
+              $active={location.pathname.startsWith('/orcamentos')}
+              $isDarkMode={isDarkMode}
+              onClick={() => navigate('/orcamentos')}
+            >
+              <NavIcon className="material-symbols-outlined">receipt_long</NavIcon>
+              <NavText>Orçamentos</NavText>
+            </NavItem>
           </NavSection>
 
           <UserSection>

@@ -12,6 +12,9 @@ import Configuracoes from "./components/Configuracoes/Configuracoes";
 import ClientsList from "./components/Clients/ClientsList/ClientsList";
 import ClientForm from "./components/Clients/ClientForm/ClientForm";
 import ClientDetail from "./components/Clients/ClientDetail/ClientDetail";
+import BudgetsList from "./components/Budgets/BudgetsList/BudgetsList";
+import BudgetForm from "./components/Budgets/BudgetForm/BudgetForm";
+import BudgetDetail from "./components/Budgets/BudgetDetail/BudgetDetail";
 
 const AppContent = () => {
   const { isDarkMode } = useTheme();
@@ -69,6 +72,38 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <ClientForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orcamentos"
+          element={
+            <PrivateRoute>
+              <BudgetsList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orcamentos/novo"
+          element={
+            <PrivateRoute>
+              <BudgetForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orcamentos/:id"
+          element={
+            <PrivateRoute>
+              <BudgetDetail />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/orcamentos/:id/editar"
+          element={
+            <PrivateRoute>
+              <BudgetForm />
             </PrivateRoute>
           }
         />

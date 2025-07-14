@@ -52,7 +52,7 @@ const HomePage = () => {
       icon: 'receipt_long',
       title: 'Gerenciar Orçamentos',
       description: 'Crie e gerencie orçamentos para seus clientes de forma rápida.',
-      action: () => console.log('Navigate to budgets')
+      action: () => navigate('/orcamentos')
     },
     {
       id: 'projects',
