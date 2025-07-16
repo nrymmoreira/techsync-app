@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { GlobalStyle } from "./styles/GlobalStyles";
+import Chat from "./components/Chat/Chat";
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
 import LandingPage from "./components/LandingPage/LandingPage";
 import LoginPage from "./components/LoginPage/LoginPage";
@@ -15,6 +16,10 @@ import ClientDetail from "./components/Clients/ClientDetail/ClientDetail";
 import BudgetsList from "./components/Budgets/BudgetsList/BudgetsList";
 import BudgetForm from "./components/Budgets/BudgetForm/BudgetForm";
 import BudgetDetail from "./components/Budgets/BudgetDetail/BudgetDetail";
+
+const isAuthenticated = () => {
+  return localStorage.getItem('techsync-authenticated') === 'true';
+};
 
 const AppContent = () => {
   const { isDarkMode } = useTheme();
@@ -108,6 +113,9 @@ const AppContent = () => {
           }
         />
       </Routes>
+      
+      {/* Chat disponível em todas as páginas quando logado */}
+      {isAuthenticated() && <Chat />}
     </>
   );
 };
