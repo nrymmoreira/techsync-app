@@ -30,7 +30,27 @@ const typing = keyframes`
     transform: translateY(0);
   }
   30% {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
+  }
+`;
+
+const pulse = keyframes`
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+`;
+
+const slideUp = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 `;
 
@@ -47,49 +67,108 @@ export const ChatContainer = styled.div`
 `;
 
 export const ChatToggleButton = styled.button`
-  width: 60px;
-  height: 60px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primary;
-  }};
+  background: linear-gradient(135deg, #F97316, #ea6a0a);
   border: none;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 20px ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.primaryShadow;
-  }};
+  box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
   transition: all 0.3s ease;
-  animation: ${props => props.$isOpen ? 'none' : bounce} 2s infinite;
+  animation: ${props => props.$isOpen ? 'none' : bounce} 3s infinite;
+  position: relative;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primaryShadow;
-    }};
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 32px rgba(249, 115, 22, 0.5);
+    background: linear-gradient(135deg, #ea6a0a, #d97706);
   }
 
   &:active {
-    transform: translateY(0);
+    transform: translateY(-1px) scale(1.02);
   }
 
   span {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     transition: transform 0.3s ease;
   }
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #F97316, #ea6a0a);
+    z-index: -1;
+    opacity: 0.3;
+    animation: pulse 2s infinite;
+  }
+
   @media (max-width: ${breakpoints.mobile}) {
-    width: 50px;
-    height: 50px;
+    width: 56px;
+    height: 56px;
     
     span {
-      font-size: 1.25rem;
+      font-size: 1.5rem;
     }
+  }
+`;
+
+export const ChatTooltip = styled.div`
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surface;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
+  }};
+  border-radius: 12px;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textPrimary;
+  }};
+  font-family: ${fonts.secondary};
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.shadow;
+  }};
+  animation: ${slideUp} 0.3s ease-out;
+  z-index: 1001;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    right: 1rem;
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 6px solid ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surface;
+    }};
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    font-size: 0.8125rem;
+    padding: 0.625rem 0.875rem;
+    right: -0.5rem;
   }
 `;
 
@@ -97,8 +176,8 @@ export const ChatWindow = styled.div`
   position: absolute;
   bottom: 80px;
   right: 0;
-  width: 400px;
-  height: 600px;
+  width: 420px;
+  height: min(600px, calc(100vh - 160px));
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
@@ -108,7 +187,7 @@ export const ChatWindow = styled.div`
     return theme.colors.surfaceBorder;
   }};
   border-radius: 16px;
-  box-shadow: 0 8px 32px ${props => {
+  box-shadow: 0 12px 48px ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.shadow;
   }};
@@ -130,23 +209,20 @@ export const ChatWindow = styled.div`
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    bottom: 70px;
-    width: calc(100vw - 2rem);
-    height: calc(100vh - 140px);
-    right: 1rem;
-    border-radius: 12px;
-    border: 1px solid ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.surfaceBorder;
-    }};
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    right: 0;
+    border-radius: 0;
+    border: none;
   }
 `;
 
 export const ChatHeader = styled.div`
-  padding: 1rem 1.5rem;
+  padding: 1.25rem 1.5rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceHover;
+    return theme.colors.surface;
   }};
   border-bottom: 1px solid ${props => {
     const theme = getTheme(props.$isDarkMode);
@@ -159,6 +235,7 @@ export const ChatHeader = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
+  flex-shrink: 0;
 
   @media (max-width: ${breakpoints.mobile}) {
     padding: 1rem;
@@ -167,7 +244,7 @@ export const ChatHeader = styled.div`
 
 export const ChatTitle = styled.h3`
   font-family: ${fonts.primary};
-  font-size: 1rem;
+  font-size: 1.125rem;
   font-weight: 600;
   margin: 0;
   color: ${props => {
@@ -177,8 +254,8 @@ export const ChatTitle = styled.h3`
 `;
 
 export const ChatCloseButton = styled.button`
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: transparent;
   border: 1px solid ${props => {
@@ -207,10 +284,11 @@ export const ChatCloseButton = styled.button`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.primary;
     }};
+    transform: scale(1.05);
   }
 
   span {
-    font-size: 1rem;
+    font-size: 1.125rem;
   }
 
   @media (min-width: ${breakpoints.tablet}) {
@@ -225,6 +303,7 @@ export const ChatMessages = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  min-height: 0;
 
   /* Scrollbar personalizada */
   &::-webkit-scrollbar {
@@ -236,6 +315,7 @@ export const ChatMessages = styled.div`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.surfaceHover;
     }};
+    border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
@@ -265,26 +345,40 @@ export const ChatMessage = styled.div`
   ${props => props.$sender === 'user' && `
     flex-direction: row-reverse;
   `}
+  animation: ${fadeIn} 0.3s ease-out;
 `;
 
 export const MessageAvatar = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return props.$sender === 'user' ? theme.colors.primary : theme.colors.success;
+    if (props.$sender === 'user') {
+      return theme.colors.primary;
+    }
+    return 'linear-gradient(135deg, #F97316, #ea6a0a)';
   }};
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: ${props => props.$sender === 'user' ? '1rem' : '0.75rem'};
+  font-size: ${props => props.$sender === 'user' ? '1rem' : '1rem'};
   font-weight: 600;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 
   span {
-    font-size: 1rem;
+    font-size: 1.125rem;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 32px;
+    height: 32px;
+    
+    span {
+      font-size: 1rem;
+    }
   }
 `;
 
@@ -303,17 +397,22 @@ export const MessageContent = styled.div`
     }
     return theme.colors.textPrimary;
   }};
-  padding: 0.75rem 1rem;
-  border-radius: ${props => props.$sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px'};
+  padding: 0.875rem 1.125rem;
+  border-radius: ${props => props.$sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};
   font-family: ${fonts.secondary};
-  font-size: 0.875rem;
-  line-height: 1.4;
+  font-size: 0.9375rem;
+  line-height: 1.5;
   max-width: 280px;
   word-wrap: break-word;
+  box-shadow: 0 2px 8px ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.shadow;
+  }};
 
   @media (max-width: ${breakpoints.mobile}) {
-    max-width: 220px;
-    font-size: 0.8125rem;
+    max-width: 240px;
+    font-size: 0.875rem;
+    padding: 0.75rem 1rem;
   }
 `;
 
@@ -325,6 +424,7 @@ export const MessageTime = styled.div`
   }};
   margin-top: 0.25rem;
   text-align: ${props => props.$sender === 'user' ? 'right' : 'left'};
+  opacity: 0.8;
 `;
 
 export const QuickQuestions = styled.div`
@@ -341,18 +441,20 @@ export const QuickQuestions = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
-  max-height: 200px;
+  max-height: 220px;
   overflow-y: auto;
+  flex-shrink: 0;
 
   @media (max-width: ${breakpoints.mobile}) {
     padding: 0.75rem;
+    max-height: 180px;
   }
 `;
 
 export const QuestionButton = styled.button`
   width: 100%;
   text-align: left;
-  padding: 0.75rem;
+  padding: 0.875rem 1rem;
   margin-bottom: 0.5rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
@@ -362,13 +464,13 @@ export const QuestionButton = styled.button`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceBorder;
   }};
-  border-radius: 8px;
+  border-radius: 12px;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
   font-family: ${fonts.secondary};
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   line-height: 1.4;
   transition: all 0.3s ease;
 
@@ -386,10 +488,19 @@ export const QuestionButton = styled.button`
       return theme.colors.primary;
     }};
     transform: translateY(-1px);
+    box-shadow: 0 2px 8px ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.shadow;
+    }};
   }
 
   &:last-child {
     margin-bottom: 0;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.8125rem;
   }
 `;
 
@@ -403,6 +514,7 @@ export const ChatInputContainer = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceBorder;
   }};
+  flex-shrink: 0;
 
   @media (max-width: ${breakpoints.mobile}) {
     padding: 0.75rem;
@@ -411,7 +523,7 @@ export const ChatInputContainer = styled.div`
 
 export const ChatInputField = styled.input`
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.input.background;
@@ -426,7 +538,7 @@ export const ChatInputField = styled.input`
     return theme.colors.textPrimary;
   }};
   font-family: ${fonts.secondary};
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   transition: all 0.3s ease;
 
   &::placeholder {
@@ -434,6 +546,7 @@ export const ChatInputField = styled.input`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.textSecondary;
     }};
+    opacity: 0.8;
   }
 
   &:focus {
@@ -446,21 +559,30 @@ export const ChatInputField = styled.input`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.input.backgroundFocus;
     }};
+    box-shadow: 0 0 0 3px ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primaryLight;
+    }};
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    font-size: 0.875rem;
+    padding: 0.75rem 0.875rem;
+  }
 `;
 
 export const ChatSendButton = styled.button`
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return props.disabled ? theme.colors.textTertiary : theme.colors.primary;
+    return props.disabled ? theme.colors.textTertiary : 'linear-gradient(135deg, #F97316, #ea6a0a)';
   }};
   border: none;
   color: white;
@@ -469,22 +591,32 @@ export const ChatSendButton = styled.button`
   justify-content: center;
   transition: all 0.3s ease;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.3);
 
   &:hover:not(:disabled) {
-    background: ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primaryHover;
-    }};
-    transform: translateY(-1px);
+    background: linear-gradient(135deg, #ea6a0a, #d97706);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4);
   }
 
   &:disabled {
     cursor: not-allowed;
     opacity: 0.5;
+    transform: none;
+    box-shadow: none;
   }
 
   span {
-    font-size: 1rem;
+    font-size: 1.125rem;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 40px;
+    height: 40px;
+    
+    span {
+      font-size: 1rem;
+    }
   }
 `;
 
@@ -500,6 +632,7 @@ export const EmptyState = styled.div`
     return theme.colors.textSecondary;
   }};
   font-family: ${fonts.secondary};
+  flex: 1;
 `;
 
 export const TypingIndicator = styled.div`
@@ -507,10 +640,14 @@ export const TypingIndicator = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceHover;
   }};
-  padding: 0.75rem 1rem;
-  border-radius: 16px 16px 16px 4px;
+  padding: 0.875rem 1.125rem;
+  border-radius: 18px 18px 18px 4px;
   display: flex;
   align-items: center;
+  box-shadow: 0 2px 8px ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.shadow;
+  }};
 `;
 
 export const TypingDots = styled.div`
@@ -523,7 +660,7 @@ export const TypingDots = styled.div`
     border-radius: 50%;
     background: ${props => {
       const theme = getTheme(props.$isDarkMode);
-      return theme.colors.textTertiary;
+      return theme.colors.primary;
     }};
     animation: ${typing} 1.4s infinite ease-in-out;
 
