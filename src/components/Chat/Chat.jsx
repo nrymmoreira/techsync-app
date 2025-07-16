@@ -3,6 +3,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import {
   ChatContainer,
   ChatToggleButton,
+  ChatTooltip,
   ChatWindow,
   ChatHeader,
   ChatTitle,
@@ -29,8 +30,20 @@ const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const tooltipTimeoutRef = useRef(null);
+
+  // Verificar se o usuário está logado
+  const isAuthenticated = () => {
+    return localStorage.getItem('techsync-authenticated') === 'true';
+  };
+
+  // Se não estiver logado, não renderizar o chat
+  if (!isAuthenticated()) {
+    return null;
+  }
 
   const quickQuestions = [
     "Como criar um novo cliente?",
@@ -66,6 +79,22 @@ const Chat = () => {
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
+    setShowTooltip(false);
+  };
+
+  const handleMouseEnter = () => {
+    if (!isOpen) {
+      tooltipTimeoutRef.current = setTimeout(() => {
+        setShowTooltip(true);
+      }, 500);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+    setShowTooltip(false);
   };
 
   const sendMessage = (text) => {
@@ -88,7 +117,7 @@ const Chat = () => {
     // Simular resposta do sistema
     setTimeout(() => {
       const response = predefinedAnswers[text.trim()] || 
-        "Obrigado pela sua pergunta! Nossa equipe está trabalhando para melhorar continuamente a plataforma. Em breve teremos mais funcionalidades disponíveis.";
+        "Obrigada pela sua pergunta! Estou aqui para ajudar você a navegar pela plataforma TechSync. Em breve teremos mais funcionalidades disponíveis.";
 
       const systemMessage = {
         id: Date.now() + 1,
@@ -123,42 +152,65 @@ const Chat = () => {
 
   return (
     <ChatContainer>
-      <ChatToggleButton
-        onClick={toggleChat}
-        $isDarkMode={isDarkMode}
-        $isOpen={isOpen}
-        aria-label="Abrir chat de suporte"
-      >
-        <span className="material-symbols-outlined">
-          {isOpen ? 'close' : 'chat'}
-        </span>
-      </ChatToggleButton>
+      <div style={{ position: 'relative' }}>
+        <ChatToggleButton
+          onClick={toggleChat}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          $isDarkMode={isDarkMode}
+          $isOpen={isOpen}
+          aria-label="Abrir chat da Athena"
+        >
+          <span className="material-symbols-outlined">
+            {isOpen ? 'close' : 'smart_toy'}
+          </span>
+        </ChatToggleButton>
+
+        {showTooltip && !isOpen && (
+          <ChatTooltip $isDarkMode={isDarkMode}>
+            Em que posso te ajudar?
+          </ChatTooltip>
+        )}
+      </div>
 
       {isOpen && (
         <ChatWindow $isDarkMode={isDarkMode}>
           <ChatHeader $isDarkMode={isDarkMode}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{
-                width: '32px',
-                height: '32px',
+                width: '36px',
+                height: '36px',
                 borderRadius: '50%',
-                background: '#F97316',
+                background: 'linear-gradient(135deg, #F97316, #ea6a0a)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 color: 'white',
-                fontSize: '1rem',
-                fontWeight: '600'
+                fontSize: '1.125rem',
+                fontWeight: '600',
+                boxShadow: '0 2px 8px rgba(249, 115, 22, 0.3)'
               }}>
-                TS
+                <span className="material-symbols-outlined" style={{ fontSize: '1.25rem' }}>
+                  smart_toy
+                </span>
               </div>
               <div>
-                <ChatTitle $isDarkMode={isDarkMode}>TechSync Suporte</ChatTitle>
+                <ChatTitle $isDarkMode={isDarkMode}>Athena</ChatTitle>
                 <div style={{ 
                   fontSize: '0.75rem', 
-                  opacity: 0.7,
-                  color: 'inherit'
+                  opacity: 0.8,
+                  color: 'inherit',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem'
                 }}>
+                  <div style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    backgroundColor: '#22c55e',
+                    animation: 'pulse 2s infinite'
+                  }}></div>
                   Online
                 </div>
               </div>
@@ -176,27 +228,37 @@ const Chat = () => {
             {messages.length === 0 ? (
               <EmptyState $isDarkMode={isDarkMode}>
                 <div style={{ 
-                  fontSize: '2rem', 
+                  fontSize: '2.5rem', 
                   marginBottom: '1rem',
-                  opacity: 0.5
+                  background: 'linear-gradient(135deg, #F97316, #ea6a0a)',
+                  borderRadius: '50%',
+                  width: '60px',
+                  height: '60px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'white',
+                  margin: '0 auto 1rem auto'
                 }}>
-                  💬
+                  <span className="material-symbols-outlined" style={{ fontSize: '2rem' }}>
+                    smart_toy
+                  </span>
                 </div>
                 <h3 style={{ 
                   margin: '0 0 0.5rem 0', 
-                  fontSize: '1rem',
+                  fontSize: '1.125rem',
                   fontWeight: '600'
                 }}>
-                  Como posso ajudar?
+                  Olá! Sou a Athena 👋
                 </h3>
                 <p style={{ 
                   margin: 0, 
                   fontSize: '0.875rem',
-                  opacity: 0.7,
+                  opacity: 0.8,
                   textAlign: 'center',
                   lineHeight: '1.4'
                 }}>
-                  Escolha uma pergunta abaixo ou digite sua dúvida
+                  Sua assistente virtual do TechSync. Como posso ajudar você hoje?
                 </p>
               </EmptyState>
             ) : (
@@ -206,14 +268,14 @@ const Chat = () => {
                     {message.sender === 'user' ? (
                       <span className="material-symbols-outlined">person</span>
                     ) : (
-                      'TS'
+                      <span className="material-symbols-outlined">smart_toy</span>
                     )}
                   </MessageAvatar>
                   <div>
                     <MessageContent $sender={message.sender} $isDarkMode={isDarkMode}>
                       {message.text}
                     </MessageContent>
-                    <MessageTime $isDarkMode={isDarkMode}>
+                    <MessageTime $isDarkMode={isDarkMode} $sender={message.sender}>
                       {message.timestamp}
                     </MessageTime>
                   </div>
@@ -224,7 +286,7 @@ const Chat = () => {
             {isTyping && (
               <ChatMessage $sender="system" $isDarkMode={isDarkMode}>
                 <MessageAvatar $sender="system" $isDarkMode={isDarkMode}>
-                  TS
+                  <span className="material-symbols-outlined">smart_toy</span>
                 </MessageAvatar>
                 <TypingIndicator $isDarkMode={isDarkMode}>
                   <TypingDots>
@@ -232,6 +294,9 @@ const Chat = () => {
                     <span></span>
                     <span></span>
                   </TypingDots>
+                  <span style={{ fontSize: '0.75rem', marginLeft: '0.5rem', opacity: 0.7 }}>
+                    Athena está digitando...
+                  </span>
                 </TypingIndicator>
               </ChatMessage>
             )}
@@ -245,8 +310,14 @@ const Chat = () => {
                 fontSize: '0.875rem', 
                 fontWeight: '600', 
                 marginBottom: '0.75rem',
-                opacity: 0.8
+                opacity: 0.9,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem'
               }}>
+                <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
+                  help
+                </span>
                 Perguntas frequentes:
               </div>
               {quickQuestions.map((question, index) => (
@@ -268,7 +339,7 @@ const Chat = () => {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                placeholder="Digite sua mensagem..."
+                placeholder="Digite sua mensagem para a Athena..."
                 $isDarkMode={isDarkMode}
                 disabled={isTyping}
               />
