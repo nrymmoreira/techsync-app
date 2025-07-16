@@ -88,25 +88,105 @@ export const HeaderActions = styled.div`
 
 export const FiltersSection = styled.div`
   display: flex;
-  gap: 1rem;
+  align-items: stretch;
+  gap: 0.75rem;
   margin-bottom: 2rem;
-  align-items: center;
 
   @media (max-width: ${breakpoints.tablet}) {
     flex-direction: column;
-    gap: 0.75rem;
+    align-items: stretch;
+    gap: 1rem;
   }
 
   @media (max-width: ${breakpoints.mobile}) {
     flex-direction: column;
-    gap: 0.75rem;
+    align-items: stretch;
+    gap: 1rem;
   }
 `;
 
 export const SearchInput = styled.input`
-  flex: 2;
-  min-width: 400px;
-  padding: 0.75rem 1rem;
+  flex: 1;
+  min-width: 300px;
+  height: 48px;
+  padding: 0 1rem 0 3rem;
+  box-sizing: border-box;
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surface;
+  }};
+  border: 2px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
+  }};
+  border-radius: 8px;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textPrimary;
+  }};
+  font-family: ${fonts.secondary};
+  font-size: 0.9375rem;
+  transition: all 0.3s ease;
+
+  background-image: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    const color = theme.colors.textSecondary.replace('#', '');
+    return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E")`;
+  }};
+  background-repeat: no-repeat;
+  background-position: 1rem center;
+
+  &::placeholder {
+    color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textSecondary;
+    }};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primary;
+    }};
+    box-shadow: 0 0 0 3px ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primaryLight;
+    }};
+  }
+
+  @media (max-width: ${breakpoints.tablet}) {
+    min-width: 250px;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 100%;
+    min-width: unset;
+  }
+`;
+
+export const FilterSelect = styled.div`
+  flex: 0 0 auto;
+  min-width: 180px;
+  
+  /* Garantir que o Select tenha a mesma altura do input */
+  & > div {
+    margin-bottom: 0;
+  }
+  
+  & button {
+    height: 48px;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: ${breakpoints.tablet}) {
+    min-width: 200px;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    min-width: 100%;
+  }
+`;
   padding-left: 3rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);

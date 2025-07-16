@@ -219,23 +219,27 @@ const BudgetsList = () => {
             $isDarkMode={isDarkMode}
           />
           
-          <Select
-            id="statusFilter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={statusOptions}
-            placeholder="Filtrar por status"
-            $isDarkMode={isDarkMode}
-          />
+          <FilterSelect>
+            <Select
+              id="statusFilter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={statusOptions}
+              placeholder="Filtrar por status"
+              $isDarkMode={isDarkMode}
+            />
+          </FilterSelect>
 
-          <Select
-            id="clientFilter"
-            value={clientFilter}
-            onChange={(e) => setClientFilter(e.target.value)}
-            options={clientOptions}
-            placeholder="Filtrar por cliente"
-            $isDarkMode={isDarkMode}
-          />
+          <FilterSelect>
+            <Select
+              id="clientFilter"
+              value={clientFilter}
+              onChange={(e) => setClientFilter(e.target.value)}
+              options={clientOptions}
+              placeholder="Filtrar por cliente"
+              $isDarkMode={isDarkMode}
+            />
+          </FilterSelect>
         </FiltersSection>
 
         {filteredBudgets.length === 0 ? (

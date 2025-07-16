@@ -3,14 +3,11 @@ import { getTheme } from '../../styles/themes';
 import { fonts, breakpoints } from '../../styles/GlobalStyles';
 
 export const SelectContainer = styled.div`
-  margin-bottom: 0;
+  margin-bottom: 1.5rem;
   width: 100%;
-  min-width: 180px;
-  flex-shrink: 0;
 
   @media (max-width: ${breakpoints.mobile}) {
-    margin-bottom: 0;
-    min-width: unset;
+    margin-bottom: 1.25rem;
   }
 `;
 
@@ -39,9 +36,11 @@ export const SelectLabel = styled.label`
 
 export const SelectButton = styled.button`
   width: 100%;
-  padding: 0.875rem 1rem;
+  min-height: 48px;
+  padding: 0 1rem;
+  box-sizing: border-box;
   font-family: ${fonts.secondary};
-  font-size: 1rem;
+  font-size: 0.9375rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.input.background;
@@ -101,8 +100,8 @@ export const SelectButton = styled.button`
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    font-size: 0.9375rem;
-    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+    min-height: 44px;
   }
 `;
 

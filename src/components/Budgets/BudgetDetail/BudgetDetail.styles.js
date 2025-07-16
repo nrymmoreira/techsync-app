@@ -127,15 +127,68 @@ export const HeaderActions = styled.div`
   @media (max-width: ${breakpoints.tablet}) {
     width: 100%;
     justify-content: flex-end;
+    flex-wrap: wrap;
   }
 
   @media (max-width: ${breakpoints.mobile}) {
+    flex-direction: column;
+    gap: 0.75rem;
+    
     button {
-      flex: 1;
+      width: 100%;
     }
   }
 `;
 
+export const StatusSection = styled.div`
+  background: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surface;
+  }};
+  border: 1px solid ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.surfaceBorder;
+  }};
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+`;
+
+export const StatusLabel = styled.h3`
+  font-family: ${fonts.primary};
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textPrimary;
+  }};
+  margin: 0;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    font-size: 1rem;
+  }
+`;
+
+export const StatusActions = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 100%;
+    justify-content: space-between;
+  }
+`;
 export const BudgetInfo = styled.div`
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
@@ -148,11 +201,15 @@ export const BudgetInfo = styled.div`
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    padding: 1rem;
+  }
 `;
 
 export const InfoGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 1.5rem;
 
   @media (max-width: ${breakpoints.mobile}) {

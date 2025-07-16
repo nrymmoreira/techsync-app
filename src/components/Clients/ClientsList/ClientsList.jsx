@@ -224,23 +224,27 @@ const ClientsList = () => {
             $isDarkMode={isDarkMode}
           />
           
-          <Select
-            id="sortFilter"
-            value={sortFilter}
-            onChange={(e) => setSortFilter(e.target.value)}
-            options={sortOptions}
-            placeholder="Ordenar por"
-            $isDarkMode={isDarkMode}
-          />
+          <FilterSelect>
+            <Select
+              id="sortFilter"
+              value={sortFilter}
+              onChange={(e) => setSortFilter(e.target.value)}
+              options={sortOptions}
+              placeholder="Ordenar por"
+              $isDarkMode={isDarkMode}
+            />
+          </FilterSelect>
 
-          <Select
-            id="statusFilter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            options={statusOptions}
-            placeholder="Filtrar por status"
-            $isDarkMode={isDarkMode}
-          />
+          <FilterSelect>
+            <Select
+              id="statusFilter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              options={statusOptions}
+              placeholder="Filtrar por status"
+              $isDarkMode={isDarkMode}
+            />
+          </FilterSelect>
         </FiltersSection>
 
         {filteredClients.length === 0 ? (

@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
+import Select from '../../Select/Select';
+import Modal from '../../Modal/Modal';
 import {
   DetailContainer,
   DetailContent,
@@ -12,6 +14,9 @@ import {
   BudgetTitle,
   BudgetSubtitle,
   HeaderActions,
+  StatusSection,
+  StatusLabel,
+  StatusActions,
   BudgetInfo,
   InfoGrid,
   InfoItem,
@@ -43,7 +48,15 @@ const BudgetDetail = () => {
   const { id } = useParams();
   const { isDarkMode } = useTheme();
   const [budget, setBudget] = useState(null);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
 
+  const statusOptions = [
+    { value: 'aberto', label: 'Aberto' },
+    { value: 'aguardando_aprovacao', label: 'Aguardando Aprovação' },
+    { value: 'aprovado', label: 'Aprovado' },
+    { value: 'pago', label: 'Pago' }
+  ];
   // Mock data - substituir pela API real
   const mockBudget = {
     id: 1,
@@ -63,8 +76,19 @@ const BudgetDetail = () => {
 
   useEffect(() => {
     setBudget(mockBudget);
+    setNewStatus(mockBudget.status);
   }, [id]);
 
+  const handleStatusChange = () => {
+    setShowStatusModal(true);
+  };
+
+  const handleStatusUpdate = () => {
+    setBudget(prev => ({ ...prev, status: newStatus }));
+    setShowStatusModal(false);
+    // Aqui você faria a chamada para a API para atualizar o status
+    console.log('Status atualizado para:', newStatus);
+  };
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -195,17 +219,28 @@ const BudgetDetail = () => {
           </HeaderActions>
         </DetailHeader>
 
+        <StatusSection $isDarkMode={isDarkMode}>
+          <StatusLabel $isDarkMode={isDarkMode}>Status do Orçamento</StatusLabel>
+          <StatusActions>
+            <StatusBadge $status={getStatusColor(budget.status)} $isDarkMode={isDarkMode}>
+              {getStatusLabel(budget.status)}
+            </StatusBadge>
+            <Button
+              variant="secondary"
+              size="small"
+              icon="edit"
+              onClick={handleStatusChange}
+              $isDarkMode={isDarkMode}
+            >
+              Alterar Status
+            </Button>
+          </StatusActions>
+        </StatusSection>
         <BudgetInfo $isDarkMode={isDarkMode}>
           <InfoGrid>
             <InfoItem>
               <InfoLabel $isDarkMode={isDarkMode}>Cliente</InfoLabel>
               <InfoValue $isDarkMode={isDarkMode}>{budget.clientName}</InfoValue>
-            </InfoItem>
-            <InfoItem>
-              <InfoLabel $isDarkMode={isDarkMode}>Status</InfoLabel>
-              <StatusBadge $status={getStatusColor(budget.status)} $isDarkMode={isDarkMode}>
-                {getStatusLabel(budget.status)}
-              </StatusBadge>
             </InfoItem>
             <InfoItem>
               <InfoLabel $isDarkMode={isDarkMode}>Valor Total</InfoLabel>
@@ -270,6 +305,42 @@ const BudgetDetail = () => {
         )}
       </DetailContent>
     </DetailContainer>
+      <Modal
+        isOpen={showStatusModal}
+        onClose={() => setShowStatusModal(false)}
+        title="Alterar Status do Orçamento"
+        $isDarkMode={isDarkMode}
+      >
+        <div style={{ padding: '1rem 0' }}>
+          <Select
+            id="newStatus"
+            label="Novo Status"
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+            options={statusOptions}
+            placeholder="Selecione o novo status"
+            $isDarkMode={isDarkMode}
+          />
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'flex-end' }}>
+            <Button
+              variant="ghost"
+              size="medium"
+              onClick={() => setShowStatusModal(false)}
+              $isDarkMode={isDarkMode}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="primary"
+              size="medium"
+              onClick={handleStatusUpdate}
+              $isDarkMode={isDarkMode}
+            >
+              Salvar
+            </Button>
+          </div>
+        </div>
+      </Modal>
   );
 };
 
