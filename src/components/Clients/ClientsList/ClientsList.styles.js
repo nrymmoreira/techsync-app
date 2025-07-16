@@ -105,29 +105,6 @@ export const FiltersSection = styled.div`
   }
 `;
 
-export const FilterSelect = styled.div`
-  flex: 0 0 auto;
-  min-width: 180px;
-  
-  /* Garantir que o Select tenha a mesma altura do input */
-  & > div {
-    margin-bottom: 0;
-  }
-  
-  & button {
-    height: 48px;
-    box-sizing: border-box;
-  }
-
-  @media (max-width: ${breakpoints.tablet}) {
-    min-width: 200px;
-  }
-
-  @media (max-width: ${breakpoints.mobile}) {
-    min-width: 100%;
-  }
-`;
-
 export const SearchInput = styled.input`
   flex: 1;
   min-width: 300px;
@@ -162,6 +139,32 @@ export const SearchInput = styled.input`
   &::placeholder {
     color: ${props => {
       const theme = getTheme(props.$isDarkMode);
+      return theme.colors.textSecondary;
+    }};
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primary;
+    }};
+    box-shadow: 0 0 0 3px ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primaryLight;
+    }};
+  }
+
+  @media (max-width: ${breakpoints.tablet}) {
+    min-width: 250px;
+  }
+
+  @media (max-width: ${breakpoints.mobile}) {
+    width: 100%;
+    min-width: unset;
+  }
+`;
+
 export const TableContainer = styled.div`
   overflow-x: auto;
   border-radius: 12px;

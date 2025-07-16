@@ -165,9 +165,6 @@ export const SearchInput = styled.input`
   }
 `;
 
-export const FilterSelect = styled.div`
-  flex: 0 0 auto;
-  min-width: 180px;
 export const TableContainer = styled.div`
   overflow-x: auto;
   border-radius: 12px;
