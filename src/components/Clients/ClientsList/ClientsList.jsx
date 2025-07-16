@@ -224,7 +224,7 @@ const ClientsList = () => {
             $isDarkMode={isDarkMode}
           />
           
-          <FilterSelect>
+          <div style={{ flex: '0 0 auto', minWidth: '180px' }}>
             <Select
               id="sortFilter"
               value={sortFilter}
@@ -233,9 +233,9 @@ const ClientsList = () => {
               placeholder="Ordenar por"
               $isDarkMode={isDarkMode}
             />
-          </FilterSelect>
+          </div>
 
-          <FilterSelect>
+          <div style={{ flex: '0 0 auto', minWidth: '180px' }}>
             <Select
               id="statusFilter"
               value={statusFilter}
@@ -244,7 +244,7 @@ const ClientsList = () => {
               placeholder="Filtrar por status"
               $isDarkMode={isDarkMode}
             />
-          </FilterSelect>
+          </div>
         </FiltersSection>
 
         {filteredClients.length === 0 ? (

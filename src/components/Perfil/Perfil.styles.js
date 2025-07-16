@@ -17,7 +17,6 @@ export const ProfileContainer = styled.main`
    @media (max-width: ${breakpoints.mobile}) {
     padding: 80px 1rem 40px; 
   }
-;
 `;
 
 export const ProfileContent = styled.div`
@@ -42,8 +41,6 @@ export const ProfileContent = styled.div`
     padding-left: 0;
     padding-right: 0;
   }
-
-;
 `;
 
 export const ProfileHeader = styled.div`
@@ -61,7 +58,6 @@ export const ProfileHeader = styled.div`
     width: 100%;
     flex-wrap: wrap;
   }
-;
 `;
 
 export const ProfilePictureSection = styled.div`
@@ -72,13 +68,11 @@ export const ProfilePictureSection = styled.div`
   @media (min-width: ${breakpoints.desktop}) {
     align-items: center;
   }
-;
 `;
 
 export const ProfilePictureContainer = styled.div`
   position: relative;
   margin-bottom: 1rem;
-;
 `;
 
 export const ProfilePicture = styled.div`
@@ -102,7 +96,6 @@ export const ProfilePicture = styled.div`
     width: 10rem;
     height: 10rem;
   }
-;
 `;
 
 export const ProfilePictureGradient = styled.div`
@@ -122,7 +115,6 @@ export const ProfilePictureGradient = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
-;
 `;
 
 export const CameraButton = styled.button`
@@ -161,7 +153,6 @@ export const CameraButton = styled.button`
   span {
     font-size: 1.25rem;
   }
-;
 `;
 
 export const ProfileInfo = styled.div`
@@ -170,7 +161,6 @@ export const ProfileInfo = styled.div`
   @media (min-width: ${breakpoints.desktop}) {
     text-align: center;
   }
-;
 `;
 
 export const ProfileName = styled.h2`
@@ -182,7 +172,6 @@ export const ProfileName = styled.h2`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
-;
 `;
 
 export const ProfileEmail = styled.p`
@@ -192,7 +181,6 @@ export const ProfileEmail = styled.p`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
-;
 `;
 
 export const TabNavigation = styled.div`
@@ -205,7 +193,6 @@ export const TabNavigation = styled.div`
     display: flex;
     justify-content: center;
   }
-;
 `;
 
 
@@ -221,7 +208,6 @@ export const TabList = styled.div`
     align-items: center;
     width: 100%;
   }
-;
 `;
 
 export const TabButton = styled.button`
@@ -274,10 +260,8 @@ export const TabButton = styled.button`
       font-size: 0.875rem;
     }
   }
-;
 `;
 
 export const ContentSection = styled.div`
   width: 100%;
-;
 `;

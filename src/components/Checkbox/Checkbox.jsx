@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CheckboxContainer, CheckboxInput, CheckboxLabel, CheckboxIcon } from './Checkbox.styles';
 
@@ -37,4 +36,3 @@ const Checkbox = ({
 };
 
 export default Checkbox;
-

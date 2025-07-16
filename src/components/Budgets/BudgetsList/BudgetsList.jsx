@@ -219,7 +219,7 @@ const BudgetsList = () => {
             $isDarkMode={isDarkMode}
           />
           
-          <FilterSelect>
+          <div style={{ flex: '0 0 auto', minWidth: '180px' }}>
             <Select
               id="statusFilter"
               value={statusFilter}
@@ -228,9 +228,9 @@ const BudgetsList = () => {
               placeholder="Filtrar por status"
               $isDarkMode={isDarkMode}
             />
-          </FilterSelect>
+          </div>
 
-          <FilterSelect>
+          <div style={{ flex: '0 0 auto', minWidth: '180px' }}>
             <Select
               id="clientFilter"
               value={clientFilter}
@@ -239,7 +239,7 @@ const BudgetsList = () => {
               placeholder="Filtrar por cliente"
               $isDarkMode={isDarkMode}
             />
-          </FilterSelect>
+          </div>
         </FiltersSection>
 
         {filteredBudgets.length === 0 ? (
