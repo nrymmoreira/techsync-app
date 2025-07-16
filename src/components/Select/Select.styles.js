@@ -97,6 +97,7 @@ export const SelectButton = styled.button`
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    min-width: 0;
   }
 
   @media (max-width: ${breakpoints.mobile}) {
@@ -106,7 +107,13 @@ export const SelectButton = styled.button`
 `;
 
 export const SelectIcon = styled.span`
+  display: flex;
   font-size: 1.25rem;
+  height: auto;
+  max-width: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
@@ -130,7 +137,7 @@ export const SelectDropdown = styled.div`
   z-index: 1000;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surface;
+    return theme.colors.background;
   }};
   border: 2px solid ${props => {
     const theme = getTheme(props.$isDarkMode);

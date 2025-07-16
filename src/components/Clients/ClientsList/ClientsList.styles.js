@@ -88,12 +88,15 @@ export const HeaderActions = styled.div`
 
 export const FiltersSection = styled.div`
   display: flex;
+  align-items: center;
   gap: 1rem;
   margin-bottom: 2rem;
-  align-items: center;
+  width: 100%;
+  flex-wrap: nowrap; 
 
   @media (max-width: ${breakpoints.tablet}) {
     flex-direction: column;
+    flex-wrap: wrap;
     gap: 0.75rem;
   }
 
@@ -103,9 +106,19 @@ export const FiltersSection = styled.div`
   }
 `;
 
+export const SelectWrapper = styled.div`
+  flex: 0 0 auto;
+  min-width: auto;
+  max-width: 100%;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    min-width: 100%;
+  }
+`;
+
 export const SearchInput = styled.input`
-  flex: 2;
-  min-width: 400px;
+  flex: 1 1 0;
+  min-width: 200px;
   padding: 0.75rem 1rem;
   padding-left: 3rem;
   background: ${props => {
@@ -154,9 +167,9 @@ export const SearchInput = styled.input`
 
   @media (max-width: ${breakpoints.mobile}) {
     width: 100%;
-    min-width: unset;
   }
 `;
+
 
 
 export const TableContainer = styled.div`

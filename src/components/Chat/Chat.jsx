@@ -12,7 +12,6 @@ import {
   MessageContent,
   MessageTime,
   MessageAvatar,
-  ChatInput,
   ChatInputContainer,
   ChatInputField,
   ChatSendButton,
