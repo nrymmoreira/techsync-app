@@ -169,142 +169,144 @@ const BudgetDetail = () => {
   }
 
   return (
-    <DetailContainer $isDarkMode={isDarkMode}>
-      <Navbar />
-      <DetailContent>
-        <DetailHeader>
-          <BackButton onClick={() => navigate('/orcamentos')} $isDarkMode={isDarkMode}>
-            <span className="material-symbols-outlined">arrow_back</span>
-          </BackButton>
-          <HeaderContent>
-            <BudgetTitle $isDarkMode={isDarkMode}>{budget.number}</BudgetTitle>
-            <BudgetSubtitle $isDarkMode={isDarkMode}>
-              <span className="material-symbols-outlined">schedule</span>
-              Criado em {formatDate(budget.createdAt)}
-            </BudgetSubtitle>
-          </HeaderContent>
-          <HeaderActions>
-            <Button
-              variant="secondary"
-              size="medium"
-              icon="picture_as_pdf"
-              onClick={handleGeneratePdf}
-              $isDarkMode={isDarkMode}
-            >
-              Gerar PDF
-            </Button>
-            <Button
-              variant="secondary"
-              size="medium"
-              icon="edit"
-              onClick={() => navigate(`/orcamentos/${id}/editar`)}
-              $isDarkMode={isDarkMode}
-            >
-              Editar
-            </Button>
-            <Button
-              variant="ghost"
-              size="medium"
-              icon="delete"
-              onClick={handleDelete}
-              $isDarkMode={isDarkMode}
-              style={{ 
-                backgroundColor: '#ef4444',
-                color: 'white',
-                borderColor: '#ef4444'
-              }}
-            >
-              Excluir
-            </Button>
-          </HeaderActions>
-        </DetailHeader>
+    <>
+      <DetailContainer $isDarkMode={isDarkMode}>
+        <Navbar />
+        <DetailContent>
+          <DetailHeader>
+            <BackButton onClick={() => navigate('/orcamentos')} $isDarkMode={isDarkMode}>
+              <span className="material-symbols-outlined">arrow_back</span>
+            </BackButton>
+            <HeaderContent>
+              <BudgetTitle $isDarkMode={isDarkMode}>{budget.number}</BudgetTitle>
+              <BudgetSubtitle $isDarkMode={isDarkMode}>
+                <span className="material-symbols-outlined">schedule</span>
+                Criado em {formatDate(budget.createdAt)}
+              </BudgetSubtitle>
+            </HeaderContent>
+            <HeaderActions>
+              <Button
+                variant="secondary"
+                size="medium"
+                icon="picture_as_pdf"
+                onClick={handleGeneratePdf}
+                $isDarkMode={isDarkMode}
+              >
+                Gerar PDF
+              </Button>
+              <Button
+                variant="secondary"
+                size="medium"
+                icon="edit"
+                onClick={() => navigate(`/orcamentos/${id}/editar`)}
+                $isDarkMode={isDarkMode}
+              >
+                Editar
+              </Button>
+              <Button
+                variant="ghost"
+                size="medium"
+                icon="delete"
+                onClick={handleDelete}
+                $isDarkMode={isDarkMode}
+                style={{ 
+                  backgroundColor: '#ef4444',
+                  color: 'white',
+                  borderColor: '#ef4444'
+                }}
+              >
+                Excluir
+              </Button>
+            </HeaderActions>
+          </DetailHeader>
 
-        <StatusSection $isDarkMode={isDarkMode}>
-          <StatusLabel $isDarkMode={isDarkMode}>Status do Orçamento</StatusLabel>
-          <StatusActions>
-            <StatusBadge $status={getStatusColor(budget.status)} $isDarkMode={isDarkMode}>
-              {getStatusLabel(budget.status)}
-            </StatusBadge>
-            <Button
-              variant="secondary"
-              size="small"
-              icon="edit"
-              onClick={handleStatusChange}
-              $isDarkMode={isDarkMode}
-            >
-              Alterar Status
-            </Button>
-          </StatusActions>
-        </StatusSection>
-        <BudgetInfo $isDarkMode={isDarkMode}>
-          <InfoGrid>
-            <InfoItem>
-              <InfoLabel $isDarkMode={isDarkMode}>Cliente</InfoLabel>
-              <InfoValue $isDarkMode={isDarkMode}>{budget.clientName}</InfoValue>
-            </InfoItem>
-            <InfoItem>
-              <InfoLabel $isDarkMode={isDarkMode}>Valor Total</InfoLabel>
-              <InfoValue $isDarkMode={isDarkMode} $isHighlight={true}>
-                {formatCurrency(budget.totalValue)}
-              </InfoValue>
-            </InfoItem>
-            <InfoItem>
-              <InfoLabel $isDarkMode={isDarkMode}>Data de Criação</InfoLabel>
-              <InfoValue $isDarkMode={isDarkMode}>{formatDate(budget.createdAt)}</InfoValue>
-            </InfoItem>
-          </InfoGrid>
-        </BudgetInfo>
+          <StatusSection $isDarkMode={isDarkMode}>
+            <StatusLabel $isDarkMode={isDarkMode}>Status do Orçamento</StatusLabel>
+            <StatusActions>
+              <StatusBadge $status={getStatusColor(budget.status)} $isDarkMode={isDarkMode}>
+                {getStatusLabel(budget.status)}
+              </StatusBadge>
+              <Button
+                variant="secondary"
+                size="small"
+                icon="edit"
+                onClick={handleStatusChange}
+                $isDarkMode={isDarkMode}
+              >
+                Alterar Status
+              </Button>
+            </StatusActions>
+          </StatusSection>
+          <BudgetInfo $isDarkMode={isDarkMode}>
+            <InfoGrid>
+              <InfoItem>
+                <InfoLabel $isDarkMode={isDarkMode}>Cliente</InfoLabel>
+                <InfoValue $isDarkMode={isDarkMode}>{budget.clientName}</InfoValue>
+              </InfoItem>
+              <InfoItem>
+                <InfoLabel $isDarkMode={isDarkMode}>Valor Total</InfoLabel>
+                <InfoValue $isDarkMode={isDarkMode} $isHighlight={true}>
+                  {formatCurrency(budget.totalValue)}
+                </InfoValue>
+              </InfoItem>
+              <InfoItem>
+                <InfoLabel $isDarkMode={isDarkMode}>Data de Criação</InfoLabel>
+                <InfoValue $isDarkMode={isDarkMode}>{formatDate(budget.createdAt)}</InfoValue>
+              </InfoItem>
+            </InfoGrid>
+          </BudgetInfo>
 
-        <ServicesSection $isDarkMode={isDarkMode}>
-          <SectionTitle $isDarkMode={isDarkMode}>Serviços</SectionTitle>
-          <ServicesList>
-            {budget.services.map((service) => (
-              <ServiceItem key={service.id} $isDarkMode={isDarkMode}>
-                <ServiceName $isDarkMode={isDarkMode}>{service.name}</ServiceName>
-                <ServiceValue $isDarkMode={isDarkMode}>
-                  {formatCurrency(service.value)}
-                </ServiceValue>
-              </ServiceItem>
-            ))}
-          </ServicesList>
-        </ServicesSection>
+          <ServicesSection $isDarkMode={isDarkMode}>
+            <SectionTitle $isDarkMode={isDarkMode}>Serviços</SectionTitle>
+            <ServicesList>
+              {budget.services.map((service) => (
+                <ServiceItem key={service.id} $isDarkMode={isDarkMode}>
+                  <ServiceName $isDarkMode={isDarkMode}>{service.name}</ServiceName>
+                  <ServiceValue $isDarkMode={isDarkMode}>
+                    {formatCurrency(service.value)}
+                  </ServiceValue>
+                </ServiceItem>
+              ))}
+            </ServicesList>
+          </ServicesSection>
 
-        <SummarySection $isDarkMode={isDarkMode}>
-          <SectionTitle $isDarkMode={isDarkMode}>Resumo Financeiro</SectionTitle>
-          <SummaryGrid>
-            <SummaryItem>
-              <SummaryLabel $isDarkMode={isDarkMode}>Subtotal:</SummaryLabel>
-              <SummaryValue $isDarkMode={isDarkMode}>
-                {formatCurrency(calculateSubtotal())}
-              </SummaryValue>
-            </SummaryItem>
-            
-            <SummaryItem>
-              <SummaryLabel $isDarkMode={isDarkMode}>Desconto:</SummaryLabel>
-              <SummaryValue $isDarkMode={isDarkMode}>
-                - {formatCurrency(budget.discount)}
-              </SummaryValue>
-            </SummaryItem>
-            
-            <SummaryItem>
-              <SummaryLabel $isDarkMode={isDarkMode}>Total:</SummaryLabel>
-              <TotalValue $isDarkMode={isDarkMode}>
-                {formatCurrency(budget.totalValue)}
-              </TotalValue>
-            </SummaryItem>
-          </SummaryGrid>
-        </SummarySection>
+          <SummarySection $isDarkMode={isDarkMode}>
+            <SectionTitle $isDarkMode={isDarkMode}>Resumo Financeiro</SectionTitle>
+            <SummaryGrid>
+              <SummaryItem>
+                <SummaryLabel $isDarkMode={isDarkMode}>Subtotal:</SummaryLabel>
+                <SummaryValue $isDarkMode={isDarkMode}>
+                  {formatCurrency(calculateSubtotal())}
+                </SummaryValue>
+              </SummaryItem>
+              
+              <SummaryItem>
+                <SummaryLabel $isDarkMode={isDarkMode}>Desconto:</SummaryLabel>
+                <SummaryValue $isDarkMode={isDarkMode}>
+                  - {formatCurrency(budget.discount)}
+                </SummaryValue>
+              </SummaryItem>
+              
+              <SummaryItem>
+                <SummaryLabel $isDarkMode={isDarkMode}>Total:</SummaryLabel>
+                <TotalValue $isDarkMode={isDarkMode}>
+                  {formatCurrency(budget.totalValue)}
+                </TotalValue>
+              </SummaryItem>
+            </SummaryGrid>
+          </SummarySection>
 
-        {budget.observations && (
-          <ObservationsSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Observações</SectionTitle>
-            <ObservationsText $isDarkMode={isDarkMode}>
-              {budget.observations}
-            </ObservationsText>
-          </ObservationsSection>
-        )}
-      </DetailContent>
-    </DetailContainer>
+          {budget.observations && (
+            <ObservationsSection $isDarkMode={isDarkMode}>
+              <SectionTitle $isDarkMode={isDarkMode}>Observações</SectionTitle>
+              <ObservationsText $isDarkMode={isDarkMode}>
+                {budget.observations}
+              </ObservationsText>
+            </ObservationsSection>
+          )}
+        </DetailContent>
+      </DetailContainer>
+      
       <Modal
         isOpen={showStatusModal}
         onClose={() => setShowStatusModal(false)}
@@ -341,6 +343,7 @@ const BudgetDetail = () => {
           </div>
         </div>
       </Modal>
+    </>
   );
 };
 
