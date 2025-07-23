@@ -92,7 +92,7 @@ export const ChatToggleButton = styled.button`
   }
 
   span {
-    font-size: 1.75rem;
+    font-size: 1.5rem;
     transition: transform 0.3s ease;
   }
 
@@ -111,11 +111,11 @@ export const ChatToggleButton = styled.button`
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     
     span {
-      font-size: 1.5rem;
+      font-size: 1.25rem;
     }
   }
 `;
@@ -176,8 +176,10 @@ export const ChatWindow = styled.div`
   position: absolute;
   bottom: 80px;
   right: 0;
-  width: 420px;
-  height: min(600px, calc(100vh - 160px));
+  width: min(420px, calc(100vw - 2rem));
+  height: min(600px, calc(100vh - 120px));
+  max-width: 420px;
+  max-height: 600px;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
@@ -195,24 +197,31 @@ export const ChatWindow = styled.div`
   flex-direction: column;
   overflow: hidden;
   animation: ${fadeIn} 0.3s ease-out;
+  backdrop-filter: none;
 
   @media (max-width: ${breakpoints.tablet}) {
     position: fixed;
-    top: 0;
+    top: 80px;
     left: 0;
     right: 0;
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
+    bottom: 1rem;
+    width: calc(100vw - 2rem);
+    height: calc(100vh - 100px);
+    margin: 0 1rem;
+    max-width: none;
+    max-height: none;
     border-radius: 0;
     border: none;
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    bottom: 0;
-    width: 100vw;
-    height: 100vh;
-    right: 0;
+    top: 80px;
+    left: 0.5rem;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: calc(100vw - 1rem);
+    height: calc(100vh - 90px);
+    margin: 0;
     border-radius: 0;
     border: none;
   }
