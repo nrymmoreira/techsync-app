@@ -12,7 +12,7 @@ import {
     SaveButtonContainer
 } from './PersonalDataForm.styles';
 
-const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpdateSuccess
+const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => {
     const { isDarkMode } = useTheme();
     const [formData, setFormData] = useState({
         nomeCompleto: "",
@@ -28,6 +28,8 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
     useEffect(() => {
         if (currentUser) {
             setFormData({
+                // O nome do campo no estado pode ser diferente (nomeCompleto),
+                // o importante é popular com o dado correto (currentUser.nome).
                 nomeCompleto: currentUser.nome || '',
                 email: currentUser.email || '',
                 telefone: currentUser.telefone || '',
@@ -36,13 +38,12 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
         }
     }, [currentUser]);
 
+    // Suas funções de validação (validateCPF, validateEmail, etc.) continuam aqui...
     const validateCPF = (cpf) => {
         const cleanCPF = cpf.replace(/[^\d]/g, '');
         if (!cleanCPF) return true;
         if (cleanCPF.length !== 11) return false;
-
         if (/^(\d)\1+$/.test(cleanCPF)) return false;
-
         let sum = 0;
         for (let i = 0; i < 9; i++) {
             sum += parseInt(cleanCPF.charAt(i)) * (10 - i);
@@ -50,7 +51,6 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
         let digit = 11 - (sum % 11);
         if (digit === 10 || digit === 11) digit = 0;
         if (parseInt(cleanCPF.charAt(9)) !== digit) return false;
-
         sum = 0;
         for (let i = 0; i < 10; i++) {
             sum += parseInt(cleanCPF.charAt(i)) * (11 - i);
@@ -73,29 +73,26 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
 
     const validateForm = () => {
         const newErrors = {};
-
         if (!formData.nomeCompleto.trim()) {
             newErrors.nomeCompleto = 'Nome completo é obrigatório';
         } else if (formData.nomeCompleto.trim().split(' ').length < 2) {
             newErrors.nomeCompleto = 'Digite seu nome completo';
         }
-
         if (!formData.email.trim()) {
             newErrors.email = 'Email é obrigatório';
         } else if (!validateEmail(formData.email)) {
             newErrors.email = 'Email inválido';
         }
-
         if (formData.telefone.trim() && !validatePhone(formData.telefone)) {
             newErrors.telefone = 'Telefone inválido';
         }
         if (formData.cpf.trim() && !validateCPF(formData.cpf)) {
             newErrors.cpf = 'CPF inválido';
         }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
 
     const handleInputChange = (field, value) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -114,8 +111,9 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
         setIsLoading(true);
         setApiError('');
 
+        // CORREÇÃO APLICADA AQUI
+        // Objeto enviado para a API sem o campo 'id'
         const dataToUpdate = {
-            id: currentUser.id,
             nome: formData.nomeCompleto,
             email: formData.email,
             telefone: formData.telefone.trim() || null,
@@ -125,10 +123,8 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
         try {
             const updatedUser = await authService.updateUser(currentUser.id, dataToUpdate);
 
-            // ATUALIZA O LOCALSTORAGE COM OS DADOS FRESCOS DO BACKEND
-            localStorage.setItem('techsync-user', JSON.stringify(updatedUser));
-
-            // CHAMA A FUNÇÃO PASSADA PELO PAI PARA ATUALIZAR O ESTADO LÁ
+            // A lógica aqui já estava correta!
+            // Chama a função do componente pai para atualizar o estado geral da página.
             if (onUpdateSuccess) {
                 onUpdateSuccess(updatedUser);
             }
@@ -190,7 +186,7 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
 
                 <Input
                     id="telefone"
-                    label="Telefone (Opcional)"
+                    label="Telefone"
                     type="tel"
                     value={formData.telefone}
                     onChange={(e) => handleInputChange("telefone", e.target.value)}
@@ -203,7 +199,7 @@ const PersonalDataForm = ({ currentUser, onUpdateSuccess }) => { // Recebe onUpd
 
                 <Input
                     id="cpf"
-                    label="CPF (Opcional)"
+                    label="CPF"
                     type="text"
                     value={formData.cpf}
                     onChange={(e) => handleInputChange("cpf", e.target.value)}

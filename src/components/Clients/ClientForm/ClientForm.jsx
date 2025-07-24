@@ -4,6 +4,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
+import { authService } from '../../../services/api'; // Importar o serviço da API
 import {
   FormContainer,
   FormContent,
@@ -16,14 +17,6 @@ import {
   SectionTitle,
   SectionDescription,
   FormGrid,
-  ContactsSection,
-  ContactCard,
-  ContactHeader,
-  ContactInfo,
-  ContactActions,
-  AddContactButton,
-  ObservationsSection,
-  ObservationsTextarea,
   FormActions,
   SaveButton,
   CancelButton
@@ -36,67 +29,58 @@ const ClientForm = () => {
   const isEditing = Boolean(id);
 
   const [formData, setFormData] = useState({
-    name: '',
+    nome: '',
     cnpj: '',
-    phone: '',
+    telefone: '',
     email: '',
-    address: '',
-    observations: ''
+    endereco: '',
   });
 
-  const [contacts, setContacts] = useState([]);
-  const [newContact, setNewContact] = useState({
-    name: '',
-    role: '',
-    phone: '',
-    email: ''
-  });
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(isEditing); // Inicia carregando se estiver editando
 
+  // Busca os dados do cliente se estiver no modo de edição
   useEffect(() => {
     if (isEditing) {
-      // Mock data - substituir pela API real
-      setFormData({
-        name: 'TechNova Solutions',
-        cnpj: '12.345.678/0001-90',
-        phone: '(11) 98765-4321',
-        email: 'contato@technova.com',
-        address: 'Av. Paulista, 1000, São Paulo - SP',
-        observations: 'Cliente desde 2021. Preferência por reuniões nas segundas-feiras pela manhã.'
-      });
-      setContacts([
-        { id: 1, name: 'João Silva', role: 'CEO', phone: '(11) 98765-4321', email: 'joao@technova.com' },
-        { id: 2, name: 'Maria Oliveira', role: 'CTO', phone: '(11) 97654-3210', email: 'maria@technova.com' }
-      ]);
+      const fetchClientData = async () => {
+        try {
+          const clientData = await authService.getClientById(id);
+          setFormData({
+            nome: clientData.nome || '',
+            cnpj: String(clientData.cnpj || ''),
+            telefone: String(clientData.telefone || ''),
+            email: clientData.email || '',
+            endereco: clientData.endereco || '',
+          });
+        } catch (error) {
+          console.error("Erro ao buscar cliente:", error);
+          setErrors({ api: 'Não foi possível carregar os dados do cliente.' });
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      fetchClientData();
     }
-  }, [isEditing]);
+  }, [id, isEditing]);
 
   const validateCNPJ = (cnpj) => {
-    const cleanCNPJ = cnpj.replace(/[^\d]/g, '');
+    const cleanCNPJ = String(cnpj).replace(/[^\d]/g, '');
     if (cleanCNPJ.length !== 14) return false;
-    
     if (/^(\d)\1+$/.test(cleanCNPJ)) return false;
-    
     let sum = 0;
     let weight = 2;
-    
     for (let i = 11; i >= 0; i--) {
-      sum += parseInt(cleanCNPJ.charAt(i)) * weight;
-      weight = weight === 9 ? 2 : weight + 1;
+        sum += parseInt(cleanCNPJ.charAt(i)) * weight;
+        weight = weight === 9 ? 2 : weight + 1;
     }
-    
     let digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
     if (parseInt(cleanCNPJ.charAt(12)) !== digit) return false;
-    
     sum = 0;
     weight = 2;
-    
     for (let i = 12; i >= 0; i--) {
-      sum += parseInt(cleanCNPJ.charAt(i)) * weight;
-      weight = weight === 9 ? 2 : weight + 1;
+        sum += parseInt(cleanCNPJ.charAt(i)) * weight;
+        weight = weight === 9 ? 2 : weight + 1;
     }
-    
     digit = sum % 11 < 2 ? 0 : 11 - (sum % 11);
     return parseInt(cleanCNPJ.charAt(13)) === digit;
   };
@@ -107,30 +91,29 @@ const ClientForm = () => {
   };
 
   const validatePhone = (phone) => {
-    const cleanPhone = phone.replace(/[^\d]/g, '');
+    const cleanPhone = String(phone).replace(/[^\d]/g, '');
     return cleanPhone.length >= 10 && cleanPhone.length <= 11;
   };
 
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Nome é obrigatório';
-    }
-
-    if (!formData.cnpj.trim()) {
+    if (!formData.nome.trim()) newErrors.nome = 'Nome é obrigatório';
+    if (!String(formData.cnpj).trim()) {
       newErrors.cnpj = 'CNPJ é obrigatório';
     } else if (!validateCNPJ(formData.cnpj)) {
       newErrors.cnpj = 'CNPJ inválido';
     }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Telefone é obrigatório';
-    } else if (!validatePhone(formData.phone)) {
-      newErrors.phone = 'Telefone inválido';
+    if (!String(formData.telefone).trim()) {
+      newErrors.telefone = 'Telefone é obrigatório';
+    } else if (!validatePhone(formData.telefone)) {
+      newErrors.telefone = 'Telefone inválido';
     }
-
-    if (formData.email && !validateEmail(formData.email)) {
+    
+    // CORREÇÃO: Validação de email agora é obrigatória
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email é obrigatório';
+    } else if (!validateEmail(formData.email)) {
       newErrors.email = 'Email inválido';
     }
 
@@ -138,66 +121,48 @@ const ClientForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const validateContactForm = () => {
-    const contactErrors = {};
-
-    if (newContact.email && !validateEmail(newContact.email)) {
-      contactErrors.contactEmail = 'Email inválido';
-    }
-
-    if (newContact.phone && !validatePhone(newContact.phone)) {
-      contactErrors.contactPhone = 'Telefone inválido';
-    }
-
-    setErrors(prev => ({ ...prev, ...contactErrors }));
-    return Object.keys(contactErrors).length === 0;
-  };
-
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
-  const handleContactChange = (field, value) => {
-    setNewContact(prev => ({ ...prev, [field]: value }));
-    
-    if (errors[`contact${field.charAt(0).toUpperCase() + field.slice(1)}`]) {
-      setErrors(prev => ({ ...prev, [`contact${field.charAt(0).toUpperCase() + field.slice(1)}`]: '' }));
-    }
-  };
-
-  const addContact = () => {
-    if (newContact.name.trim() && newContact.role.trim() && validateContactForm()) {
-      setContacts(prev => [...prev, { 
-        id: Date.now(), 
-        ...newContact 
-      }]);
-      setNewContact({ name: '', role: '', phone: '', email: '' });
-    }
-  };
-
-  const removeContact = (contactId) => {
-    setContacts(prev => prev.filter(contact => contact.id !== contactId));
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
     if (!validateForm()) return;
 
     setIsLoading(true);
 
+    const storedUser = JSON.parse(localStorage.getItem('techsync-user'));
+    if (storedUser?.empresa?.id == null) {
+        setErrors({ api: 'ID da sua empresa não encontrado. Faça login novamente.' });
+        setIsLoading(false);
+        return;
+    }
+
+    const clientPayload = {
+        nome: formData.nome,
+        cnpj: Number(String(formData.cnpj).replace(/[^\d]/g, '')),
+        telefone: Number(String(formData.telefone).replace(/[^\d]/g, '')),
+        email: formData.email,
+        endereco: formData.endereco,
+        status: 'ATIVO', // Status padrão ao criar/editar
+        empresa: {
+            id: storedUser.empresa.id
+        }
+    };
+
     try {
-      // Simular salvamento na API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      console.log('Saving client:', { ...formData, contacts });
+      if (isEditing) {
+        await authService.updateClient(id, clientPayload);
+      } else {
+        await authService.createClient(clientPayload);
+      }
       navigate('/clientes');
     } catch (error) {
-      setErrors({ api: 'Erro ao salvar cliente' });
+      console.error('Erro ao salvar cliente:', error);
+      setErrors({ api: error.message || 'Erro ao salvar cliente. Tente novamente.' });
     } finally {
       setIsLoading(false);
     }
@@ -232,14 +197,16 @@ const ClientForm = () => {
               Dados principais do cliente
             </SectionDescription>
 
+            {errors.api && <p style={{ color: 'red', fontSize: '0.875rem' }}>{errors.api}</p>}
+
             <FormGrid>
               <Input
-                id="name"
+                id="nome"
                 label="Nome"
                 type="text"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                error={errors.name}
+                value={formData.nome}
+                onChange={(e) => handleInputChange('nome', e.target.value)}
+                error={errors.nome}
                 placeholder="Nome da empresa ou pessoa"
                 icon="business"
                 required
@@ -249,7 +216,7 @@ const ClientForm = () => {
 
               <Input
                 id="cnpj"
-                label="CNPJ/CPF"
+                label="CNPJ"
                 type="text"
                 value={formData.cnpj}
                 onChange={(e) => handleInputChange('cnpj', e.target.value)}
@@ -262,12 +229,12 @@ const ClientForm = () => {
               />
 
               <Input
-                id="phone"
+                id="telefone"
                 label="Telefone"
                 type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                error={errors.phone}
+                value={formData.telefone}
+                onChange={(e) => handleInputChange('telefone', e.target.value)}
+                error={errors.telefone}
                 placeholder="(00) 00000-0000"
                 icon="phone"
                 required
@@ -277,6 +244,7 @@ const ClientForm = () => {
 
               <Input
                 id="email"
+                // CORREÇÃO: Campo agora é obrigatório
                 label="Email"
                 type="email"
                 value={formData.email}
@@ -284,18 +252,19 @@ const ClientForm = () => {
                 error={errors.email}
                 placeholder="email@exemplo.com"
                 icon="mail"
+                required // CORREÇÃO
                 $isDarkMode={isDarkMode}
                 disabled={isLoading}
               />
 
               <div style={{ gridColumn: '1 / -1' }}>
                 <Input
-                  id="address"
-                  label="Endereço"
+                  id="endereco"
+                  label="Endereço (Opcional)"
                   type="text"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                  error={errors.address}
+                  value={formData.endereco}
+                  onChange={(e) => handleInputChange('endereco', e.target.value)}
+                  error={errors.endereco}
                   placeholder="Endereço completo"
                   icon="location_on"
                   $isDarkMode={isDarkMode}
@@ -304,125 +273,6 @@ const ClientForm = () => {
               </div>
             </FormGrid>
           </FormSection>
-
-          <ContactsSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Contatos</SectionTitle>
-            <SectionDescription $isDarkMode={isDarkMode}>
-              Pessoas de contato na empresa
-            </SectionDescription>
-
-            {contacts.map((contact) => (
-              <ContactCard key={contact.id} $isDarkMode={isDarkMode}>
-                <ContactHeader>
-                  <ContactInfo>
-                    <h4>{contact.name}</h4>
-                    <span>{contact.role}</span>
-                  </ContactInfo>
-                  <ContactActions>
-                    <button
-                      type="button"
-                      onClick={() => removeContact(contact.id)}
-                      title="Remover contato"
-                    >
-                      <span className="material-symbols-outlined">delete</span>
-                    </button>
-                  </ContactActions>
-                </ContactHeader>
-                <div style={{ display: 'flex', gap: '1rem', fontSize: '0.875rem', color: 'inherit' }}>
-                  {contact.phone && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>phone</span>
-                      {contact.phone}
-                    </div>
-                  )}
-                  {contact.email && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                      <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>mail</span>
-                      {contact.email}
-                    </div>
-                  )}
-                </div>
-              </ContactCard>
-            ))}
-
-            <FormGrid>
-              <Input
-                id="contactName"
-                label="Nome do contato"
-                type="text"
-                value={newContact.name}
-                onChange={(e) => handleContactChange('name', e.target.value)}
-                placeholder="Nome do contato"
-                icon="person"
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              <Input
-                id="contactRole"
-                label="Cargo"
-                type="text"
-                value={newContact.role}
-                onChange={(e) => handleContactChange('role', e.target.value)}
-                placeholder="Cargo ou função"
-                icon="work"
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              <Input
-                id="contactPhone"
-                label="Telefone"
-                type="tel"
-                value={newContact.phone}
-                onChange={(e) => handleContactChange('phone', e.target.value)}
-                error={errors.contactPhone}
-                placeholder="(00) 00000-0000"
-                icon="phone"
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              <Input
-                id="contactEmail"
-                label="Email"
-                type="email"
-                value={newContact.email}
-                onChange={(e) => handleContactChange('email', e.target.value)}
-                error={errors.contactEmail}
-                placeholder="email@exemplo.com"
-                icon="mail"
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-            </FormGrid>
-
-            <AddContactButton
-              type="button"
-              onClick={addContact}
-              $isDarkMode={isDarkMode}
-              disabled={!newContact.name.trim() || !newContact.role.trim() || isLoading}
-            >
-              <span className="material-symbols-outlined">add</span>
-              Adicionar Contato
-            </AddContactButton>
-          </ContactsSection>
-
-          <ObservationsSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Observações</SectionTitle>
-            <SectionDescription $isDarkMode={isDarkMode}>
-              Informações adicionais sobre o cliente
-            </SectionDescription>
-
-            <ObservationsTextarea
-              value={formData.observations}
-              onChange={(e) => handleInputChange('observations', e.target.value)}
-              placeholder="Adicione observações ou notas sobre o cliente..."
-              rows={4}
-              $isDarkMode={isDarkMode}
-              disabled={isLoading}
-            />
-          </ObservationsSection>
 
           <FormActions>
             <CancelButton

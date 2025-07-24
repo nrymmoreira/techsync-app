@@ -448,3 +448,42 @@ export const EmptyStateDescription = styled.p`
   line-height: 1.5;
   max-width: 400px;
 `;
+
+// --- NOVOS ESTILOS ADICIONADOS AQUI ---
+
+export const ActionsCell = styled.td`
+  text-align: right;
+  padding-right: 1.5rem;
+`;
+
+export const ActionButton = styled.button`
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  color: ${props => {
+    const theme = getTheme(props.$isDarkMode);
+    return theme.colors.textSecondary;
+  }};
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background-color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceHover;
+    }};
+    color: ${props => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.primary;
+    }};
+  }
+
+  .material-symbols-outlined {
+    font-size: 1.25rem;
+  }
+`;

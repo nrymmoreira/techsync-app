@@ -1,11 +1,11 @@
-// src/components/pages/Perfil/Perfil.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from '../../contexts/ThemeContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from "../Navbar/Navbar";
 import PersonalDataForm from './PersonalDataForm/PersonalDataForm';
 import CompanyDataForm from './CompanyDataForm/CompanyDataForm';
 import SettingsForm from './SettingsForm/SettingsForm';
+import { authService } from "../../services/api.js";
 import {
   ProfileContainer,
   ProfileContent,
@@ -27,92 +27,117 @@ import {
 const Perfil = () => {
   const { isDarkMode } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dados-pessoais");
-  const [currentUser, setCurrentUser] = useState(null);
+  
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const loadUserFromLocalStorage = () => {
-    const storedUser = localStorage.getItem('techsync-user');
-    if (storedUser) {
-      try {
-        setCurrentUser(JSON.parse(storedUser));
-      } catch (e) {
-        console.error("Erro ao fazer parse dos dados do usuário do localStorage:", e);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      const storedUser = localStorage.getItem('techsync-user');
+      if (!storedUser) {
+        navigate('/login');
+        return;
       }
-    } else {
-        setCurrentUser(null);
+
+      try {
+        setLoading(true);
+        const user = JSON.parse(storedUser);
+        
+        const [userData, companyData] = await Promise.all([
+          authService.getUserById(user.id),
+          authService.getCompany(user.id)
+        ]);
+
+        const combinedData = { ...userData, empresa: companyData };
+        setProfileData(combinedData);
+        
+        localStorage.setItem('techsync-user', JSON.stringify(combinedData));
+        
+      } catch (err) {
+        console.error("Erro ao buscar dados do perfil:", err);
+        setError("Não foi possível carregar os dados do perfil. Tente novamente.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, [navigate]);
+
+  const handleDataUpdate = (updatedData) => {
+    setProfileData(prevData => {
+        const newData = { ...prevData, ...updatedData };
+        localStorage.setItem('techsync-user', JSON.stringify(newData));
+        return newData;
+    });
+  };
+  
+  const handlePictureClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file || !profileData?.id) return;
+
+    try {
+      setLoading(true);
+      const updatedCompany = await authService.updateCompanyLogo(profileData.id, file);
+      
+      handleDataUpdate({ empresa: updatedCompany });
+
+    } catch (err) {
+      console.error("Erro ao fazer upload da logo:", err);
+      setError("Falha no upload da logo. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadUserFromLocalStorage();
-  }, []);
-
-  const handleUserUpdate = (updatedUserData) => {
-    setCurrentUser(updatedUserData);
-  
-    loadUserFromLocalStorage();
-  };
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabFromUrl = urlParams.get('tab');
-    if (tabFromUrl) {
-      setActiveTab(tabFromUrl);
-    }
+    if (tabFromUrl) setActiveTab(tabFromUrl);
   }, [location]);
 
   const tabs = [
-    {
-      id: "dados-pessoais",
-      label: "Dados Pessoais",
-      icon: "person"
-    },
-    {
-      id: "dados-empresa",
-      label: "Dados da Empresa",
-      icon: "business",
-    },
-    {
-      id: "configuracoes",
-      label: "Configurações",
-      icon: "settings",
-    },
+    { id: "dados-pessoais", label: "Dados Pessoais", icon: "person" },
+    { id: "dados-empresa", label: "Dados da Empresa", icon: "business" },
+    { id: "configuracoes", label: "Configurações", icon: "settings" },
   ];
 
   const renderActiveTab = () => {
+    if (loading) return <div>Carregando...</div>;
+    if (!profileData) return <div>{error || "Nenhum dado de usuário encontrado."}</div>;
+
     switch (activeTab) {
       case "dados-pessoais":
-        return <PersonalDataForm currentUser={currentUser} onUpdateSuccess={handleUserUpdate} />;
+        return <PersonalDataForm currentUser={profileData} onUpdateSuccess={handleDataUpdate} />;
       case "dados-empresa":
-        // Passa currentUser e a função para atualizar o usuário
-        return <CompanyDataForm currentUser={currentUser} onUpdateUser={handleUserUpdate} />;
+        return <CompanyDataForm currentUser={profileData} onUpdateSuccess={handleDataUpdate} />;
       case "configuracoes":
         return <SettingsForm />;
       default:
-        return <PersonalDataForm currentUser={currentUser} onUpdateSuccess={handleUserUpdate} />;
+        return <PersonalDataForm currentUser={profileData} onUpdateSuccess={handleDataUpdate} />;
     }
   };
 
   const getProfileName = () => {
-    // Se tem empresa cadastrada, mostra o nome da empresa, senão mostra o nome do usuário
-    if (currentUser?.empresa?.nomeEmpresa) {
-      return currentUser.empresa.nomeEmpresa;
-    }
-    return currentUser ? currentUser.nome : 'Carregando...';
+    if (loading) return "Carregando...";
+    return profileData?.empresa?.nome || "(Nome da Empresa)";
   };
 
   const getProfileEmail = () => {
-    return currentUser ? currentUser.email : 'carregando@email.com';
+    if (loading) return "carregando@email.com";
+    return profileData?.email || "Email não encontrado";
   };
-
-  const getProfilePictureInitial = () => {
-    // Se tem empresa cadastrada, usa a inicial da empresa, senão usa a do usuário
-    if (currentUser?.empresa?.nomeEmpresa) {
-      return currentUser.empresa.nomeEmpresa.charAt(0).toUpperCase();
-    }
-    return currentUser && currentUser.nome ? currentUser.nome.charAt(0).toUpperCase() : '?';
-  };
-
+  
   return (
     <ProfileContainer $isDarkMode={isDarkMode}>
       <Navbar />
@@ -120,17 +145,26 @@ const Perfil = () => {
         <ProfileHeader>
           <ProfilePictureSection>
             <ProfilePictureContainer>
+              <input
+                type="file"
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+                accept="image/png, image/jpeg, image/gif"
+              />
               <ProfilePicture $isDarkMode={isDarkMode}>
-                <ProfilePictureGradient $isDarkMode={isDarkMode}>
-                  <span style={{ fontSize: '3rem', fontWeight: 'bold' }}>
-                    {getProfilePictureInitial()}
-                  </span>
-                </ProfilePictureGradient>
+                {profileData?.empresa?.logo ? (
+                  <img src={profileData.empresa.logo} alt="Logo da Empresa" style={{ width: '100%', height: '100%', objectFit: 'cover' }}/>
+                ) : (
+                  <ProfilePictureGradient $isDarkMode={isDarkMode}>
+                    <span style={{ fontSize: '3rem', fontWeight: 'bold' }}>
+                      {profileData?.empresa?.nome ? profileData.empresa.nome.charAt(0).toUpperCase() : 'E'}
+                    </span>
+                  </ProfilePictureGradient>
+                )}
               </ProfilePicture>
-              <CameraButton $isDarkMode={isDarkMode}>
-                <span className="material-symbols-outlined">
-                  photo_camera
-                </span>
+              <CameraButton $isDarkMode={isDarkMode} onClick={handlePictureClick}>
+                <span className="material-symbols-outlined">photo_camera</span>
               </CameraButton>
             </ProfilePictureContainer>
             <ProfileInfo>
@@ -145,24 +179,24 @@ const Perfil = () => {
         </ProfileHeader>
 
         <ContentSection>
-          <TabNavigation>
-            <TabList>
-              {tabs.map((tab) => (
-               <TabButton
-                 key={tab.id}
-                 $isActive={activeTab === tab.id}
-                 $isDarkMode={isDarkMode}
-                 onClick={() => setActiveTab(tab.id)}
-               >
-                 <span className="material-symbols-outlined">
-                   {tab.icon}
-                 </span>
-                 {tab.label}
-               </TabButton>
-              ))}
-            </TabList>
-          </TabNavigation>
-          {renderActiveTab()}
+           <TabNavigation>
+             <TabList>
+               {tabs.map((tab) => (
+                <TabButton
+                  key={tab.id}
+                  $isActive={activeTab === tab.id}
+                  $isDarkMode={isDarkMode}
+                  onClick={() => setActiveTab(tab.id)}
+                >
+                  <span className="material-symbols-outlined">
+                    {tab.icon}
+                  </span>
+                  {tab.label}
+                </TabButton>
+               ))}
+             </TabList>
+           </TabNavigation>
+           {renderActiveTab()}
         </ContentSection>
       </ProfileContent>
     </ProfileContainer>

@@ -4,6 +4,8 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Select from '../../Select/Select';
+import Modal from '../../Modal/Modal';
+import { authService } from '../../../services/api';
 import {
   ClientsContainer,
   ClientsContent,
@@ -23,13 +25,13 @@ import {
   ClientAvatar,
   ClientInfo,
   ClientName,
-  ClientContact,
   StatusBadge,
-  ProjectsCount,
   EmptyState,
   EmptyStateIcon,
   EmptyStateTitle,
-  EmptyStateDescription
+  EmptyStateDescription,
+  ActionsCell,
+  ActionButton
 } from './ClientsList.styles';
 
 const ClientsList = () => {
@@ -38,124 +40,66 @@ const ClientsList = () => {
   const [clients, setClients] = useState([]);
   const [filteredClients, setFilteredClients] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortFilter, setSortFilter] = useState('recent');
+  const [sortFilter, setSortFilter] = useState('name_asc');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState(null);
 
   const sortOptions = [
-    { value: 'recent', label: 'Mais recentes' },
-    { value: 'name', label: 'Nome A-Z' },
-    { value: 'projects', label: 'Mais projetos' }
+    { value: 'name_asc', label: 'Nome A-Z' },
+    { value: 'name_desc', label: 'Nome Z-A' },
   ];
 
   const statusOptions = [
     { value: 'all', label: 'Todos' },
-    { value: 'active', label: 'Ativos' },
-    { value: 'inactive', label: 'Inativos' }
-  ];
-
-  // Mock data - substituir pela API real
-  const mockClients = [
-    {
-      id: 1,
-      name: 'TechNova Solutions',
-      cnpj: '12.345.678/0001-90',
-      phone: '(11) 98765-4321',
-      email: 'contato@technova.com',
-      address: 'Av. Paulista, 1000, São Paulo - SP',
-      activeProjects: 3,
-      lastContact: '2023-04-15',
-      status: 'active',
-      contacts: [
-        { name: 'João Silva', role: 'CEO', phone: '(11) 98765-4321', email: 'joao@technova.com' }
-      ],
-      observations: 'Cliente desde 2021. Preferência por reuniões nas segundas-feiras pela manhã.'
-    },
-    {
-      id: 2,
-      name: 'DataFlex Analytics',
-      cnpj: '98.765.432/0001-10',
-      phone: '(21) 91234-5678',
-      email: 'info@dataflex.com',
-      address: 'Rua das Flores, 500, Rio de Janeiro - RJ',
-      activeProjects: 0,
-      lastContact: '2023-03-22',
-      status: 'inactive',
-      contacts: [],
-      observations: ''
-    },
-    {
-      id: 3,
-      name: 'WebSphere Design',
-      cnpj: '45.678.901/0001-23',
-      phone: '(31) 99876-5432',
-      email: 'contato@websphere.com',
-      address: 'Av. Afonso Pena, 3000, Belo Horizonte - MG',
-      activeProjects: 1,
-      lastContact: '2023-04-10',
-      status: 'active',
-      contacts: [],
-      observations: ''
-    },
-    {
-      id: 4,
-      name: 'CloudPeak Systems',
-      cnpj: '78.901.234/0001-56',
-      phone: '(41) 98765-1234',
-      email: 'info@cloudpeak.com',
-      address: 'Rua XV de Novembro, 800, Curitiba - PR',
-      activeProjects: 2,
-      lastContact: '2023-04-18',
-      status: 'active',
-      contacts: [],
-      observations: ''
-    },
-    {
-      id: 5,
-      name: 'DigitalEdge Marketing',
-      cnpj: '23.456.789/0001-67',
-      phone: '(51) 97654-3210',
-      email: 'contato@digitaledge.com',
-      address: 'Av. Ipiranga, 1200, Porto Alegre - RS',
-      activeProjects: 0,
-      lastContact: '2023-02-28',
-      status: 'inactive',
-      contacts: [],
-      observations: ''
-    }
+    { value: 'ATIVO', label: 'Ativos' },
+    { value: 'INATIVO', label: 'Inativos' }
   ];
 
   useEffect(() => {
-    setClients(mockClients);
-    setFilteredClients(mockClients);
+    const fetchClients = async () => {
+      try {
+        setLoading(true);
+        const data = await authService.getAllClients();
+        setClients(data);
+      } catch (err) {
+        setError('Falha ao carregar clientes. Tente novamente.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClients();
   }, []);
 
   useEffect(() => {
-    let filtered = clients.filter(client => {
-      const searchLower = searchTerm.toLowerCase().trim();
-      
-      if (!searchLower) return true;
-      
-      const matchesName = client.name.toLowerCase().includes(searchLower);
-      const matchesCNPJ = client.cnpj.replace(/[^\d]/g, '').includes(searchLower.replace(/[^\d]/g, ''));
-      const matchesEmail = client.email.toLowerCase().includes(searchLower);
-      
-      const matchesSearch = matchesName || matchesCNPJ || matchesEmail;
-      
-      const matchesStatus = statusFilter === 'all' || client.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    });
+    let filtered = [...clients];
 
-    // Aplicar ordenação
+    if (searchTerm) {
+      filtered = filtered.filter(client => {
+        const searchLower = searchTerm.toLowerCase().trim();
+        const matchesName = client.nome.toLowerCase().includes(searchLower);
+        const cnpjValue = String(client.cnpj_cpf ?? client.cnpj ?? '');
+        const matchesCNPJ = cnpjValue.includes(searchLower.replace(/[^\d]/g, ''));
+        const matchesEmail = client.email.toLowerCase().includes(searchLower);
+        return matchesName || matchesCNPJ || matchesEmail;
+      });
+    }
+
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(client => client.status === statusFilter);
+    }
+
     switch (sortFilter) {
-      case 'recent':
-        filtered.sort((a, b) => new Date(b.lastContact) - new Date(a.lastContact));
+      case 'name_asc':
+        filtered.sort((a, b) => a.nome.localeCompare(b.nome));
         break;
-      case 'name':
-        filtered.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'projects':
-        filtered.sort((a, b) => b.activeProjects - a.activeProjects);
+      case 'name_desc':
+        filtered.sort((a, b) => b.nome.localeCompare(a.nome));
         break;
       default:
         break;
@@ -164,30 +108,48 @@ const ClientsList = () => {
     setFilteredClients(filtered);
   }, [clients, searchTerm, sortFilter, statusFilter]);
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-  };
+  const getClientInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
 
-  const getClientInitial = (name) => {
-    return name.charAt(0).toUpperCase();
-  };
-
-  const handleClientClick = (clientId) => {
-    navigate(`/clientes/${clientId}`);
-  };
+  const handleClientClick = (clientId) => navigate(`/clientes/${clientId}`);
 
   const handleEditClient = (clientId, event) => {
     event.stopPropagation();
     navigate(`/clientes/${clientId}/editar`);
   };
 
-  const handleDeleteClient = (clientId, event) => {
+  const handleDeleteClick = (client, event) => {
     event.stopPropagation();
-    if (window.confirm('Tem certeza que deseja excluir este cliente?')) {
-      setClients(prev => prev.filter(client => client.id !== clientId));
+    setClientToDelete(client);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteClient = async () => {
+    if (!clientToDelete) return;
+    try {
+      await authService.deleteClient(clientToDelete.id);
+      // CORREÇÃO: Força o recarregamento da página para garantir que a lista seja atualizada.
+      window.location.reload();
+    } catch (err) {
+      setError('Erro ao excluir cliente. Tente novamente.');
+    } finally {
+      setShowDeleteModal(false);
+      setClientToDelete(null);
     }
   };
+
+  if (loading) {
+    return (
+      <ClientsContainer $isDarkMode={isDarkMode}>
+        <Navbar />
+        <ClientsContent>
+          <EmptyState $isDarkMode={isDarkMode}>
+            <EmptyStateIcon className="material-symbols-outlined">hourglass_empty</EmptyStateIcon>
+            <EmptyStateTitle $isDarkMode={isDarkMode}>A carregar clientes...</EmptyStateTitle>
+          </EmptyState>
+        </ClientsContent>
+      </ClientsContainer>
+    );
+  }
 
   return (
     <ClientsContainer $isDarkMode={isDarkMode}>
@@ -198,7 +160,7 @@ const ClientsList = () => {
             <div>
               <PageTitle $isDarkMode={isDarkMode}>Clientes</PageTitle>
               <PageDescription $isDarkMode={isDarkMode}>
-                Gerencie seus clientes e acompanhe seus projetos
+                Faça a gestão dos seus clientes e acompanhe os seus projetos
               </PageDescription>
             </div>
             <HeaderActions>
@@ -218,7 +180,7 @@ const ClientsList = () => {
         <FiltersSection>
           <SearchInput
             type="text"
-            placeholder="Buscar por nome, CNPJ ou email..."
+            placeholder="Procurar por nome, NIF/NIPC ou email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             $isDarkMode={isDarkMode}
@@ -241,7 +203,7 @@ const ClientsList = () => {
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               options={statusOptions}
-              placeholder="Filtrar por status"
+              placeholder="Filtrar por estado"
               $isDarkMode={isDarkMode}
             />
           </div>
@@ -249,19 +211,17 @@ const ClientsList = () => {
 
         {filteredClients.length === 0 ? (
           <EmptyState $isDarkMode={isDarkMode}>
-            <EmptyStateIcon className="material-symbols-outlined">
-              group
-            </EmptyStateIcon>
+            <EmptyStateIcon className="material-symbols-outlined">group</EmptyStateIcon>
             <EmptyStateTitle $isDarkMode={isDarkMode}>
-              {searchTerm ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
+              {searchTerm || statusFilter !== 'all' ? 'Nenhum cliente encontrado' : 'Nenhum cliente registado'}
             </EmptyStateTitle>
             <EmptyStateDescription $isDarkMode={isDarkMode}>
-              {searchTerm 
-                ? 'Tente ajustar os filtros de busca'
-                : 'Comece adicionando seu primeiro cliente'
+              {searchTerm || statusFilter !== 'all' 
+                ? 'Tente ajustar os filtros de pesquisa'
+                : 'Comece por adicionar o seu primeiro cliente'
               }
             </EmptyStateDescription>
-            {!searchTerm && (
+            {!searchTerm && statusFilter === 'all' && (
               <Button
                 variant="primary"
                 size="medium"
@@ -279,15 +239,10 @@ const ClientsList = () => {
             <ClientsTable $isDarkMode={isDarkMode}>
               <TableHeader $isDarkMode={isDarkMode}>
                 <tr>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>
-                    Nome
-                    <span className="material-symbols-outlined">unfold_more</span>
-                  </TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>CNPJ</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>
-                    Status
-                    <span className="material-symbols-outlined">unfold_more</span>
-                  </TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>Nome</TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>NIF/NIPC</TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>Estado</TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode} style={{ textAlign: 'right' }}>Ações</TableHeaderCell>
                 </tr>
               </TableHeader>
               <TableBody>
@@ -300,32 +255,32 @@ const ClientsList = () => {
                     <td>
                       <ClientInfo>
                         <ClientAvatar $isDarkMode={isDarkMode}>
-                          {getClientInitial(client.name)}
+                          {getClientInitial(client.nome)}
                         </ClientAvatar>
                         <ClientName $isDarkMode={isDarkMode}>
-                          {client.name}
+                          {client.nome}
                         </ClientName>
                       </ClientInfo>
                     </td>
                     <td>
                       <span style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                        {client.cnpj}
+                        {/* CORREÇÃO: Garante que o valor não seja 'null' */}
+                        {(client.cnpj_cpf ?? client.cnpj) ?? ''}
                       </span>
                     </td>
                     <td>
-                      {client.activeProjects > 0 ? (
-                        <StatusBadge $status="active" $isDarkMode={isDarkMode}>
-                          <ProjectsCount>
-                            {client.activeProjects}
-                          </ProjectsCount>
-                          projeto{client.activeProjects > 1 ? 's' : ''} ativo{client.activeProjects > 1 ? 's' : ''}
-                        </StatusBadge>
-                      ) : (
-                        <StatusBadge $status="inactive" $isDarkMode={isDarkMode}>
-                          Sem projetos ativos
-                        </StatusBadge>
-                      )}
+                      <StatusBadge $status={client.status === 'ATIVO' ? 'active' : 'inactive'} $isDarkMode={isDarkMode}>
+                        {client.status === 'ATIVO' ? 'Ativo' : 'Inativo'}
+                      </StatusBadge>
                     </td>
+                    <ActionsCell>
+                        <ActionButton $isDarkMode={isDarkMode} onClick={(e) => handleEditClient(client.id, e)}>
+                            <span className="material-symbols-outlined">edit</span>
+                        </ActionButton>
+                        <ActionButton $isDarkMode={isDarkMode} onClick={(e) => handleDeleteClick(client, e)}>
+                            <span className="material-symbols-outlined">delete</span>
+                        </ActionButton>
+                    </ActionsCell>
                   </ClientRow>
                 ))}
               </TableBody>
@@ -333,6 +288,37 @@ const ClientsList = () => {
           </TableContainer>
         )}
       </ClientsContent>
+
+      <Modal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title="Confirmar Exclusão"
+        $isDarkMode={isDarkMode}
+      >
+        <p>
+          Tem a certeza que deseja excluir o cliente <strong>{clientToDelete?.nome}</strong>?
+          <br />
+          Esta ação não pode ser desfeita.
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
+          <Button
+            variant="secondary"
+            size="medium"
+            onClick={() => setShowDeleteModal(false)}
+            $isDarkMode={isDarkMode}
+          >
+            Cancelar
+          </Button>
+          <Button
+            variant="danger"
+            size="medium"
+            onClick={confirmDeleteClient}
+            $isDarkMode={isDarkMode}
+          >
+            Excluir
+          </Button>
+        </div>
+      </Modal>
     </ClientsContainer>
   );
 };

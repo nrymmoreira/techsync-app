@@ -37,33 +37,73 @@ api.interceptors.response.use(
 );
 
 export const authService = {
-  register: async (userData) => {
+  registerAndCreateCompany: async (userData, companyData) => {
     try {
-      const response = await api.post('/api/usuarios', {
-        nome: userData.nome,
+      await api.post('/api/usuarios', userData);
+      const loginResponse = await api.post('/api/usuarios/login', {
         email: userData.email,
-        senha: userData.senha
+        senha: userData.senha,
       });
-      return response.data;
+      const userId = loginResponse.data.user?.id;
+      if (userId == null) {
+        throw new Error('Falha ao obter ID do usuário após o cadastro.');
+      }
+      const companyPayload = { ...companyData, usuario: { id: userId } };
+      await api.post('/api/empresa', companyPayload);
+      return { success: true };
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao criar conta');
+      console.error("Erro no processo de cadastro:", error);
+      throw new Error(error.response?.data?.error || 'Erro no processo de cadastro.');
     }
   },
 
+  // --- FUNÇÃO DE LOGIN CORRIGIDA E ROBUSTA ---
   login: async (email, password) => {
     try {
-      const response = await api.post('/api/usuarios/login', {
-        email,
-        senha: password
-      });
-      if (response.data.token) {
-        localStorage.setItem('techsync-token', response.data.token);
+      // Passo 1: Fazer o login para obter o token e os dados básicos do usuário
+      const loginResponse = await api.post('/api/usuarios/login', { email, senha: password });
+
+      if (loginResponse.data.token) {
+        localStorage.setItem('techsync-token', loginResponse.data.token);
         localStorage.setItem('techsync-authenticated', 'true');
-        localStorage.setItem('techsync-user', JSON.stringify(response.data.user));
+
+        const basicUser = loginResponse.data.user;
+        if (!basicUser || basicUser.id == null) {
+            throw new Error("Dados do usuário não retornados no login.");
+        }
+
+        // Passo 2: Usar o ID do usuário para buscar os dados completos da empresa.
+        let companyData = null;
+        try {
+            // Chamada direta da API para garantir que os dados mais recentes sejam obtidos
+            const companyResponse = await api.get(`/api/empresa/usuario/${basicUser.id}`);
+            companyData = companyResponse.data;
+        } catch (companyError) {
+            // Se a empresa não for encontrada (404), isso é um estado válido. Outros erros são registrados.
+            if (companyError.response?.status !== 404) {
+                console.error("Erro ao buscar dados da empresa durante o login:", companyError);
+            }
+        }
+
+        // Passo 3: Combinar os dados e salvar o objeto completo no localStorage
+        const completeUser = { ...basicUser, empresa: companyData };
+        localStorage.setItem('techsync-user', JSON.stringify(completeUser));
       }
+      return loginResponse.data;
+    } catch (error) {
+      localStorage.removeItem('techsync-token');
+      localStorage.removeItem('techsync-authenticated');
+      localStorage.removeItem('techsync-user');
+      throw new Error(error.response?.data?.error || 'Erro ao fazer login: Credenciais inválidas.');
+    }
+  },
+  
+  getUserById: async (id) => {
+    try {
+      const response = await api.get(`/api/usuarios/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao fazer login: Credenciais inválidas.');
+      throw new Error(error.response?.data?.error || 'Erro ao buscar dados do usuário');
     }
   },
 
@@ -76,19 +116,18 @@ export const authService = {
     }
   },
 
-  getCompany: async (id) => { // Buscar empresa pelo ID (que é o ID do usuário)
+  getCompany: async (usuarioId) => {
     try {
-      const response = await api.get(`/api/empresa/${id}`);
+      const response = await api.get(`/api/empresa/usuario/${usuarioId}`);
       return response.data;
     } catch (error) {
       if (error.response?.status === 404) {
-          throw new Error('404'); 
+        return null; 
       }
       throw new Error(error.response?.data?.error || 'Erro ao buscar dados da empresa.');
     }
   },
 
-  // Este método será chamado para criar uma nova empresa (o ID será atribuído no backend)
   createCompany: async (companyData) => {
     try {
       const response = await api.post('/api/empresa', companyData);
@@ -97,14 +136,71 @@ export const authService = {
       throw new Error(error.response?.data?.error || 'Erro ao criar empresa.');
     }
   },
-
-  // Este método será chamado para atualizar uma empresa existente
-  updateCompany: async (id, companyData) => { // ID é o ID da empresa (que é o ID do usuário)
+  
+  updateCompany: async (id, companyData) => {
     try {
       const response = await api.put(`/api/empresa/${id}`, companyData);
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Erro ao atualizar empresa.');
+    }
+  },
+
+  updateCompanyLogo: async (id, logoFile) => {
+    const formData = new FormData();
+    formData.append('logo', logoFile);
+    try {
+      const response = await api.put(`/api/empresa/logo/${id}`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      return response.data;
+    } catch (error) {
+       throw new Error(error.response?.data?.error || 'Erro ao atualizar logo da empresa.');
+    }
+  },
+
+  getAllClients: async () => {
+    try {
+      const response = await api.get('/api/cliente');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao buscar clientes.');
+    }
+  },
+
+  deleteClient: async (id) => {
+    try {
+      await api.delete(`/api/cliente/${id}`);
+      return { success: true };
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao excluir cliente.');
+    }
+  },
+  
+  getClientById: async (id) => {
+    try {
+      const response = await api.get(`/api/cliente/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao buscar dados do cliente.');
+    }
+  },
+
+  createClient: async (clientData) => {
+    try {
+      const response = await api.post('/api/cliente', clientData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao criar cliente.');
+    }
+  },
+
+  updateClient: async (id, clientData) => {
+    try {
+      const response = await api.put(`/api/cliente/${id}`, clientData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar cliente.');
     }
   }
 };
