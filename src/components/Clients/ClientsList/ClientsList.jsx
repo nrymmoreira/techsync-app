@@ -83,10 +83,11 @@ const ClientsList = () => {
       filtered = filtered.filter(client => {
         const searchLower = searchTerm.toLowerCase().trim();
         const matchesName = client.nome.toLowerCase().includes(searchLower);
-        const cnpjValue = String(client.cnpj_cpf ?? client.cnpj ?? '');
-        const matchesCNPJ = cnpjValue.includes(searchLower.replace(/[^\d]/g, ''));
+        // CORREÇÃO: Busca pelo campo 'cnpj_cpf'
+        const docValue = String(client.cnpj_cpf ?? '');
+        const matchesDoc = docValue.includes(searchLower.replace(/[^\d]/g, ''));
         const matchesEmail = client.email.toLowerCase().includes(searchLower);
-        return matchesName || matchesCNPJ || matchesEmail;
+        return matchesName || matchesDoc || matchesEmail;
       });
     }
 
@@ -127,7 +128,6 @@ const ClientsList = () => {
     if (!clientToDelete) return;
     try {
       await authService.deleteClient(clientToDelete.id);
-      // CORREÇÃO: Força o recarregamento da página para garantir que a lista seja atualizada.
       window.location.reload();
     } catch (err) {
       setError('Erro ao excluir cliente. Tente novamente.');
@@ -180,7 +180,7 @@ const ClientsList = () => {
         <FiltersSection>
           <SearchInput
             type="text"
-            placeholder="Procurar por nome, NIF/NIPC ou email..."
+            placeholder="Procurar por nome, CPF/CNPJ ou email..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             $isDarkMode={isDarkMode}
@@ -240,7 +240,7 @@ const ClientsList = () => {
               <TableHeader $isDarkMode={isDarkMode}>
                 <tr>
                   <TableHeaderCell $isDarkMode={isDarkMode}>Nome</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>NIF/NIPC</TableHeaderCell>
+                  <TableHeaderCell $isDarkMode={isDarkMode}>CPF/CNPJ</TableHeaderCell>
                   <TableHeaderCell $isDarkMode={isDarkMode}>Estado</TableHeaderCell>
                   <TableHeaderCell $isDarkMode={isDarkMode} style={{ textAlign: 'right' }}>Ações</TableHeaderCell>
                 </tr>
@@ -264,8 +264,7 @@ const ClientsList = () => {
                     </td>
                     <td>
                       <span style={{ fontFamily: 'monospace', fontSize: '0.875rem' }}>
-                        {/* CORREÇÃO: Garante que o valor não seja 'null' */}
-                        {(client.cnpj_cpf ?? client.cnpj) ?? ''}
+                        {client.cnpj_cpf ?? ''}
                       </span>
                     </td>
                     <td>

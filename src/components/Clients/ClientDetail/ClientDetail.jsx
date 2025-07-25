@@ -21,6 +21,13 @@ import {
   ContactInfo,
   ContactItem,
   ContactIcon,
+  // Estilos para contatos e observações
+  ContactsSection,
+  ContactCard,
+  ContactHeader,
+  ContactName,
+  ContactRole,
+  ContactDetails,
   ObservationsSection,
   SectionTitle,
   ObservationsText,
@@ -28,6 +35,7 @@ import {
   EmptyStateIcon,
   EmptyStateTitle,
   EmptyStateDescription,
+  // Estilos para as abas
   TabsSection,
   TabsList,
   TabButton,
@@ -52,6 +60,7 @@ const ClientDetail = () => {
         setClient(data);
       } catch (err) {
         setError('Não foi possível carregar os dados do cliente.');
+        console.error(err);
       } finally {
         setLoading(false);
       }
@@ -65,7 +74,9 @@ const ClientDetail = () => {
       setShowDeleteModal(false);
       navigate('/clientes');
     } catch (err) {
+      console.error("Erro ao excluir cliente:", err);
       setShowDeleteModal(false);
+      // O ideal seria mostrar um toast de erro aqui
     }
   };
 
@@ -157,8 +168,7 @@ const ClientDetail = () => {
           <ContactInfo>
             <ContactItem $isDarkMode={isDarkMode}>
               <ContactIcon className="material-symbols-outlined">badge</ContactIcon>
-              {/* CORREÇÃO: Garante que o valor não seja 'null' */}
-              {(client.cnpj ?? client.cnpj_cpf) ?? ''}
+              {(client.cnpj_cpf ?? client.cnpj) ?? ''}
             </ContactItem>
             <ContactItem $isDarkMode={isDarkMode}>
               <ContactIcon className="material-symbols-outlined">phone</ContactIcon>
@@ -171,6 +181,40 @@ const ClientDetail = () => {
           </ContactInfo>
         </ClientInfo>
 
+        {/* --- SECÇÃO DE CONTATOS REINTEGRADA --- */}
+        <ContactsSection $isDarkMode={isDarkMode}>
+          <SectionTitle $isDarkMode={isDarkMode}>Contatos</SectionTitle>
+          {client.contatos && client.contatos.length > 0 ? (
+            client.contatos.map((contact) => (
+              <ContactCard key={contact.id} $isDarkMode={isDarkMode}>
+                <ContactHeader>
+                  <div>
+                    <ContactName $isDarkMode={isDarkMode}>{contact.nome}</ContactName>
+                    <ContactRole $isDarkMode={isDarkMode}>{contact.cargo}</ContactRole>
+                  </div>
+                </ContactHeader>
+                <ContactDetails $isDarkMode={isDarkMode}>
+                  {contact.telefone && (
+                    <div>
+                      <span className="material-symbols-outlined">phone</span>
+                      {String(contact.telefone)}
+                    </div>
+                  )}
+                  {contact.email && (
+                    <div>
+                      <span className="material-symbols-outlined">mail</span>
+                      {contact.email}
+                    </div>
+                  )}
+                </ContactDetails>
+              </ContactCard>
+            ))
+          ) : (
+            <p style={{ color: 'inherit', opacity: 0.7, fontSize: '0.9rem' }}>Nenhum contato adicional cadastrado.</p>
+          )}
+        </ContactsSection>
+
+        {/* --- SECÇÃO DE OBSERVAÇÕES REINTEGRADA --- */}
         {client.obs && (
           <ObservationsSection $isDarkMode={isDarkMode}>
             <SectionTitle $isDarkMode={isDarkMode}>Observações</SectionTitle>
@@ -182,29 +226,10 @@ const ClientDetail = () => {
         
         <TabsSection $isDarkMode={isDarkMode}>
           <TabsList $isDarkMode={isDarkMode}>
-            <TabButton
-              $isActive={activeTab === 'projects'}
-              $isDarkMode={isDarkMode}
-              onClick={() => setActiveTab('projects')}
-            >
-              Projetos
-            </TabButton>
-            <TabButton
-              $isActive={activeTab === 'budgets'}
-              $isDarkMode={isDarkMode}
-              onClick={() => setActiveTab('budgets')}
-            >
-              Orçamentos
-            </TabButton>
-            <TabButton
-              $isActive={activeTab === 'attachments'}
-              $isDarkMode={isDarkMode}
-              onClick={() => setActiveTab('attachments')}
-            >
-              Anexos
-            </TabButton>
+            <TabButton $isActive={activeTab === 'projects'} $isDarkMode={isDarkMode} onClick={() => setActiveTab('projects')}>Projetos</TabButton>
+            <TabButton $isActive={activeTab === 'budgets'} $isDarkMode={isDarkMode} onClick={() => setActiveTab('budgets')}>Orçamentos</TabButton>
+            <TabButton $isActive={activeTab === 'attachments'} $isDarkMode={isDarkMode} onClick={() => setActiveTab('attachments')}>Anexos</TabButton>
           </TabsList>
-
           <TabContent $isDarkMode={isDarkMode}>
             {activeTab === 'projects' && (
               <EmptyState $isDarkMode={isDarkMode} style={{padding: '2rem'}}>
@@ -215,7 +240,6 @@ const ClientDetail = () => {
                 </EmptyStateDescription>
               </EmptyState>
             )}
-
             {activeTab === 'budgets' && (
               <EmptyState $isDarkMode={isDarkMode} style={{padding: '2rem'}}>
                 <EmptyStateIcon className="material-symbols-outlined">receipt_long</EmptyStateIcon>
@@ -225,7 +249,6 @@ const ClientDetail = () => {
                 </EmptyStateDescription>
               </EmptyState>
             )}
-
             {activeTab === 'attachments' && (
               <EmptyState $isDarkMode={isDarkMode} style={{padding: '2rem'}}>
                 <EmptyStateIcon className="material-symbols-outlined">attach_file</EmptyStateIcon>
@@ -252,22 +275,8 @@ const ClientDetail = () => {
           Esta ação não pode ser desfeita.
         </p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '2rem' }}>
-          <Button
-            variant="secondary"
-            size="medium"
-            onClick={() => setShowDeleteModal(false)}
-            $isDarkMode={isDarkMode}
-          >
-            Cancelar
-          </Button>
-          <Button
-            variant="danger"
-            size="medium"
-            onClick={handleDelete}
-            $isDarkMode={isDarkMode}
-          >
-            Excluir
-          </Button>
+          <Button variant="secondary" size="medium" onClick={() => setShowDeleteModal(false)} $isDarkMode={isDarkMode}>Cancelar</Button>
+          <Button variant="danger" size="medium" onClick={handleDelete} $isDarkMode={isDarkMode}>Excluir</Button>
         </div>
       </Modal>
     </DetailContainer>

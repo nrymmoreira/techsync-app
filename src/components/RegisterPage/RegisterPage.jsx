@@ -44,16 +44,9 @@ const RegisterPage = () => {
 
   const handleInputChange = (field) => (event) => {
     const value = event.target.type === 'checkbox' ? event.target.checked : event.target.value;
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
+    setFormData(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({
-        ...prev,
-        [field]: ''
-      }));
+      setErrors(prev => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -69,7 +62,7 @@ const RegisterPage = () => {
   };
 
   const validateCNPJ = (cnpj) => {
-    const cleanCNPJ = cnpj.replace(/[^\d]/g, '');
+    const cleanCNPJ = String(cnpj).replace(/[^\d]/g, '');
     if (cleanCNPJ.length !== 14) return false;
     if (/^(\d)\1+$/.test(cleanCNPJ)) return false;
     let sum = 0;
@@ -93,39 +86,29 @@ const RegisterPage = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.fullName.trim()) {
-      newErrors.fullName = 'Nome completo é obrigatório';
-    }
-    if (!formData.companyName.trim()) {
-      newErrors.companyName = 'Nome da empresa é obrigatório';
-    }
-    if (!formData.cnpj.trim()) {
+    if (!formData.fullName.trim()) newErrors.fullName = 'Nome completo é obrigatório';
+    if (!formData.companyName.trim()) newErrors.companyName = 'Nome da empresa é obrigatório';
+    if (!String(formData.cnpj).trim()) {
       newErrors.cnpj = 'CNPJ é obrigatório';
     } else if (!validateCNPJ(formData.cnpj)) {
       newErrors.cnpj = 'CNPJ inválido';
     }
-
     if (!formData.email) {
       newErrors.email = 'Email é obrigatório';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email inválido';
     }
-
     if (!formData.password) {
       newErrors.password = 'Senha é obrigatória';
     } else if (!validatePassword(formData.password)) {
       newErrors.password = 'Senha não atende aos requisitos mínimos';
     }
-
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = 'Confirmação de senha é obrigatória';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Senhas não coincidem';
     }
-
-    if (!formData.acceptTerms) {
-      newErrors.acceptTerms = 'Você deve aceitar os termos de serviço';
-    }
+    if (!formData.acceptTerms) newErrors.acceptTerms = 'Você deve aceitar os termos de serviço';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -133,7 +116,6 @@ const RegisterPage = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -148,7 +130,7 @@ const RegisterPage = () => {
 
       const companyData = {
         nome: formData.companyName,
-        cnpj: formData.cnpj.replace(/[^\d]/g, ''),
+        cnpj: Number(String(formData.cnpj).replace(/[^\d]/g, '')),
         currency: 'BRL',
         timezone: 'GMT-3'
       };
@@ -158,7 +140,6 @@ const RegisterPage = () => {
       setShowSuccessModal(true);
     } catch (error) {
       const errorMessage = error.message || 'Ocorreu um erro.';
-      // CORREÇÃO: Verifica a mensagem de erro para dar um feedback específico
       if (errorMessage.includes('Email já cadastrado')) {
         setErrors({ email: 'Este email já está em uso. Tente outro.' });
       } else {
@@ -179,11 +160,9 @@ const RegisterPage = () => {
       <ContentWrapper>
         <TextSection>
           <Logo size="small"/>
-          
           <MainTitle $isDarkMode={isDarkMode}>
             <HighlightText>Bem-vindo</HighlightText> ao futuro da produtividade
           </MainTitle>
-          
           <Description $isDarkMode={isDarkMode}>
             No limiar de uma nova era, onde o trabalho ultrapassa os limites da 
             Terra e se expande para além das estrelas, o TechSync redefine a forma 
@@ -321,7 +300,7 @@ const RegisterPage = () => {
                 $isDarkMode={isDarkMode}
                 disabled={isLoading}
               >
-                {isLoading ? 'Criando conta...' : 'Criar conta'}
+                {isLoading ? 'A criar conta...' : 'Criar conta'}
               </Button>
             </form>
 
@@ -337,32 +316,14 @@ const RegisterPage = () => {
         </FormSection>
       </ContentWrapper>
 
-      {/* Seus modais de Termos e Privacidade continuam aqui... */}
-      <Modal
-        isOpen={showTermsModal}
-        onClose={() => setShowTermsModal(false)}
-        title="Termos de Serviço"
-        $isDarkMode={isDarkMode}
-      >
-        <p>Conteúdo dos Termos de Serviço...</p>
-      </Modal>
-
-      <Modal
-        isOpen={showPrivacyModal}
-        onClose={() => setShowPrivacyModal(false)}
-        title="Política de Privacidade"
-        $isDarkMode={isDarkMode}
-      >
-        <p>Conteúdo da Política de Privacidade...</p>
-      </Modal>
-
+      {/* Modais */}
       <Modal
         isOpen={showSuccessModal}
         onClose={handleSuccessModalClose}
-        title="Cadastro Concluído"
+        title="Registo Concluído"
         $isDarkMode={isDarkMode}
       >
-        <p>Sua conta e empresa foram criadas com sucesso! Você será redirecionado para a página de login.</p>
+        <p>A sua conta e empresa foram criadas com sucesso! Será redirecionado para a página de login.</p>
         <Button
           variant="primary"
           size="medium"
