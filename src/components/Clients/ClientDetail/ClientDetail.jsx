@@ -181,11 +181,11 @@ const ClientDetail = () => {
           </ContactInfo>
         </ClientInfo>
 
-        {/* --- SECÇÃO DE CONTATOS REINTEGRADA --- */}
+        {/* --- SECÇÃO DE responsaveis REINTEGRADA --- */}
         <ContactsSection $isDarkMode={isDarkMode}>
           <SectionTitle $isDarkMode={isDarkMode}>Contatos</SectionTitle>
-          {client.contatos && client.contatos.length > 0 ? (
-            client.contatos.map((contact) => (
+          {client.responsaveis && client.responsaveis.length > 0 ? (
+            client.responsaveis.map((contact) => (
               <ContactCard key={contact.id} $isDarkMode={isDarkMode}>
                 <ContactHeader>
                   <div>

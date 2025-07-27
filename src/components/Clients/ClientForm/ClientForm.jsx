@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
-import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import { authService } from '../../../services/api';
 import {
@@ -30,6 +29,7 @@ import {
   SaveButton,
   CancelButton
 } from './ClientForm.styles';
+import { mask } from 'remask';
 
 const ClientForm = () => {
   const navigate = useNavigate();
@@ -43,14 +43,14 @@ const ClientForm = () => {
     telefone: '',
     email: '',
     endereco: '',
-    obs: '' // O nome do estado agora corresponde à API
+    observacao: '' // O nome do estado agora corresponde à API
   });
 
   // --- LÓGICA DE CONTATOS REINTEGRADA ---
   const [contacts, setContacts] = useState([]);
   const [newContact, setNewContact] = useState({
     nome: '',
-    cargo: '',
+    funcao: '',
     telefone: '',
     email: ''
   });
@@ -66,14 +66,14 @@ const ClientForm = () => {
           const clientData = await authService.getClientById(id);
           setFormData({
             nome: clientData.nome || '',
-            cnpj_cpf: String(clientData.cnpj_cpf || clientData.cnpj || ''),
-            telefone: String(clientData.telefone || ''),
+            cnpj_cpf: String(mask(clientData.cnpj_cpf, (clientData.cnpj_cpf.replace(/[^\d]/g, '').length <= 11 ? '999.999.999-99' : '99.999.999/9999-99')) || ''),
+            telefone: String(mask(clientData.telefone, '(99) 99999-9999') || ''),
             email: clientData.email || '',
             endereco: clientData.endereco || '',
-            obs: clientData.obs || ''
+            observacao: clientData.observacao || ''
           });
           // Popula os contatos
-          setContacts(clientData.contatos || []);
+          setContacts(clientData.responsaveis || []);
         } catch (error) {
           console.error("Erro ao buscar cliente:", error);
           setErrors({ api: 'Não foi possível carregar os dados do cliente.' });
@@ -137,9 +137,9 @@ const ClientForm = () => {
   };
 
   const addContact = () => {
-    if (newContact.nome.trim() && newContact.cargo.trim()) {
+    if (newContact.nome.trim() && newContact.funcao.trim()) {
       setContacts(prev => [...prev, { id: Date.now(), ...newContact }]);
-      setNewContact({ nome: '', cargo: '', telefone: '', email: '' });
+      setNewContact({ nome: '', funcao: '', telefone: '', email: '' });
     }
   };
 
@@ -163,15 +163,14 @@ const ClientForm = () => {
 
     const clientPayload = {
         nome: formData.nome,
-        cnpj_cpf: Number(String(formData.cnpj_cpf).replace(/[^\d]/g, '')),
-        telefone: Number(String(formData.telefone).replace(/[^\d]/g, '')),
+        cnpj_cpf: formData.cnpj_cpf,
+        telefone: formData.telefone,
         email: formData.email,
         endereco: formData.endereco,
-        obs: formData.obs,
+        observacao: formData.observacao,
         status: 'ATIVO',
-        empresa: { id: storedUser.empresa.id },
-        // Envia a lista de contatos (removendo o ID temporário do frontend)
-        contatos: contacts.map(({ id, ...rest }) => rest)
+        // Envia a lista de responsaveis (removendo o ID temporário do frontend)
+        responsaveis: contacts.map(({ id, ...rest }) => rest)
     };
 
     try {
@@ -227,8 +226,8 @@ const ClientForm = () => {
 
             <FormGrid>
               <Input id="nome" label="Nome" type="text" value={formData.nome} onChange={(e) => handleInputChange('nome', e.target.value)} error={errors.nome} placeholder="Nome da empresa ou pessoa" icon="business" required $isDarkMode={isDarkMode} disabled={isLoading} />
-              <Input id="cnpj_cpf" label="CPF/CNPJ" type="text" value={formData.cnpj_cpf} onChange={(e) => handleInputChange('cnpj_cpf', e.target.value)} error={errors.cnpj_cpf} placeholder="00.000.000/0000-00 ou 000.000.000-00" icon="badge" required $isDarkMode={isDarkMode} disabled={isLoading} />
-              <Input id="telefone" label="Telefone" type="tel" value={formData.telefone} onChange={(e) => handleInputChange('telefone', e.target.value)} error={errors.telefone} placeholder="(00) 00000-0000" icon="phone" required $isDarkMode={isDarkMode} disabled={isLoading} />
+              <Input id="cnpj_cpf" label="CPF/CNPJ" type="text" value={formData.cnpj_cpf} onChange={(e) => handleInputChange('cnpj_cpf', mask(e.target.value, (e.target.value.replace(/[^\d]/g, '')).length <= 11 ? '999.999.999-99' : '99.999.999/9999-99'))} error={errors.cnpj_cpf} placeholder="00.000.000/0000-00 ou 000.000.000-00" icon="badge" required $isDarkMode={isDarkMode} disabled={isLoading} />
+              <Input id="telefone" label="Telefone" type="tel" value={formData.telefone} onChange={(e) => handleInputChange('telefone', mask(e.target.value, '(99) 99999-9999'))} error={errors.telefone} placeholder="(00) 00000-0000" icon="phone" required $isDarkMode={isDarkMode} disabled={isLoading} />
               <Input id="email" label="Email" type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)} error={errors.email} placeholder="email@exemplo.com" icon="mail" required $isDarkMode={isDarkMode} disabled={isLoading} />
               <div style={{ gridColumn: '1 / -1' }}>
                 <Input id="endereco" label="Endereço (Opcional)" type="text" value={formData.endereco} onChange={(e) => handleInputChange('endereco', e.target.value)} error={errors.endereco} placeholder="Endereço completo" icon="location_on" $isDarkMode={isDarkMode} disabled={isLoading} />
@@ -236,19 +235,19 @@ const ClientForm = () => {
             </FormGrid>
           </FormSection>
 
-          {/* --- SECÇÃO DE CONTATOS CORRIGIDA --- */}
+          {/* --- SECÇÃO DE RESPONSAVEIS CORRIGIDA --- */}
           <ContactsSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Contatos</SectionTitle>
+            <SectionTitle $isDarkMode={isDarkMode}>Responsáveis</SectionTitle>
             <SectionDescription $isDarkMode={isDarkMode}>
-              Pessoas de contato na empresa (opcional)
+              Pessoas responsáveis pela empresa (opcional)
             </SectionDescription>
 
             {contacts.map((contact) => (
               <ContactCard key={contact.id} $isDarkMode={isDarkMode}>
                 <ContactHeader>
-                  <ContactInfo>
+                  <ContactInfo $isDarkMode={isDarkMode}>
                     <h4>{contact.nome}</h4>
-                    <span>{contact.cargo}</span>
+                    <span>{contact.funcao}</span>
                   </ContactInfo>
                   <ContactActions>
                     <button type="button" onClick={() => removeContact(contact.id)} title="Remover contato">
@@ -265,12 +264,12 @@ const ClientForm = () => {
 
             <FormGrid>
               <Input id="contactName" label="Nome do contato" type="text" value={newContact.nome} onChange={(e) => handleContactChange('nome', e.target.value)} placeholder="Nome do contato" icon="person" $isDarkMode={isDarkMode} disabled={isLoading} />
-              <Input id="contactRole" label="Cargo" type="text" value={newContact.cargo} onChange={(e) => handleContactChange('cargo', e.target.value)} placeholder="Cargo ou função" icon="work" $isDarkMode={isDarkMode} disabled={isLoading} />
-              <Input id="contactPhone" label="Telefone do contato" type="tel" value={newContact.telefone} onChange={(e) => handleContactChange('telefone', e.target.value)} placeholder="(00) 00000-0000" icon="phone" $isDarkMode={isDarkMode} disabled={isLoading} />
+              <Input id="contactRole" label="Função" type="text" value={newContact.funcao} onChange={(e) => handleContactChange('funcao', e.target.value)} placeholder="Cargo ou função" icon="work" $isDarkMode={isDarkMode} disabled={isLoading} />
+              <Input id="contactPhone" label="Telefone do contato" type="tel" value={newContact.telefone} onChange={(e) => handleContactChange('telefone', mask(e.target.value, '(99) 99999-9999'))} placeholder="(00) 00000-0000" icon="phone" $isDarkMode={isDarkMode} disabled={isLoading} />
               <Input id="contactEmail" label="Email do contato" type="email" value={newContact.email} onChange={(e) => handleContactChange('email', e.target.value)} placeholder="email@exemplo.com" icon="mail" $isDarkMode={isDarkMode} disabled={isLoading} />
             </FormGrid>
 
-            <AddContactButton type="button" onClick={addContact} $isDarkMode={isDarkMode} disabled={!newContact.nome.trim() || !newContact.cargo.trim() || isLoading}>
+            <AddContactButton type="button" onClick={addContact} $isDarkMode={isDarkMode} disabled={!newContact.nome.trim() || !newContact.funcao.trim() || isLoading}>
               <span className="material-symbols-outlined">add</span>
               Adicionar Contato
             </AddContactButton>
@@ -282,8 +281,8 @@ const ClientForm = () => {
               Informações adicionais sobre o cliente
             </SectionDescription>
             <ObservationsTextarea
-              value={formData.obs}
-              onChange={(e) => handleInputChange('obs', e.target.value)}
+              value={formData.observacao}
+              onChange={(e) => handleInputChange('observacao', e.target.value)}
               placeholder="Adicione observações ou notas sobre o cliente..."
               rows={4}
               $isDarkMode={isDarkMode}
