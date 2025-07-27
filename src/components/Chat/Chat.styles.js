@@ -182,7 +182,7 @@ export const ChatWindow = styled.div`
   max-height: 600px;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surface;
+    return theme.colors.background;
   }};
   border: 1px solid ${props => {
     const theme = getTheme(props.$isDarkMode);
@@ -307,7 +307,7 @@ export const ChatCloseButton = styled.button`
 
 export const ChatMessages = styled.div`
   flex: 1;
-  padding: 1rem;
+  padding: 0.2rem;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -635,7 +635,7 @@ export const EmptyState = styled.div`
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 2rem 1rem;
+  padding: 1rem;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
