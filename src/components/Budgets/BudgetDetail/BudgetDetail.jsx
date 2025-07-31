@@ -5,6 +5,7 @@ import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Select from '../../Select/Select';
 import Modal from '../../Modal/Modal';
+import { authService } from '../../../services/api';
 import {
   DetailContainer,
   DetailContent,
@@ -57,37 +58,32 @@ const BudgetDetail = () => {
     { value: 'aprovado', label: 'Aprovado' },
     { value: 'pago', label: 'Pago' }
   ];
-  // Mock data - substituir pela API real
-  const mockBudget = {
-    id: 1,
-    number: 'ORC-2024-001',
-    clientId: '1',
-    clientName: 'TechNova Solutions',
-    status: 'aguardando_aprovacao',
-    totalValue: 15000.00,
-    createdAt: '2024-01-15',
-    services: [
-      { id: 1, name: 'Desenvolvimento Website', value: 12000.00 },
-      { id: 2, name: 'Consultoria UX', value: 3000.00 }
-    ],
-    discount: 500.00,
-    observations: 'Projeto de redesign completo com foco em UX e performance. Cliente solicitou prazo de entrega em 3 meses.'
-  };
-
   useEffect(() => {
-    setBudget(mockBudget);
-    setNewStatus(mockBudget.status);
+    async function fetchBudget() {
+      try {
+        const data = await authService.getBudgetById(id);
+        setBudget(data);
+        setNewStatus(data.status);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    fetchBudget();
   }, [id]);
 
   const handleStatusChange = () => {
     setShowStatusModal(true);
   };
 
-  const handleStatusUpdate = () => {
-    setBudget(prev => ({ ...prev, status: newStatus }));
-    setShowStatusModal(false);
-    // Aqui você faria a chamada para a API para atualizar o status
-    console.log('Status atualizado para:', newStatus);
+  const handleStatusUpdate = async () => {
+    try {
+      await authService.updateBudget(id, { status: newStatus });
+      setBudget(prev => ({ ...prev, status: newStatus }));
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setShowStatusModal(false);
+    }
   };
   const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -130,15 +126,24 @@ const BudgetDetail = () => {
     return budget?.services.reduce((total, service) => total + service.value, 0) || 0;
   };
 
-  const handleGeneratePdf = () => {
-    console.log('Generating PDF for budget:', budget);
-    alert('PDF gerado com sucesso! (Funcionalidade simulada)');
+  const handleGeneratePdf = async () => {
+    try {
+      const blob = await authService.generateBudgetPdf(id);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      window.open(url, '_blank');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (window.confirm('Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita.')) {
-      console.log('Excluir orçamento:', id);
-      navigate('/orcamentos');
+      try {
+        await authService.deleteBudget(id);
+        navigate('/orcamentos');
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 

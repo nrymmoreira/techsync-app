@@ -5,6 +5,7 @@ import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import Select from '../../Select/Select';
+import { authService } from '../../../services/api';
 import {
   FormContainer,
   FormContent,
@@ -58,28 +59,41 @@ const BudgetForm = () => {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  const clientOptions = [
-    { value: '', label: 'Selecione um cliente' },
-    { value: '1', label: 'TechNova Solutions' },
-    { value: '2', label: 'DataFlex Analytics' },
-    { value: '3', label: 'WebSphere Design' },
-    { value: '4', label: 'CloudPeak Systems' }
-  ];
+  const [clientOptions, setClientOptions] = useState([
+    { value: '', label: 'Selecione um cliente' }
+  ]);
 
   useEffect(() => {
-    if (isEditing) {
-      // Mock data - substituir pela API real
-      setFormData({
-        clientId: '1',
-        discount: 500,
-        observations: 'Projeto de redesign completo com foco em UX'
-      });
-      setServices([
-        { id: 1, name: 'Desenvolvimento Website', value: 12000.00 },
-        { id: 2, name: 'Consultoria UX', value: 3000.00 }
-      ]);
+    async function loadData() {
+      try {
+        const clients = await authService.getAllClients();
+        setClientOptions([
+          { value: '', label: 'Selecione um cliente' },
+          ...clients.map((c) => ({ value: String(c.id), label: c.nome }))
+        ]);
+
+        if (isEditing) {
+          const budget = await authService.getBudgetById(id);
+          setFormData({
+            clientId: String(budget.cliente?.id ?? ''),
+            discount: budget.desconto ?? 0,
+            observations: budget.observacoes ?? ''
+          });
+          setServices(
+            budget.servicos?.map((s) => ({
+              id: s.id,
+              name: s.descricao,
+              value: s.valor,
+              quantidade: s.quantidade
+            })) || []
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }, [isEditing]);
+    loadData();
+  }, [id, isEditing]);
 
   const calculateSubtotal = () => {
     return services.reduce((total, service) => total + parseFloat(service.value || 0), 0);
@@ -152,10 +166,11 @@ const BudgetForm = () => {
 
   const addService = () => {
     if (validateServiceForm()) {
-      setServices(prev => [...prev, { 
-        id: Date.now(), 
+      setServices(prev => [...prev, {
+        id: Date.now(),
         name: newService.name,
-        value: parseFloat(newService.value)
+        value: parseFloat(newService.value),
+        quantidade: 1
       }]);
       setNewService({ name: '', value: '' });
       
@@ -171,23 +186,28 @@ const BudgetForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
 
     try {
-      // Simular salvamento na API
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      const budgetData = {
-        ...formData,
-        services,
-        subtotal: calculateSubtotal(),
-        total: calculateTotal()
+      const payload = {
+        cliente: { id: Number(formData.clientId) },
+        desconto: parseFloat(formData.discount || 0),
+        observacoes: formData.observations,
+        servicos: services.map((s) => ({
+          descricao: s.name,
+          valor: parseFloat(s.value),
+          quantidade: s.quantidade ?? 1
+        }))
       };
-      
-      console.log('Saving budget:', budgetData);
+
+      if (isEditing) {
+        await authService.updateBudget(id, payload);
+      } else {
+        await authService.createBudget(payload);
+      }
       navigate('/orcamentos');
     } catch (error) {
       setErrors({ api: 'Erro ao salvar orçamento' });
@@ -196,21 +216,19 @@ const BudgetForm = () => {
     }
   };
 
-  const handleGeneratePdf = () => {
-    if (!validateForm()) {
-      alert('Preencha todos os campos obrigatórios antes de gerar o PDF');
+  const handleGeneratePdf = async () => {
+    if (!isEditing) {
+      alert('Salve o orçamento antes de gerar o PDF');
       return;
     }
 
-    // Simular geração de PDF
-    console.log('Generating PDF for budget:', {
-      ...formData,
-      services,
-      subtotal: calculateSubtotal(),
-      total: calculateTotal()
-    });
-    
-    alert('PDF gerado com sucesso! (Funcionalidade simulada)');
+    try {
+      const blob = await authService.generateBudgetPdf(id);
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      window.open(url, '_blank');
+    } catch (error) {
+      alert('Erro ao gerar PDF');
+    }
   };
 
   const handleCancel = () => {

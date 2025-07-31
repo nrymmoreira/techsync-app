@@ -195,6 +195,55 @@ export const authService = {
     } catch (error) {
       throw new Error(error.response?.data?.error || 'Erro ao atualizar cliente.');
     }
+  },
+  // ===================== ORCAMENTOS =====================
+  getAllBudgets: async () => {
+    try {
+      const response = await api.get('/api/orcamentos');
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao buscar orçamentos.');
+    }
+  },
+  getBudgetById: async (id) => {
+    try {
+      const response = await api.get(`/api/orcamentos/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao buscar dados do orçamento.');
+    }
+  },
+  createBudget: async (budgetData) => {
+    try {
+      const response = await api.post('/api/orcamentos', budgetData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao criar orçamento.');
+    }
+  },
+  updateBudget: async (id, budgetData) => {
+    try {
+      const response = await api.put(`/api/orcamentos/${id}`, budgetData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao atualizar orçamento.');
+    }
+  },
+  deleteBudget: async (id) => {
+    try {
+      await api.delete(`/api/orcamentos/${id}`);
+      return { success: true };
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao excluir orçamento.');
+    }
+  },
+  generateBudgetPdf: async (id) => {
+    try {
+      const response = await api.get(`/api/orcamentos/${id}/pdf`, { responseType: 'blob' });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || 'Erro ao gerar PDF do orçamento.');
+    }
   }
 };
 
