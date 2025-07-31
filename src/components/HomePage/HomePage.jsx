@@ -95,9 +95,9 @@ const HomePage = () => {
                 <CardButton 
                   onClick={feature.action} 
                   $isDarkMode={isDarkMode}
-                  $isActive={feature.id === 'clients'}
+                  $isActive={feature.id === 'clients' || feature.id === 'budgets'}
                 >
-                  {feature.id === 'clients' ? 'Acessar' : 'Em breve'}
+                  {feature.id === 'clients' || feature.id === 'budgets' ? 'Acessar' : 'Em breve'}
                 </CardButton>
               </FeatureCard>
             ))}
