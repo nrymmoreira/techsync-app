@@ -1,36 +1,40 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = 'http://localhost:8080';
+const API_BASE_URL = "http://localhost:8080";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
-    'Content-Type': 'application/json'
+    "Content-Type": "application/json",
+    "Allow-Control-Allow-Origin": "http://localhost:5173",
   },
-  timeout: 10000
+  timeout: 10000,
 });
 
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('techsync-token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+window.location.pathname !== "/login" ??
+  api.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem("techsync-token");
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isLoginOrRegisterPath = error.config.url.includes('/api/usuarios/login') || error.config.url.includes('/api/usuarios');
+    const isLoginOrRegisterPath =
+      error.config.url.includes("/api/usuarios/login") ||
+      error.config.url.includes("/api/usuarios");
 
     if (error.response?.status === 401 && !isLoginOrRegisterPath) {
-      localStorage.removeItem('techsync-token');
-      localStorage.removeItem('techsync-authenticated');
-      localStorage.removeItem('techsync-user');
-      window.location.href = '/login';
+      localStorage.removeItem("techsync-token");
+      localStorage.removeItem("techsync-authenticated");
+      localStorage.removeItem("techsync-user");
+      window.location.href = "/login";
     }
     return Promise.reject(error);
   }
@@ -40,11 +44,12 @@ export const authService = {
   // --- NOVA FUNÇÃO QUE ORQUESTRA O REGISTO COMPLETO ---
   registerAndCreateCompany: async (userData, companyData) => {
     try {
+      debugger;
       // Passo 1: Registar o utilizador (endpoint público)
-      await api.post('/api/usuarios', userData);
+      await api.post("/api/usuarios", userData);
 
       // Passo 2: Fazer login para obter o token e o ID do novo utilizador
-      const loginResponse = await api.post('/api/usuarios/login', {
+      const loginResponse = await api.post("/api/usuarios/login", {
         email: userData.email,
         senha: userData.senha,
       });
@@ -54,7 +59,7 @@ export const authService = {
 
       // Validar se obtivemos os dados necessários
       if (userId == null || !token) {
-        throw new Error('Falha ao obter dados de autenticação após o registo.');
+        throw new Error("Falha ao obter dados de autenticação após o registo.");
       }
 
       // Passo 3: Criar a empresa, associando-a ao ID do utilizador
@@ -65,62 +70,80 @@ export const authService = {
 
       // Adiciona manualmente o token de autenticação ao cabeçalho
       // para esta requisição específica, pois ainda não está no localStorage.
-      await api.post('/api/empresa', companyPayload, {
+      await api.post("/api/empresa", companyPayload, {
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       return { success: true };
-
     } catch (error) {
       console.error("Erro no processo de registo:", error);
-      throw new Error(error.response?.data?.error || 'Erro no processo de registo.');
+      throw new Error(
+        error.response?.data?.error || "Erro no processo de registo."
+      );
     }
   },
 
   login: async (email, password) => {
     try {
-      const loginResponse = await api.post('/api/usuarios/login', { email, senha: password });
+      const loginResponse = await api.post("/api/usuarios/login", {
+        email,
+        senha: password,
+      });
+
+      debugger;
 
       if (loginResponse.data.token) {
-        localStorage.setItem('techsync-token', loginResponse.data.token);
-        localStorage.setItem('techsync-authenticated', 'true');
+        localStorage.setItem("techsync-token", loginResponse.data.token);
+        localStorage.setItem("techsync-authenticated", "true");
 
         const basicUser = loginResponse.data.user;
+        ("");
+
         if (!basicUser || basicUser.id == null) {
-            throw new Error("Dados do utilizador não retornados no login.");
+          throw new Error("Dados do utilizador não retornados no login.");
         }
 
         let companyData = null;
         try {
-            const companyResponse = await api.get(`/api/empresa/usuario/${basicUser.id}`);
-            companyData = companyResponse.data;
+          const companyResponse = await api.get(
+            `/api/empresa/usuario/${basicUser.id}`
+          );
+          companyData = companyResponse.data;
         } catch (companyError) {
-            if (companyError.response?.status !== 404) {
-                console.error("Erro ao buscar dados da empresa durante o login:", companyError);
-            }
+          if (companyError.response?.status !== 404) {
+            console.error(
+              "Erro ao buscar dados da empresa durante o login:",
+              companyError
+            );
+          }
         }
 
         const completeUser = { ...basicUser, empresa: companyData };
-        localStorage.setItem('techsync-user', JSON.stringify(completeUser));
+        localStorage.setItem("techsync-user", JSON.stringify(completeUser));
       }
       return loginResponse.data;
     } catch (error) {
-      localStorage.removeItem('techsync-token');
-      localStorage.removeItem('techsync-authenticated');
-      localStorage.removeItem('techsync-user');
-      throw new Error(error.response?.data?.error || 'Erro ao fazer login: Credenciais inválidas.');
+      localStorage.removeItem("techsync-token");
+      localStorage.removeItem("techsync-authenticated");
+      localStorage.removeItem("techsync-user");
+      throw new Error(
+        error.response?.data?.error ||
+          "Erro ao fazer login: Credenciais inválidas."
+      );
     }
   },
-  
+
   // ... (restante das funções)
   getUserById: async (id) => {
     try {
       const response = await api.get(`/api/usuarios/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao buscar dados do usuário');
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar dados do usuário"
+      );
     }
   },
   updateUser: async (id, userData) => {
@@ -128,7 +151,9 @@ export const authService = {
       const response = await api.put(`/api/usuarios/${id}`, userData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao atualizar dados do usuário');
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar dados do usuário"
+      );
     }
   },
   getCompany: async (usuarioId) => {
@@ -136,16 +161,20 @@ export const authService = {
       const response = await api.get(`/api/empresa/usuario/${usuarioId}`);
       return response.data;
     } catch (error) {
-      if (error.response?.status === 404) { return null; }
-      throw new Error(error.response?.data?.error || 'Erro ao buscar dados da empresa.');
+      if (error.response?.status === 404) {
+        return null;
+      }
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar dados da empresa."
+      );
     }
   },
   createCompany: async (companyData) => {
     try {
-      const response = await api.post('/api/empresa', companyData);
+      const response = await api.post("/api/empresa", companyData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao criar empresa.');
+      throw new Error(error.response?.data?.error || "Erro ao criar empresa.");
     }
   },
   updateCompany: async (id, companyData) => {
@@ -153,15 +182,19 @@ export const authService = {
       const response = await api.put(`/api/empresa/${id}`, companyData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao atualizar empresa.');
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar empresa."
+      );
     }
   },
   getAllClients: async () => {
     try {
-      const response = await api.get('/api/cliente');
+      const response = await api.get("/api/cliente");
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao buscar clientes.');
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar clientes."
+      );
     }
   },
   deleteClient: async (id) => {
@@ -169,7 +202,9 @@ export const authService = {
       await api.delete(`/api/cliente/${id}`);
       return { success: true };
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao excluir cliente.');
+      throw new Error(
+        error.response?.data?.error || "Erro ao excluir cliente."
+      );
     }
   },
   getClientById: async (id) => {
@@ -177,15 +212,17 @@ export const authService = {
       const response = await api.get(`/api/cliente/${id}`);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao buscar dados do cliente.');
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar dados do cliente."
+      );
     }
   },
   createClient: async (clientData) => {
     try {
-      const response = await api.post('/api/cliente', clientData);
+      const response = await api.post("/api/cliente", clientData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao criar cliente.');
+      throw new Error(error.response?.data?.error || "Erro ao criar cliente.");
     }
   },
   updateClient: async (id, clientData) => {
@@ -193,9 +230,11 @@ export const authService = {
       const response = await api.put(`/api/cliente/${id}`, clientData);
       return response.data;
     } catch (error) {
-      throw new Error(error.response?.data?.error || 'Erro ao atualizar cliente.');
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar cliente."
+      );
     }
-  }
+  },
 };
 
 export default api;
