@@ -4,6 +4,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Select from '../../Select/Select';
+import { authService } from '../../../services/api';
 import {
   BudgetsContainer,
   BudgetsContent,
@@ -39,6 +40,10 @@ const BudgetsList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [clientFilter, setClientFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [clientOptions, setClientOptions] = useState([
+    { value: 'all', label: 'Todos os clientes' }
+  ]);
 
   const statusOptions = [
     { value: 'all', label: 'Todos os status' },
@@ -48,80 +53,26 @@ const BudgetsList = () => {
     { value: 'pago', label: 'Pago' }
   ];
 
-  const clientOptions = [
-    { value: 'all', label: 'Todos os clientes' },
-    { value: '1', label: 'TechNova Solutions' },
-    { value: '2', label: 'DataFlex Analytics' },
-    { value: '3', label: 'WebSphere Design' },
-    { value: '4', label: 'CloudPeak Systems' }
-  ];
-
-  // Mock data - substituir pela API real
-  const mockBudgets = [
-    {
-      id: 1,
-      number: 'ORC-2024-001',
-      clientId: '1',
-      clientName: 'TechNova Solutions',
-      status: 'aguardando_aprovacao',
-      totalValue: 15000.00,
-      createdAt: '2024-01-15',
-      services: [
-        { name: 'Desenvolvimento Website', value: 12000.00 },
-        { name: 'Consultoria UX', value: 3000.00 }
-      ],
-      discount: 0,
-      observations: 'Projeto de redesign completo'
-    },
-    {
-      id: 2,
-      number: 'ORC-2024-002',
-      clientId: '3',
-      clientName: 'WebSphere Design',
-      status: 'aprovado',
-      totalValue: 8500.00,
-      createdAt: '2024-01-20',
-      services: [
-        { name: 'Sistema CRM', value: 8500.00 }
-      ],
-      discount: 500.00,
-      observations: ''
-    },
-    {
-      id: 3,
-      number: 'ORC-2024-003',
-      clientId: '4',
-      clientName: 'CloudPeak Systems',
-      status: 'pago',
-      totalValue: 25000.00,
-      createdAt: '2024-01-10',
-      services: [
-        { name: 'Aplicativo Mobile', value: 20000.00 },
-        { name: 'API Backend', value: 5000.00 }
-      ],
-      discount: 0,
-      observations: 'Projeto prioritário'
-    },
-    {
-      id: 4,
-      number: 'ORC-2024-004',
-      clientId: '1',
-      clientName: 'TechNova Solutions',
-      status: 'aberto',
-      totalValue: 5000.00,
-      createdAt: '2024-01-25',
-      services: [
-        { name: 'Manutenção Mensal', value: 5000.00 }
-      ],
-      discount: 0,
-      observations: 'Contrato de manutenção'
-    }
-  ];
-
   useEffect(() => {
-    setBudgets(mockBudgets);
-    setFilteredBudgets(mockBudgets);
+    async function fetchData() {
+      try {
+        const [budgetsData, clients] = await Promise.all([
+          authService.getAllBudgets(),
+          authService.getAllClients(),
+        ]);
+        setBudgets(budgetsData);
+        setFilteredBudgets(budgetsData);
+        setClientOptions([
+          { value: 'all', label: 'Todos os clientes' },
+          ...clients.map((c) => ({ value: String(c.id), label: c.nome }))
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
   }, []);
+
 
   useEffect(() => {
     let filtered = budgets.filter(budget => {
@@ -183,6 +134,24 @@ const BudgetsList = () => {
   const handleBudgetClick = (budgetId) => {
     navigate(`/orcamentos/${budgetId}`);
   };
+
+  if (loading) {
+    return (
+      <BudgetsContainer $isDarkMode={isDarkMode}>
+        <Navbar />
+        <BudgetsContent>
+          <EmptyState $isDarkMode={isDarkMode}>
+            <EmptyStateIcon className="material-symbols-outlined">
+              hourglass_empty
+            </EmptyStateIcon>
+            <EmptyStateTitle $isDarkMode={isDarkMode}>
+              A carregar orçamentos...
+            </EmptyStateTitle>
+          </EmptyState>
+        </BudgetsContent>
+      </BudgetsContainer>
+    );
+  }
 
   return (
     <BudgetsContainer $isDarkMode={isDarkMode}>
