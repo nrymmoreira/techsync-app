@@ -1,6 +1,7 @@
 import axios from "axios";
 
 const API_BASE_URL = "http://localhost:8080";
+const ROTAS_SEM_AUTH = ["/login", "/cadastro"];
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,7 +12,7 @@ const api = axios.create({
   timeout: 10000,
 });
 
-window.location.pathname !== "/login" ??
+!ROTAS_SEM_AUTH.includes(window.location.pathname) &&
   api.interceptors.request.use(
     (config) => {
       const token = localStorage.getItem("techsync-token");
@@ -44,7 +45,6 @@ export const authService = {
   // --- NOVA FUNÇÃO QUE ORQUESTRA O REGISTO COMPLETO ---
   registerAndCreateCompany: async (userData, companyData) => {
     try {
-      debugger;
       // Passo 1: Registar o utilizador (endpoint público)
       await api.post("/api/usuarios", userData);
 
