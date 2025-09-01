@@ -1,6 +1,6 @@
-import styled from 'styled-components';
-import { getTheme } from '../../styles/themes';
-import { fonts, breakpoints } from '../../styles/GlobalStyles';
+import styled from "styled-components";
+import { getTheme } from "../../styles/themes";
+import { fonts, breakpoints } from "../../styles/GlobalStyles";
 
 export const StyledButton = styled.button`
   font-family: ${fonts.secondary};
@@ -17,21 +17,21 @@ export const StyledButton = styled.button`
   overflow: hidden;
 
   /* Tamanhos */
-  ${props => {
+  ${(props) => {
     switch (props.$size) {
-      case 'small':
+      case "small":
         return `
           padding: 0.5rem 1rem;
           font-size: 0.875rem;
           min-height: 36px;
         `;
-      case 'large':
+      case "large":
         return `
           padding: 1rem 2rem;
           font-size: 1.125rem;
           min-height: 52px;
         `;
-      case 'medium':
+      case "medium":
       default:
         return `
           padding: 0.75rem 1.5rem;
@@ -42,11 +42,11 @@ export const StyledButton = styled.button`
   }}
 
   /* Variantes */
-  ${props => {
+  ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    
+
     switch (props.$variant) {
-      case 'secondary':
+      case "secondary":
         return `
           background: transparent;
           color: ${theme.colors.primary};
@@ -64,7 +64,7 @@ export const StyledButton = styled.button`
             box-shadow: 0 4px 15px ${theme.colors.primaryShadow};
           }
         `;
-      case 'ghost':
+      case "ghost":
         return `
           background: transparent;
           color: ${theme.colors.textSecondary};
@@ -80,7 +80,23 @@ export const StyledButton = styled.button`
             transform: translateY(0);
           }
         `;
-      case 'primary':
+      case "ghost-report":
+        return `
+          background: transparent;
+          color: ${theme.colors.textSecondary};
+          border: 2px solid ${theme.colors.textTertiary};
+
+          &:hover:not(:disabled) {
+            color: ${theme.colors.success};
+            border-color: ${theme.colors.success};
+            transform: translateY(-2px);
+          }
+
+          &:active:not(:disabled) {
+            transform: translateY(0);
+          }
+        `;
+      case "primary":
       default:
         return `
           background: ${theme.colors.primary};
@@ -111,7 +127,7 @@ export const StyledButton = styled.button`
 
   /* Efeito de ondulação */
   &::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -129,21 +145,21 @@ export const StyledButton = styled.button`
   }
 
   @media (max-width: ${breakpoints.tablet}) {
-    ${props => {
+    ${(props) => {
       switch (props.$size) {
-        case 'small':
+        case "small":
           return `
             padding: 0.5rem 0.875rem;
             font-size: 0.8125rem;
             min-height: 34px;
           `;
-        case 'large':
+        case "large":
           return `
             padding: 0.875rem 1.75rem;
             font-size: 1rem;
             min-height: 48px;
           `;
-        case 'medium':
+        case "medium":
         default:
           return `
             padding: 0.625rem 1.25rem;
@@ -155,21 +171,21 @@ export const StyledButton = styled.button`
   }
 
   @media (max-width: ${breakpoints.mobile}) {
-    ${props => {
+    ${(props) => {
       switch (props.$size) {
-        case 'small':
+        case "small":
           return `
             padding: 0.4375rem 0.75rem;
             font-size: 0.75rem;
             min-height: 32px;
           `;
-        case 'large':
+        case "large":
           return `
             padding: 0.75rem 1.5rem;
             font-size: 0.9375rem;
             min-height: 44px;
           `;
-        case 'medium':
+        case "medium":
         default:
           return `
             padding: 0.5625rem 1rem;
@@ -184,12 +200,16 @@ export const StyledButton = styled.button`
 export const ButtonIcon = styled.span`
   font-size: 1.25em;
   line-height: 1;
-  
-  ${props => props.$position === 'left' && `
+
+  ${(props) =>
+    props.$position === "left" &&
+    `
     margin-right: -0.125rem;
   `}
-  
-  ${props => props.$position === 'right' && `
+
+  ${(props) =>
+    props.$position === "right" &&
+    `
     margin-left: -0.125rem;
   `}
 

@@ -1,11 +1,11 @@
-import styled from 'styled-components';
-import { getTheme } from '../../../styles/themes';
-import { fonts, breakpoints } from '../../../styles/GlobalStyles';
+import styled from "styled-components";
+import { getTheme } from "../../../styles/themes";
+import { fonts, breakpoints } from "../../../styles/GlobalStyles";
 
 export const DetailContainer = styled.main`
   min-height: 100vh;
   padding-top: 80px;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.background;
   }};
@@ -45,15 +45,16 @@ export const BackButton = styled.button`
   width: 40px;
   height: 40px;
   border-radius: 8px;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
-  color: ${props => {
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
@@ -64,15 +65,15 @@ export const BackButton = styled.button`
   flex-shrink: 0;
 
   &:hover {
-    background: ${props => {
+    background: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.surfaceHover;
     }};
-    border-color: ${props => {
+    border-color: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.primary;
     }};
-    color: ${props => {
+    color: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.primary;
     }};
@@ -92,7 +93,7 @@ export const BudgetTitle = styled.h1`
   font-family: ${fonts.primary};
   font-size: 1.75rem;
   font-weight: 700;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -109,7 +110,7 @@ export const BudgetSubtitle = styled.div`
   gap: 0.375rem;
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
@@ -133,7 +134,7 @@ export const HeaderActions = styled.div`
   @media (max-width: ${breakpoints.mobile}) {
     flex-direction: column;
     gap: 0.75rem;
-    
+
     button {
       width: 100%;
     }
@@ -141,14 +142,15 @@ export const HeaderActions = styled.div`
 `;
 
 export const StatusSection = styled.div`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -168,7 +170,7 @@ export const StatusLabel = styled.h3`
   font-family: ${fonts.primary};
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -190,14 +192,15 @@ export const StatusActions = styled.div`
   }
 `;
 export const BudgetInfo = styled.div`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -228,7 +231,7 @@ export const InfoLabel = styled.span`
   font-family: ${fonts.secondary};
   font-size: 0.8125rem;
   font-weight: 500;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
@@ -239,8 +242,8 @@ export const InfoLabel = styled.span`
 export const InfoValue = styled.span`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
-  font-weight: ${props => props.$isHighlight ? '700' : '500'};
-  color: ${props => {
+  font-weight: ${(props) => (props.$isHighlight ? "700" : "500")};
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return props.$isHighlight ? theme.colors.primary : theme.colors.textPrimary;
   }};
@@ -256,29 +259,29 @@ export const StatusBadge = styled.div`
   font-size: 0.8125rem;
   font-weight: 500;
   width: fit-content;
-  
-  ${props => {
+
+  ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     switch (props.$status) {
-      case 'success':
+      case "success":
         return `
           background: ${theme.colors.success}20;
           color: ${theme.colors.success};
           border: 1px solid ${theme.colors.success}40;
         `;
-      case 'warning':
+      case "warning":
         return `
           background: ${theme.colors.warning}20;
           color: ${theme.colors.warning};
           border: 1px solid ${theme.colors.warning}40;
         `;
-      case 'info':
+      case "info":
         return `
           background: ${theme.colors.info}20;
           color: ${theme.colors.info};
           border: 1px solid ${theme.colors.info}40;
         `;
-      case 'error':
+      case "error":
         return `
           background: ${theme.colors.error}20;
           color: ${theme.colors.error};
@@ -295,14 +298,15 @@ export const StatusBadge = styled.div`
 `;
 
 export const ServicesSection = styled.div`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -312,7 +316,7 @@ export const SectionTitle = styled.h3`
   font-family: ${fonts.primary};
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -330,14 +334,15 @@ export const ServiceItem = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 1rem;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceHover;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 8px;
 `;
 
@@ -345,7 +350,7 @@ export const ServiceName = styled.span`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
   font-weight: 500;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -355,21 +360,22 @@ export const ServiceValue = styled.span`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
   font-weight: 600;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.primary;
   }};
 `;
 
 export const SummarySection = styled.div`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -380,7 +386,7 @@ export const SummaryGrid = styled.div`
   flex-direction: column;
   gap: 0.75rem;
   padding: 1rem;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceHover;
   }};
@@ -396,7 +402,7 @@ export const SummaryItem = styled.div`
 export const SummaryLabel = styled.span`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
@@ -406,7 +412,7 @@ export const SummaryValue = styled.span`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
   font-weight: 500;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -416,21 +422,22 @@ export const TotalValue = styled.span`
   font-family: ${fonts.secondary};
   font-size: 1.125rem;
   font-weight: 700;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.primary;
   }};
 `;
 
 export const ObservationsSection = styled.div`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
@@ -439,7 +446,7 @@ export const ObservationsSection = styled.div`
 export const ObservationsText = styled.p`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
@@ -458,7 +465,7 @@ export const EmptyState = styled.div`
 
 export const EmptyStateIcon = styled.span`
   font-size: 3rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
@@ -470,7 +477,7 @@ export const EmptyStateTitle = styled.h3`
   font-family: ${fonts.primary};
   font-size: 1.125rem;
   font-weight: 600;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -480,7 +487,7 @@ export const EmptyStateTitle = styled.h3`
 export const EmptyStateDescription = styled.p`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};

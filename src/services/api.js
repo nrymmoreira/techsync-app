@@ -298,6 +298,18 @@ export const authService = {
       );
     }
   },
+  generateBudgetStatusReport: async () => {
+    try {
+      const response = await api.get(`/api/relatorio/orcamento/status`, {
+        responseType: "blob",
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao gerar PDF do orçamento."
+      );
+    }
+  },
 };
 
 export default api;

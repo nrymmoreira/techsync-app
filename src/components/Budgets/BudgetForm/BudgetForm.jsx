@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme } from '../../../contexts/ThemeContext';
-import Navbar from '../../Navbar/Navbar';
-import Button from '../../Button/Button';
-import Input from '../../Input/Input';
-import Select from '../../Select/Select';
-import { authService } from '../../../services/api';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTheme } from "../../../contexts/ThemeContext";
+import Navbar from "../../Navbar/Navbar";
+import Button from "../../Button/Button";
+import Input from "../../Input/Input";
+import Select from "../../Select/Select";
+import { authService } from "../../../services/api";
 import {
   FormContainer,
   FormContent,
@@ -35,8 +35,8 @@ import {
   FormActions,
   SaveButton,
   CancelButton,
-  GeneratePdfButton
-} from './BudgetForm.styles';
+  GeneratePdfButton,
+} from "./BudgetForm.styles";
 
 const BudgetForm = () => {
   const navigate = useNavigate();
@@ -45,22 +45,22 @@ const BudgetForm = () => {
   const isEditing = Boolean(id);
 
   const [formData, setFormData] = useState({
-    clientId: '',
+    clientId: "",
     discount: 0,
-    observations: ''
+    observations: "",
   });
 
   const [services, setServices] = useState([]);
   const [newService, setNewService] = useState({
-    name: '',
-    value: ''
+    name: "",
+    value: "",
   });
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
   const [clientOptions, setClientOptions] = useState([
-    { value: '', label: 'Selecione um cliente' }
+    { value: "", label: "Selecione um cliente" },
   ]);
 
   useEffect(() => {
@@ -68,23 +68,23 @@ const BudgetForm = () => {
       try {
         const clients = await authService.getAllClients();
         setClientOptions([
-          { value: '', label: 'Selecione um cliente' },
-          ...clients.map((c) => ({ value: String(c.id), label: c.nome }))
+          { value: "", label: "Selecione um cliente" },
+          ...clients.map((c) => ({ value: String(c.id), label: c.nome })),
         ]);
 
         if (isEditing) {
           const budget = await authService.getBudgetById(id);
           setFormData({
-            clientId: String(budget.cliente?.id ?? ''),
+            clientId: String(budget.cliente?.id ?? ""),
             discount: budget.desconto ?? 0,
-            observations: budget.observacoes ?? ''
+            observations: budget.observacoes ?? "",
           });
           setServices(
             budget.servicos?.map((s) => ({
               id: s.id,
               name: s.descricao,
               value: s.valor,
-              quantidade: s.quantidade
+              quantidade: s.quantidade,
             })) || []
           );
         }
@@ -96,7 +96,10 @@ const BudgetForm = () => {
   }, [id, isEditing]);
 
   const calculateSubtotal = () => {
-    return services.reduce((total, service) => total + parseFloat(service.value || 0), 0);
+    return services.reduce(
+      (total, service) => total + parseFloat(service.value || 0),
+      0
+    );
   };
 
   const calculateTotal = () => {
@@ -106,9 +109,9 @@ const BudgetForm = () => {
   };
 
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
@@ -116,17 +119,17 @@ const BudgetForm = () => {
     const newErrors = {};
 
     if (!formData.clientId) {
-      newErrors.clientId = 'Cliente é obrigatório';
+      newErrors.clientId = "Cliente é obrigatório";
     }
 
     if (services.length === 0) {
-      newErrors.services = 'Adicione pelo menos um serviço';
+      newErrors.services = "Adicione pelo menos um serviço";
     }
 
     const discount = parseFloat(formData.discount || 0);
     const subtotal = calculateSubtotal();
     if (discount > subtotal) {
-      newErrors.discount = 'Desconto não pode ser maior que o subtotal';
+      newErrors.discount = "Desconto não pode ser maior que o subtotal";
     }
 
     setErrors(newErrors);
@@ -137,51 +140,57 @@ const BudgetForm = () => {
     const serviceErrors = {};
 
     if (!newService.name.trim()) {
-      serviceErrors.serviceName = 'Nome do serviço é obrigatório';
+      serviceErrors.serviceName = "Nome do serviço é obrigatório";
     }
 
     if (!newService.value || parseFloat(newService.value) <= 0) {
-      serviceErrors.serviceValue = 'Valor deve ser maior que zero';
+      serviceErrors.serviceValue = "Valor deve ser maior que zero";
     }
 
-    setErrors(prev => ({ ...prev, ...serviceErrors }));
+    setErrors((prev) => ({ ...prev, ...serviceErrors }));
     return Object.keys(serviceErrors).length === 0;
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const handleServiceChange = (field, value) => {
-    setNewService(prev => ({ ...prev, [field]: value }));
-    
+    setNewService((prev) => ({ ...prev, [field]: value }));
+
     if (errors[`service${field.charAt(0).toUpperCase() + field.slice(1)}`]) {
-      setErrors(prev => ({ ...prev, [`service${field.charAt(0).toUpperCase() + field.slice(1)}`]: '' }));
+      setErrors((prev) => ({
+        ...prev,
+        [`service${field.charAt(0).toUpperCase() + field.slice(1)}`]: "",
+      }));
     }
   };
 
   const addService = () => {
     if (validateServiceForm()) {
-      setServices(prev => [...prev, {
-        id: Date.now(),
-        name: newService.name,
-        value: parseFloat(newService.value),
-        quantidade: 1
-      }]);
-      setNewService({ name: '', value: '' });
-      
+      setServices((prev) => [
+        ...prev,
+        {
+          id: Date.now(),
+          name: newService.name,
+          value: parseFloat(newService.value),
+          quantidade: 1,
+        },
+      ]);
+      setNewService({ name: "", value: "" });
+
       if (errors.services) {
-        setErrors(prev => ({ ...prev, services: '' }));
+        setErrors((prev) => ({ ...prev, services: "" }));
       }
     }
   };
 
   const removeService = (serviceId) => {
-    setServices(prev => prev.filter(service => service.id !== serviceId));
+    setServices((prev) => prev.filter((service) => service.id !== serviceId));
   };
 
   const handleSubmit = async (event) => {
@@ -199,8 +208,9 @@ const BudgetForm = () => {
         servicos: services.map((s) => ({
           descricao: s.name,
           valor: parseFloat(s.value),
-          quantidade: s.quantidade ?? 1
-        }))
+          quantidade: s.quantidade ?? 1,
+        })),
+        status: "PENDENTE",
       };
 
       if (isEditing) {
@@ -208,9 +218,9 @@ const BudgetForm = () => {
       } else {
         await authService.createBudget(payload);
       }
-      navigate('/orcamentos');
+      navigate("/orcamentos");
     } catch (error) {
-      setErrors({ api: 'Erro ao salvar orçamento' });
+      setErrors({ api: "Erro ao salvar orçamento" });
     } finally {
       setIsLoading(false);
     }
@@ -218,21 +228,21 @@ const BudgetForm = () => {
 
   const handleGeneratePdf = async () => {
     if (!isEditing) {
-      alert('Salve o orçamento antes de gerar o PDF');
+      alert("Salve o orçamento antes de gerar o PDF");
       return;
     }
 
     try {
       const blob = await authService.generateBudgetPdf(id);
       const url = window.URL.createObjectURL(new Blob([blob]));
-      window.open(url, '_blank');
+      window.open(url, "_blank");
     } catch (error) {
-      alert('Erro ao gerar PDF');
+      alert("Erro ao gerar PDF");
     }
   };
 
   const handleCancel = () => {
-    navigate('/orcamentos');
+    navigate("/orcamentos");
   };
 
   return (
@@ -240,22 +250,29 @@ const BudgetForm = () => {
       <Navbar />
       <FormContent>
         <FormHeader>
-          <BackButton onClick={() => navigate('/orcamentos')} $isDarkMode={isDarkMode}>
+          <BackButton
+            onClick={() => navigate("/orcamentos")}
+            $isDarkMode={isDarkMode}
+          >
             <span className="material-symbols-outlined">arrow_back</span>
           </BackButton>
           <HeaderContent>
             <PageTitle $isDarkMode={isDarkMode}>
-              {isEditing ? 'Editar Orçamento' : 'Novo Orçamento'}
+              {isEditing ? "Editar Orçamento" : "Novo Orçamento"}
             </PageTitle>
             <PageDescription $isDarkMode={isDarkMode}>
-              {isEditing ? 'Atualize as informações do orçamento' : 'Preencha os dados do novo orçamento'}
+              {isEditing
+                ? "Atualize as informações do orçamento"
+                : "Preencha os dados do novo orçamento"}
             </PageDescription>
           </HeaderContent>
         </FormHeader>
 
         <form onSubmit={handleSubmit}>
           <FormSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Informações Básicas</SectionTitle>
+            <SectionTitle $isDarkMode={isDarkMode}>
+              Informações Básicas
+            </SectionTitle>
             <SectionDescription $isDarkMode={isDarkMode}>
               Dados principais do orçamento
             </SectionDescription>
@@ -265,7 +282,7 @@ const BudgetForm = () => {
                 id="clientId"
                 label="Cliente"
                 value={formData.clientId}
-                onChange={(e) => handleInputChange('clientId', e.target.value)}
+                onChange={(e) => handleInputChange("clientId", e.target.value)}
                 options={clientOptions}
                 error={errors.clientId}
                 placeholder="Selecione um cliente"
@@ -283,7 +300,13 @@ const BudgetForm = () => {
             </SectionDescription>
 
             {errors.services && (
-              <div style={{ color: '#ef4444', fontSize: '0.8125rem', marginBottom: '1rem' }}>
+              <div
+                style={{
+                  color: "#ef4444",
+                  fontSize: "0.8125rem",
+                  marginBottom: "1rem",
+                }}
+              >
                 {errors.services}
               </div>
             )}
@@ -314,7 +337,7 @@ const BudgetForm = () => {
                 label="Nome do serviço"
                 type="text"
                 value={newService.name}
-                onChange={(e) => handleServiceChange('name', e.target.value)}
+                onChange={(e) => handleServiceChange("name", e.target.value)}
                 error={errors.serviceName}
                 placeholder="Ex: Desenvolvimento de website"
                 icon="work"
@@ -329,7 +352,7 @@ const BudgetForm = () => {
                 step="0.01"
                 min="0"
                 value={newService.value}
-                onChange={(e) => handleServiceChange('value', e.target.value)}
+                onChange={(e) => handleServiceChange("value", e.target.value)}
                 error={errors.serviceValue}
                 placeholder="0,00"
                 icon="attach_money"
@@ -342,7 +365,9 @@ const BudgetForm = () => {
               type="button"
               onClick={addService}
               $isDarkMode={isDarkMode}
-              disabled={!newService.name.trim() || !newService.value || isLoading}
+              disabled={
+                !newService.name.trim() || !newService.value || isLoading
+              }
             >
               <span className="material-symbols-outlined">add</span>
               Adicionar Serviço
@@ -350,9 +375,11 @@ const BudgetForm = () => {
           </ServicesSection>
 
           <SummarySection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Resumo Financeiro</SectionTitle>
-            
-            <FormGrid style={{ marginBottom: '1.5rem' }}>
+            <SectionTitle $isDarkMode={isDarkMode}>
+              Resumo Financeiro
+            </SectionTitle>
+
+            <FormGrid style={{ marginBottom: "1.5rem" }}>
               <Input
                 id="discount"
                 label="Desconto"
@@ -361,7 +388,7 @@ const BudgetForm = () => {
                 min="0"
                 max={calculateSubtotal()}
                 value={formData.discount}
-                onChange={(e) => handleInputChange('discount', e.target.value)}
+                onChange={(e) => handleInputChange("discount", e.target.value)}
                 error={errors.discount}
                 placeholder="0,00"
                 icon="percent"
@@ -377,14 +404,14 @@ const BudgetForm = () => {
                   {formatCurrency(calculateSubtotal())}
                 </SummaryValue>
               </SummaryItem>
-              
+
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Desconto:</SummaryLabel>
                 <SummaryValue $isDarkMode={isDarkMode}>
                   - {formatCurrency(parseFloat(formData.discount || 0))}
                 </SummaryValue>
               </SummaryItem>
-              
+
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Total:</SummaryLabel>
                 <TotalValue $isDarkMode={isDarkMode}>
@@ -402,7 +429,9 @@ const BudgetForm = () => {
 
             <ObservationsTextarea
               value={formData.observations}
-              onChange={(e) => handleInputChange('observations', e.target.value)}
+              onChange={(e) =>
+                handleInputChange("observations", e.target.value)
+              }
               placeholder="Adicione observações ou detalhes sobre o orçamento..."
               rows={4}
               $isDarkMode={isDarkMode}
@@ -411,7 +440,7 @@ const BudgetForm = () => {
           </ObservationsSection>
 
           <FormActions>
-            <div style={{ display: 'flex', gap: '1rem' }}>
+            <div style={{ display: "flex", gap: "1rem" }}>
               <CancelButton
                 type="button"
                 onClick={handleCancel}
@@ -425,10 +454,14 @@ const BudgetForm = () => {
                 $isDarkMode={isDarkMode}
                 disabled={isLoading}
               >
-                {isLoading ? 'Salvando...' : (isEditing ? 'Salvar Alterações' : 'Salvar Orçamento')}
+                {isLoading
+                  ? "Salvando..."
+                  : isEditing
+                  ? "Salvar Alterações"
+                  : "Salvar Orçamento"}
               </SaveButton>
             </div>
-            
+
             <GeneratePdfButton
               type="button"
               onClick={handleGeneratePdf}

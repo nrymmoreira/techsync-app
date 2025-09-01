@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme } from '../../../contexts/ThemeContext';
-import Navbar from '../../Navbar/Navbar';
-import Button from '../../Button/Button';
-import Select from '../../Select/Select';
-import Modal from '../../Modal/Modal';
-import { authService } from '../../../services/api';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTheme } from "../../../contexts/ThemeContext";
+import Navbar from "../../Navbar/Navbar";
+import Button from "../../Button/Button";
+import Select from "../../Select/Select";
+import Modal from "../../Modal/Modal";
+import { authService } from "../../../services/api";
 import {
   DetailContainer,
   DetailContent,
@@ -41,8 +41,8 @@ import {
   EmptyState,
   EmptyStateIcon,
   EmptyStateTitle,
-  EmptyStateDescription
-} from './BudgetDetail.styles';
+  EmptyStateDescription,
+} from "./BudgetDetail.styles";
 
 const BudgetDetail = () => {
   const navigate = useNavigate();
@@ -50,13 +50,13 @@ const BudgetDetail = () => {
   const { isDarkMode } = useTheme();
   const [budget, setBudget] = useState(null);
   const [showStatusModal, setShowStatusModal] = useState(false);
-  const [newStatus, setNewStatus] = useState('');
+  const [newStatus, setNewStatus] = useState("");
 
   const statusOptions = [
-    { value: 'aberto', label: 'Aberto' },
-    { value: 'aguardando_aprovacao', label: 'Aguardando Aprovação' },
-    { value: 'aprovado', label: 'Aprovado' },
-    { value: 'pago', label: 'Pago' }
+    { value: "aberto", label: "Aberto" },
+    { value: "aguardando_aprovacao", label: "Aguardando Aprovação" },
+    { value: "aprovado", label: "Aprovado" },
+    { value: "pago", label: "Pago" },
   ];
   useEffect(() => {
     async function fetchBudget() {
@@ -78,7 +78,7 @@ const BudgetDetail = () => {
   const handleStatusUpdate = async () => {
     try {
       await authService.updateBudget(id, { status: newStatus });
-      setBudget(prev => ({ ...prev, status: newStatus }));
+      setBudget((prev) => ({ ...prev, status: newStatus }));
     } catch (error) {
       console.error(error);
     } finally {
@@ -86,61 +86,67 @@ const BudgetDetail = () => {
     }
   };
   const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
     }).format(value);
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    return date.toLocaleDateString("pt-BR");
   };
 
   const getStatusLabel = (status) => {
     const statusMap = {
-      'aberto': 'Aberto',
-      'aguardando_aprovacao': 'Aguardando Aprovação',
-      'aprovado': 'Aprovado',
-      'pago': 'Pago'
+      aberto: "Aberto",
+      aguardando_aprovacao: "Aguardando Aprovação",
+      aprovado: "Aprovado",
+      pago: "Pago",
     };
     return statusMap[status] || status;
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'aberto':
-        return 'warning';
-      case 'aguardando_aprovacao':
-        return 'info';
-      case 'aprovado':
-        return 'success';
-      case 'pago':
-        return 'success';
+      case "aberto":
+        return "warning";
+      case "aguardando_aprovacao":
+        return "info";
+      case "aprovado":
+        return "success";
+      case "pago":
+        return "success";
       default:
-        return 'info';
+        return "info";
     }
   };
 
   const calculateSubtotal = () => {
-    return budget?.services.reduce((total, service) => total + service.value, 0) || 0;
+    return (
+      budget?.services.reduce((total, service) => total + service.value, 0) || 0
+    );
   };
 
   const handleGeneratePdf = async () => {
     try {
       const blob = await authService.generateBudgetPdf(id);
       const url = window.URL.createObjectURL(new Blob([blob]));
-      window.open(url, '_blank');
+      window.open(url, "_blank");
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita.')) {
+    if (
+      window.confirm(
+        "Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita."
+      )
+    ) {
       try {
         await authService.deleteBudget(id);
-        navigate('/orcamentos');
+        navigate("/orcamentos");
       } catch (error) {
         console.error(error);
       }
@@ -153,17 +159,21 @@ const BudgetDetail = () => {
         <Navbar />
         <DetailContent>
           <EmptyState $isDarkMode={isDarkMode}>
-            <EmptyStateIcon className="material-symbols-outlined">error</EmptyStateIcon>
-            <EmptyStateTitle $isDarkMode={isDarkMode}>Orçamento não encontrado</EmptyStateTitle>
+            <EmptyStateIcon className="material-symbols-outlined">
+              error
+            </EmptyStateIcon>
+            <EmptyStateTitle $isDarkMode={isDarkMode}>
+              Orçamento não encontrado
+            </EmptyStateTitle>
             <EmptyStateDescription $isDarkMode={isDarkMode}>
               O orçamento solicitado não foi encontrado ou foi removido.
             </EmptyStateDescription>
             <Button
               variant="primary"
               size="medium"
-              onClick={() => navigate('/orcamentos')}
+              onClick={() => navigate("/orcamentos")}
               $isDarkMode={isDarkMode}
-              style={{ marginTop: '1rem' }}
+              style={{ marginTop: "1rem" }}
             >
               Voltar para Orçamentos
             </Button>
@@ -179,11 +189,16 @@ const BudgetDetail = () => {
         <Navbar />
         <DetailContent>
           <DetailHeader>
-            <BackButton onClick={() => navigate('/orcamentos')} $isDarkMode={isDarkMode}>
+            <BackButton
+              onClick={() => navigate("/orcamentos")}
+              $isDarkMode={isDarkMode}
+            >
               <span className="material-symbols-outlined">arrow_back</span>
             </BackButton>
             <HeaderContent>
-              <BudgetTitle $isDarkMode={isDarkMode}>{budget.number}</BudgetTitle>
+              <BudgetTitle $isDarkMode={isDarkMode}>
+                {budget.number}
+              </BudgetTitle>
               <BudgetSubtitle $isDarkMode={isDarkMode}>
                 <span className="material-symbols-outlined">schedule</span>
                 Criado em {formatDate(budget.createdAt)}
@@ -214,10 +229,10 @@ const BudgetDetail = () => {
                 icon="delete"
                 onClick={handleDelete}
                 $isDarkMode={isDarkMode}
-                style={{ 
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  borderColor: '#ef4444'
+                style={{
+                  backgroundColor: "#ef4444",
+                  color: "white",
+                  borderColor: "#ef4444",
                 }}
               >
                 Excluir
@@ -226,9 +241,14 @@ const BudgetDetail = () => {
           </DetailHeader>
 
           <StatusSection $isDarkMode={isDarkMode}>
-            <StatusLabel $isDarkMode={isDarkMode}>Status do Orçamento</StatusLabel>
+            <StatusLabel $isDarkMode={isDarkMode}>
+              Status do Orçamento
+            </StatusLabel>
             <StatusActions>
-              <StatusBadge $status={getStatusColor(budget.status)} $isDarkMode={isDarkMode}>
+              <StatusBadge
+                $status={getStatusColor(budget.status)}
+                $isDarkMode={isDarkMode}
+              >
                 {getStatusLabel(budget.status)}
               </StatusBadge>
               <Button
@@ -246,7 +266,9 @@ const BudgetDetail = () => {
             <InfoGrid>
               <InfoItem>
                 <InfoLabel $isDarkMode={isDarkMode}>Cliente</InfoLabel>
-                <InfoValue $isDarkMode={isDarkMode}>{budget.clientName}</InfoValue>
+                <InfoValue $isDarkMode={isDarkMode}>
+                  {budget.clientName}
+                </InfoValue>
               </InfoItem>
               <InfoItem>
                 <InfoLabel $isDarkMode={isDarkMode}>Valor Total</InfoLabel>
@@ -256,7 +278,9 @@ const BudgetDetail = () => {
               </InfoItem>
               <InfoItem>
                 <InfoLabel $isDarkMode={isDarkMode}>Data de Criação</InfoLabel>
-                <InfoValue $isDarkMode={isDarkMode}>{formatDate(budget.createdAt)}</InfoValue>
+                <InfoValue $isDarkMode={isDarkMode}>
+                  {formatDate(budget.createdAt)}
+                </InfoValue>
               </InfoItem>
             </InfoGrid>
           </BudgetInfo>
@@ -266,7 +290,9 @@ const BudgetDetail = () => {
             <ServicesList>
               {budget.services.map((service) => (
                 <ServiceItem key={service.id} $isDarkMode={isDarkMode}>
-                  <ServiceName $isDarkMode={isDarkMode}>{service.name}</ServiceName>
+                  <ServiceName $isDarkMode={isDarkMode}>
+                    {service.name}
+                  </ServiceName>
                   <ServiceValue $isDarkMode={isDarkMode}>
                     {formatCurrency(service.value)}
                   </ServiceValue>
@@ -276,22 +302,24 @@ const BudgetDetail = () => {
           </ServicesSection>
 
           <SummarySection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Resumo Financeiro</SectionTitle>
-            <SummaryGrid>
+            <SectionTitle $isDarkMode={isDarkMode}>
+              Resumo Financeiro
+            </SectionTitle>
+            <SummaryGrid $isDarkMode={isDarkMode}>
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Subtotal:</SummaryLabel>
                 <SummaryValue $isDarkMode={isDarkMode}>
                   {formatCurrency(calculateSubtotal())}
                 </SummaryValue>
               </SummaryItem>
-              
+
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Desconto:</SummaryLabel>
                 <SummaryValue $isDarkMode={isDarkMode}>
                   - {formatCurrency(budget.discount)}
                 </SummaryValue>
               </SummaryItem>
-              
+
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Total:</SummaryLabel>
                 <TotalValue $isDarkMode={isDarkMode}>
@@ -311,14 +339,14 @@ const BudgetDetail = () => {
           )}
         </DetailContent>
       </DetailContainer>
-      
+
       <Modal
         isOpen={showStatusModal}
         onClose={() => setShowStatusModal(false)}
         title="Alterar Status do Orçamento"
         $isDarkMode={isDarkMode}
       >
-        <div style={{ padding: '1rem 0' }}>
+        <div style={{ padding: "1rem 0" }}>
           <Select
             id="newStatus"
             label="Novo Status"
@@ -328,7 +356,14 @@ const BudgetDetail = () => {
             placeholder="Selecione o novo status"
             $isDarkMode={isDarkMode}
           />
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', justifyContent: 'flex-end' }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "1rem",
+              marginTop: "2rem",
+              justifyContent: "flex-end",
+            }}
+          >
             <Button
               variant="ghost"
               size="medium"
