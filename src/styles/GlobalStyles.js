@@ -78,6 +78,14 @@ export const GlobalStyle = createGlobalStyle`
   ::-webkit-scrollbar-thumb:hover {
     background: ${props => getTheme(props.$isDarkMode).colors.primary};
   }
+
+  /* Prevenir seleção de texto durante drag and drop */
+  .react-beautiful-dnd-dragging * {
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+  }
 `;
 
 // Legacy colors for backward compatibility (will be removed gradually)

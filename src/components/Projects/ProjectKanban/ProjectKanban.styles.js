@@ -306,6 +306,13 @@ export const TaskCard = styled.div`
     '0 1px 3px rgba(0, 0, 0, 0.1)'
   };
   transform: ${props => props.$isDragging ? 'rotate(5deg)' : 'rotate(0deg)'};
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
 
   &:hover {
     border-color: ${props => {
@@ -317,6 +324,10 @@ export const TaskCard = styled.div`
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.shadow;
     }};
+    
+    .task-edit-button {
+      opacity: 1 !important;
+    }
   }
 
   &:last-child {
@@ -334,6 +345,11 @@ export const TaskTitle = styled.h4`
   }};
   margin: 0 0 0.5rem 0;
   line-height: 1.4;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 `;
 
 export const TaskDescription = styled.p`
@@ -349,12 +365,22 @@ export const TaskDescription = styled.p`
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 `;
 
 export const TaskMeta = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 `;
 
 export const TaskPriority = styled.div`
@@ -367,6 +393,11 @@ export const TaskPriority = styled.div`
   background: ${props => `${props.$color}20`};
   color: ${props => props.$color};
   width: fit-content;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 `;
 
 export const TaskAssignee = styled.div`
@@ -378,9 +409,15 @@ export const TaskAssignee = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 
   span {
     font-size: 0.875rem;
+    pointer-events: none;
   }
 `;
 
@@ -393,9 +430,15 @@ export const TaskDueDate = styled.div`
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  pointer-events: none;
 
   span {
     font-size: 0.875rem;
+    pointer-events: none;
   }
 `;
 

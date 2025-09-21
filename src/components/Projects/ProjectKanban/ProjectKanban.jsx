@@ -165,27 +165,43 @@ const ProjectKanban = () => {
       return;
     }
 
-    const sourceColumn = tasks[source.droppableId];
-    const destColumn = tasks[destination.droppableId];
+    const sourceColumn = [...(tasks[source.droppableId] || [])];
+    const destColumn = source.droppableId === destination.droppableId 
+      ? sourceColumn 
+      : [...(tasks[destination.droppableId] || [])];
+      
     const draggedTask = sourceColumn.find(task => task.id === draggableId);
 
     if (!draggedTask) return;
 
-    // Remover da coluna de origem
-    const newSourceTasks = sourceColumn.filter(task => task.id !== draggableId);
-    
-    // Adicionar na coluna de destino
-    const newDestTasks = [...destColumn];
-    newDestTasks.splice(destination.index, 0, { ...draggedTask, status: destination.droppableId });
+    if (source.droppableId === destination.droppableId) {
+      // Reordenar dentro da mesma coluna
+      const newTasks = [...sourceColumn];
+      const [removed] = newTasks.splice(source.index, 1);
+      newTasks.splice(destination.index, 0, removed);
+      
+      setTasks(prev => ({
+        ...prev,
+        [source.droppableId]: newTasks
+      }));
+    } else {
+      // Mover entre colunas diferentes
+      const newSourceTasks = sourceColumn.filter(task => task.id !== draggableId);
+      const newDestTasks = [...destColumn];
+      newDestTasks.splice(destination.index, 0, { 
+        ...draggedTask, 
+        status: destination.droppableId 
+      });
 
-    setTasks(prev => ({
-      ...prev,
-      [source.droppableId]: newSourceTasks,
-      [destination.droppableId]: newDestTasks
-    }));
+      setTasks(prev => ({
+        ...prev,
+        [source.droppableId]: newSourceTasks,
+        [destination.droppableId]: newDestTasks
+      }));
+    }
 
     // Aqui você faria a chamada para a API para atualizar o status da tarefa
-    console.log(`Tarefa ${draggedTask.titulo} movida para ${destination.droppableId}`);
+    console.log(`Tarefa "${draggedTask.titulo}" movida para ${destination.droppableId}`);
   };
 
   const handleStatusesChange = (newStatuses) => {
@@ -230,7 +246,12 @@ const ProjectKanban = () => {
       const newStatus = taskData.status;
       
       setTasks(prev => {
-        const newTasks = { ...prev };
+        const newTasks = {};
+        
+        // Criar cópias de todas as colunas
+        Object.keys(prev).forEach(key => {
+          newTasks[key] = [...prev[key]];
+        });
         
         // Remover da coluna anterior
         newTasks[oldStatus] = newTasks[oldStatus].filter(task => task.id !== taskId);
@@ -255,6 +276,7 @@ const ProjectKanban = () => {
     }
 
     setShowTaskModal(false);
+    setEditingTask(null);
     setNewTask({
       titulo: '',
       descricao: '',
@@ -403,7 +425,7 @@ const ProjectKanban = () => {
                                 {...provided.dragHandleProps}
                                 $isDragging={snapshot.isDragging}
                                 $isDarkMode={isDarkMode}
-                                onClick={() => handleEditTask(task)}
+                                onDoubleClick={() => handleEditTask(task)}
                               >
                                 <TaskTitle $isDarkMode={isDarkMode}>
                                   {task.titulo}
@@ -433,6 +455,42 @@ const ProjectKanban = () => {
                                     </TaskDueDate>
                                   )}
                                 </TaskMeta>
+                                
+                                {/* Botão de edição visível apenas no hover */}
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '0.5rem',
+                                  right: '0.5rem',
+                                  opacity: 0,
+                                  transition: 'opacity 0.2s ease',
+                                  pointerEvents: 'auto'
+                                }}
+                                className="task-edit-button"
+                                >
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleEditTask(task);
+                                    }}
+                                    style={{
+                                      width: '24px',
+                                      height: '24px',
+                                      borderRadius: '4px',
+                                      background: isDarkMode ? 'rgba(78, 86, 105, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+                                      border: 'none',
+                                      color: isDarkMode ? '#F5F5F5' : '#1E293B',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s ease'
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>
+                                      edit
+                                    </span>
+                                  </button>
+                                </div>
                               </TaskCard>
                             )}
                           </Draggable>
@@ -500,7 +558,9 @@ const ProjectKanban = () => {
                 fontFamily: 'Inter, sans-serif',
                 fontSize: '0.9375rem',
                 resize: 'vertical',
-                minHeight: '80px'
+                minHeight: '80px',
+                userSelect: 'text',
+                WebkitUserSelect: 'text'
               }}
             />
           </div>
