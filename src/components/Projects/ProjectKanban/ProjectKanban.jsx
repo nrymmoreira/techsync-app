@@ -7,6 +7,7 @@ import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import Modal from '../../Modal/Modal';
 import Select from '../../Select/Select';
+import StatusManager from '../StatusManager/StatusManager';
 import { authService } from '../../../services/api';
 import {
   KanbanContainer,
@@ -35,7 +36,9 @@ import {
   EmptyColumnIcon,
   EmptyColumnText,
   LoadingState,
-  ErrorState
+  ErrorState,
+  KanbanActions,
+  StatusManagerSection
 } from './ProjectKanban.styles';
 
 const ProjectKanban = () => {
@@ -44,6 +47,12 @@ const ProjectKanban = () => {
   const { isDarkMode } = useTheme();
   
   const [project, setProject] = useState(null);
+  const [statuses, setStatuses] = useState([
+    { id: 'TODO', title: 'A Fazer', color: '#6b7280' },
+    { id: 'IN_PROGRESS', title: 'Em Progresso', color: '#3b82f6' },
+    { id: 'REVIEW', title: 'Em Revisão', color: '#f59e0b' },
+    { id: 'DONE', title: 'Concluído', color: '#10b981' }
+  ]);
   const [tasks, setTasks] = useState({
     'TODO': [],
     'IN_PROGRESS': [],
@@ -53,21 +62,16 @@ const ProjectKanban = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showStatusManager, setShowStatusManager] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [newTask, setNewTask] = useState({
     titulo: '',
     descricao: '',
     prioridade: 'MEDIA',
+    status: 'TODO',
     dataVencimento: '',
     responsavel: ''
   });
-
-  const columns = [
-    { id: 'TODO', title: 'A Fazer', color: '#6b7280' },
-    { id: 'IN_PROGRESS', title: 'Em Progresso', color: '#3b82f6' },
-    { id: 'REVIEW', title: 'Em Revisão', color: '#f59e0b' },
-    { id: 'DONE', title: 'Concluído', color: '#10b981' }
-  ];
 
   const priorityOptions = [
     { value: 'BAIXA', label: 'Baixa' },
@@ -75,6 +79,11 @@ const ProjectKanban = () => {
     { value: 'ALTA', label: 'Alta' },
     { value: 'URGENTE', label: 'Urgente' }
   ];
+
+  const statusOptions = statuses.map(status => ({
+    value: status.id,
+    label: status.title
+  }));
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -91,64 +100,37 @@ const ProjectKanban = () => {
         };
 
         // Simular tarefas do projeto
-        const mockTasks = {
-          'TODO': [
-            {
-              id: '1',
-              titulo: 'Criar wireframes',
-              descricao: 'Desenvolver wireframes das principais páginas',
-              prioridade: 'ALTA',
-              responsavel: 'João Silva',
-              dataVencimento: '2024-02-15',
-              status: 'TODO'
-            },
-            {
-              id: '2',
-              titulo: 'Definir paleta de cores',
-              descricao: 'Escolher cores que representem a marca',
-              prioridade: 'MEDIA',
-              responsavel: 'Maria Santos',
-              dataVencimento: '2024-02-10',
-              status: 'TODO'
-            }
-          ],
-          'IN_PROGRESS': [
-            {
-              id: '3',
-              titulo: 'Desenvolver homepage',
-              descricao: 'Implementar a página inicial do site',
-              prioridade: 'ALTA',
-              responsavel: 'Pedro Costa',
-              dataVencimento: '2024-02-20',
-              status: 'IN_PROGRESS'
-            }
-          ],
-          'REVIEW': [
-            {
-              id: '4',
-              titulo: 'Revisar conteúdo',
-              descricao: 'Revisar textos e imagens do site',
-              prioridade: 'MEDIA',
-              responsavel: 'Ana Lima',
-              dataVencimento: '2024-02-12',
-              status: 'REVIEW'
-            }
-          ],
-          'DONE': [
-            {
-              id: '5',
-              titulo: 'Análise de requisitos',
-              descricao: 'Levantamento completo dos requisitos do projeto',
-              prioridade: 'ALTA',
-              responsavel: 'Carlos Oliveira',
-              dataVencimento: '2024-01-30',
-              status: 'DONE'
-            }
-          ]
-        };
+        const initialTasks = {};
+        statuses.forEach(status => {
+          initialTasks[status.id] = [];
+        });
+
+        // Adicionar algumas tarefas de exemplo
+        initialTasks['TODO'] = [
+          {
+            id: '1',
+            titulo: 'Criar wireframes',
+            descricao: 'Desenvolver wireframes das principais páginas',
+            prioridade: 'ALTA',
+            responsavel: 'João Silva',
+            dataVencimento: '2024-02-15',
+            status: 'TODO'
+          }
+        ];
+        initialTasks['IN_PROGRESS'] = [
+          {
+            id: '3',
+            titulo: 'Desenvolver homepage',
+            descricao: 'Implementar a página inicial do site',
+            prioridade: 'ALTA',
+            responsavel: 'Pedro Costa',
+            dataVencimento: '2024-02-20',
+            status: 'IN_PROGRESS'
+          }
+        ];
 
         setProject(mockProject);
-        setTasks(mockTasks);
+        setTasks(initialTasks);
       } catch (err) {
         setError('Erro ao carregar dados do projeto');
         console.error(err);
@@ -159,6 +141,17 @@ const ProjectKanban = () => {
 
     fetchProjectData();
   }, [id]);
+
+  // Atualizar tasks quando os status mudarem
+  useEffect(() => {
+    setTasks(prevTasks => {
+      const newTasks = {};
+      statuses.forEach(status => {
+        newTasks[status.id] = prevTasks[status.id] || [];
+      });
+      return newTasks;
+    });
+  }, [statuses]);
 
   const handleDragEnd = (result) => {
     const { destination, source, draggableId } = result;
@@ -195,6 +188,10 @@ const ProjectKanban = () => {
     console.log(`Tarefa ${draggedTask.titulo} movida para ${destination.droppableId}`);
   };
 
+  const handleStatusesChange = (newStatuses) => {
+    setStatuses(newStatuses);
+  };
+
   const handleTaskInputChange = (field, value) => {
     setNewTask(prev => ({ ...prev, [field]: value }));
   };
@@ -212,29 +209,48 @@ const ProjectKanban = () => {
     setShowTaskModal(true);
   };
 
+  const handleEditTask = (task) => {
+    setNewTask(task);
+    setEditingTask(task);
+    setShowTaskModal(true);
+  };
+
   const handleSaveTask = () => {
     if (!newTask.titulo.trim()) return;
 
     const taskId = editingTask ? editingTask.id : Date.now().toString();
     const taskData = {
       ...newTask,
-      id: taskId,
-      status: newTask.status || 'TODO'
+      id: taskId
     };
 
     if (editingTask) {
-      // Atualizar tarefa existente
-      setTasks(prev => ({
-        ...prev,
-        [taskData.status]: prev[taskData.status].map(task =>
-          task.id === taskId ? taskData : task
-        )
-      }));
+      // Remover da coluna anterior se o status mudou
+      const oldStatus = editingTask.status;
+      const newStatus = taskData.status;
+      
+      setTasks(prev => {
+        const newTasks = { ...prev };
+        
+        // Remover da coluna anterior
+        newTasks[oldStatus] = newTasks[oldStatus].filter(task => task.id !== taskId);
+        
+        // Adicionar na nova coluna
+        if (!newTasks[newStatus]) newTasks[newStatus] = [];
+        const existingIndex = newTasks[newStatus].findIndex(task => task.id === taskId);
+        if (existingIndex >= 0) {
+          newTasks[newStatus][existingIndex] = taskData;
+        } else {
+          newTasks[newStatus].push(taskData);
+        }
+        
+        return newTasks;
+      });
     } else {
       // Criar nova tarefa
       setTasks(prev => ({
         ...prev,
-        [taskData.status]: [...prev[taskData.status], taskData]
+        [taskData.status]: [...(prev[taskData.status] || []), taskData]
       }));
     }
 
@@ -243,15 +259,10 @@ const ProjectKanban = () => {
       titulo: '',
       descricao: '',
       prioridade: 'MEDIA',
+      status: 'TODO',
       dataVencimento: '',
       responsavel: ''
     });
-  };
-
-  const handleEditTask = (task) => {
-    setNewTask(task);
-    setEditingTask(task);
-    setShowTaskModal(true);
   };
 
   const getPriorityColor = (priority) => {
@@ -326,6 +337,15 @@ const ProjectKanban = () => {
           </HeaderContent>
           <HeaderActions>
             <Button
+              variant="ghost"
+              size="medium"
+              icon="tune"
+              onClick={() => setShowStatusManager(true)}
+              $isDarkMode={isDarkMode}
+            >
+              Gerenciar Status
+            </Button>
+            <Button
               variant="secondary"
               size="medium"
               icon="edit"
@@ -339,7 +359,7 @@ const ProjectKanban = () => {
 
         <DragDropContext onDragEnd={handleDragEnd}>
           <KanbanBoard>
-            {columns.map((column) => (
+            {statuses.map((column) => (
               <Column key={column.id} $isDarkMode={isDarkMode}>
                 <ColumnHeader $isDarkMode={isDarkMode}>
                   <ColumnTitle $color={column.color} $isDarkMode={isDarkMode}>
@@ -366,7 +386,7 @@ const ProjectKanban = () => {
                       $isDraggingOver={snapshot.isDraggingOver}
                       $isDarkMode={isDarkMode}
                     >
-                      {tasks[column.id].length === 0 ? (
+                      {(tasks[column.id] || []).length === 0 ? (
                         <EmptyColumn $isDarkMode={isDarkMode}>
                           <EmptyColumnIcon className="material-symbols-outlined">
                             task_alt
@@ -374,7 +394,7 @@ const ProjectKanban = () => {
                           <EmptyColumnText>Nenhuma tarefa</EmptyColumnText>
                         </EmptyColumn>
                       ) : (
-                        tasks[column.id].map((task, index) => (
+                        (tasks[column.id] || []).map((task, index) => (
                           <Draggable key={task.id} draggableId={task.id} index={index}>
                             {(provided, snapshot) => (
                               <TaskCard
@@ -443,6 +463,15 @@ const ProjectKanban = () => {
             onChange={(e) => handleTaskInputChange('titulo', e.target.value)}
             placeholder="Digite o título da tarefa"
             required
+            $isDarkMode={isDarkMode}
+          />
+
+          <Select
+            id="taskStatus"
+            label="Status"
+            value={newTask.status}
+            onChange={(e) => handleTaskInputChange('status', e.target.value)}
+            options={statusOptions}
             $isDarkMode={isDarkMode}
           />
 
@@ -525,6 +554,19 @@ const ProjectKanban = () => {
             </Button>
           </div>
         </div>
+      </Modal>
+
+      <Modal
+        isOpen={showStatusManager}
+        onClose={() => setShowStatusManager(false)}
+        title="Gerenciar Status do Projeto"
+        $isDarkMode={isDarkMode}
+      >
+        <StatusManager
+          statuses={statuses}
+          onStatusesChange={handleStatusesChange}
+          $isDarkMode={isDarkMode}
+        />
       </Modal>
     </KanbanContainer>
   );

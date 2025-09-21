@@ -471,3 +471,22 @@ export const ErrorState = styled.div`
     font-size: 3rem;
   }
 `;
+
+export const KanbanActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: ${breakpoints.mobile}) {
+    flex-direction: column;
+    gap: 0.75rem;
+
+    button {
+      width: 100%;
+    }
+  }
+`;
+
+export const StatusManagerSection = styled.div`
+  margin-bottom: 2rem;
+`;

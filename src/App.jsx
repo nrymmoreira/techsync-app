@@ -18,6 +18,7 @@ import BudgetForm from "./components/Budgets/BudgetForm/BudgetForm";
 import BudgetDetail from "./components/Budgets/BudgetDetail/BudgetDetail";
 import ProjectsDashboard from "./components/Projects/ProjectsDashboard/ProjectsDashboard";
 import ProjectsList from "./components/Projects/ProjectsList/ProjectsList";
+import ProjectForm from "./components/Projects/ProjectForm/ProjectForm";
 import ProjectKanban from "./components/Projects/ProjectKanban/ProjectKanban";
 
 const isAuthenticated = () => {
@@ -128,6 +129,22 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <ProjectsList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projetos/novo"
+          element={
+            <PrivateRoute>
+              <ProjectForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projetos/:id/editar"
+          element={
+            <PrivateRoute>
+              <ProjectForm />
             </PrivateRoute>
           }
         />

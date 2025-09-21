@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
+import PieChart from '../../Charts/PieChart/PieChart';
+import BarChart from '../../Charts/BarChart/BarChart';
 import { authService } from '../../../services/api';
 import {
   DashboardContainer,
@@ -107,6 +109,22 @@ const ProjectsDashboard = () => {
 
     fetchDashboardData();
   }, []);
+
+  // Dados para os gráficos
+  const pieChartData = [
+    { name: 'Em Andamento', value: metrics.inProgress },
+    { name: 'Concluídos', value: metrics.completed },
+    { name: 'Pendentes', value: metrics.pending }
+  ].filter(item => item.value > 0);
+
+  const barChartData = [
+    { name: 'Jan', value: 2 },
+    { name: 'Fev', value: 5 },
+    { name: 'Mar', value: 3 },
+    { name: 'Abr', value: 8 },
+    { name: 'Mai', value: 4 },
+    { name: 'Jun', value: 6 }
+  ];
 
   const getStatusLabel = (status) => {
     const statusMap = {
@@ -223,6 +241,34 @@ const ProjectsDashboard = () => {
             </MetricContent>
           </MetricCard>
         </MetricsGrid>
+
+        <ChartsSection>
+          <ChartCard $isDarkMode={isDarkMode}>
+            <ChartTitle $isDarkMode={isDarkMode}>Status dos Projetos</ChartTitle>
+            <ChartContent>
+              {pieChartData.length > 0 ? (
+                <PieChart data={pieChartData} title="Status dos Projetos" />
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'inherit'
+                }}>
+                  Nenhum dado disponível
+                </div>
+              )}
+            </ChartContent>
+          </ChartCard>
+
+          <ChartCard $isDarkMode={isDarkMode}>
+            <ChartTitle $isDarkMode={isDarkMode}>Projetos por Mês</ChartTitle>
+            <ChartContent>
+              <BarChart data={barChartData} title="Projetos por Mês" />
+            </ChartContent>
+          </ChartCard>
+        </ChartsSection>
 
         <RecentProjectsSection $isDarkMode={isDarkMode}>
           <SectionTitle $isDarkMode={isDarkMode}>Projetos Recentes</SectionTitle>
