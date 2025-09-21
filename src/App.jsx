@@ -16,6 +16,9 @@ import ClientDetail from "./components/Clients/ClientDetail/ClientDetail";
 import BudgetsList from "./components/Budgets/BudgetsList/BudgetsList";
 import BudgetForm from "./components/Budgets/BudgetForm/BudgetForm";
 import BudgetDetail from "./components/Budgets/BudgetDetail/BudgetDetail";
+import ProjectsDashboard from "./components/Projects/ProjectsDashboard/ProjectsDashboard";
+import ProjectsList from "./components/Projects/ProjectsList/ProjectsList";
+import ProjectKanban from "./components/Projects/ProjectKanban/ProjectKanban";
 
 const isAuthenticated = () => {
   return localStorage.getItem('techsync-authenticated') === 'true';
@@ -109,6 +112,30 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <BudgetForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projetos/dashboard"
+          element={
+            <PrivateRoute>
+              <ProjectsDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projetos"
+          element={
+            <PrivateRoute>
+              <ProjectsList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/projetos/:id"
+          element={
+            <PrivateRoute>
+              <ProjectKanban />
             </PrivateRoute>
           }
         />

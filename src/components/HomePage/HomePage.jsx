@@ -59,7 +59,7 @@ const HomePage = () => {
       icon: 'folder_managed',
       title: 'Gerenciar Projetos',
       description: 'Acompanhe o progresso dos projetos ativos e planeje novos.',
-      action: () => console.log('Navigate to projects')
+      action: () => navigate('/projetos')
     },
     {
       id: 'financial',
@@ -95,9 +95,9 @@ const HomePage = () => {
                 <CardButton 
                   onClick={feature.action} 
                   $isDarkMode={isDarkMode}
-                  $isActive={feature.id === 'clients' || feature.id === 'budgets'}
+                  $isActive={feature.id === 'clients' || feature.id === 'budgets' || feature.id === 'projects'}
                 >
-                  {feature.id === 'clients' || feature.id === 'budgets' ? 'Acessar' : 'Em breve'}
+                  {feature.id === 'clients' || feature.id === 'budgets' || feature.id === 'projects' ? 'Acessar' : 'Em breve'}
                 </CardButton>
               </FeatureCard>
             ))}
