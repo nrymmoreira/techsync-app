@@ -100,43 +100,62 @@ const Chat = () => {
     setShowTooltip(false);
   };
 
-  const sendMessage = (text) => {
-    if (!text.trim()) return;
+  const sendMessage = async (text) => {
+  if (!text.trim()) return;
 
-    const userMessage = {
-      id: Date.now(),
-      text: text.trim(),
-      sender: "user",
+  const userMessage = {
+    id: Date.now(),
+    text: text.trim(),
+    sender: "user",
+    timestamp: new Date().toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }),
+  };
+
+  setMessages((prev) => [...prev, userMessage]);
+  setInputValue("");
+  setIsTyping(true);
+
+  try {
+    const response = await fetch("http://localhost:8080/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_input: text }),
+    });
+
+    const data = await response.json();
+
+    const systemMessage = {
+      id: Date.now() + 1,
+      text: data.candidates[0].content.parts[0].text || "Desculpe, não consegui entender sua pergunta.",
+      sender: "system",
       timestamp: new Date().toLocaleTimeString("pt-BR", {
         hour: "2-digit",
         minute: "2-digit",
       }),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
-    setIsTyping(true);
-
-    // Simular resposta do sistema
-    setTimeout(() => {
-      const response =
-        predefinedAnswers[text.trim()] ||
-        "Obrigada pela sua pergunta! Estou aqui para ajudar você a navegar pela plataforma TechSync. Em breve teremos mais funcionalidades disponíveis.";
-
-      const systemMessage = {
+    setMessages((prev) => [...prev, systemMessage]);
+  } catch (error) {
+    console.error(error);
+    setMessages((prev) => [
+      ...prev,
+      {
         id: Date.now() + 1,
-        text: response,
+        text: "Ocorreu um erro ao buscar a resposta. Tente novamente mais tarde.",
         sender: "system",
         timestamp: new Date().toLocaleTimeString("pt-BR", {
           hour: "2-digit",
           minute: "2-digit",
         }),
-      };
+      },
+    ]);
+  } finally {
+    setIsTyping(false);
+  }
+};
 
-      setMessages((prev) => [...prev, systemMessage]);
-      setIsTyping(false);
-    }, 1500);
-  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
