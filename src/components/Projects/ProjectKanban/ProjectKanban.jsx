@@ -65,20 +65,17 @@ const ProjectKanban = () => {
   const [showStatusManager, setShowStatusManager] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [newTask, setNewTask] = useState({
-    titulo: '',
+    nome: '',
     descricao: '',
-    prioridade: 'MEDIA',
     status: 'TODO',
-    dataVencimento: '',
-    responsavel: ''
+    dataInicio: '',
+    dataTermino: '',
+    responsavelId: ''
   });
 
-  const priorityOptions = [
-    { value: 'BAIXA', label: 'Baixa' },
-    { value: 'MEDIA', label: 'Média' },
-    { value: 'ALTA', label: 'Alta' },
-    { value: 'URGENTE', label: 'Urgente' }
-  ];
+  const [userOptions, setUserOptions] = useState([
+    { value: '', label: 'Selecione um responsável' }
+  ]);
 
   const statusOptions = statuses.map(status => ({
     value: status.id,
@@ -90,47 +87,36 @@ const ProjectKanban = () => {
       try {
         setLoading(true);
         
-        // Simular dados do projeto até implementar a API
-        const mockProject = {
-          id: parseInt(id),
-          nome: 'Website Corporativo',
-          cliente: { nome: 'TechCorp Ltd' },
-          status: 'EM_ANDAMENTO',
-          progresso: 65
-        };
-
-        // Simular tarefas do projeto
+        // Buscar dados reais do projeto
+        const projectData = await authService.getProjectById(id);
+        setProject(projectData);
+        
+        // Buscar tarefas do projeto
+        const tasksData = await authService.getProjectTasks(id);
+        
+        // Organizar tarefas por status
         const initialTasks = {};
         statuses.forEach(status => {
           initialTasks[status.id] = [];
         });
-
-        // Adicionar algumas tarefas de exemplo
-        initialTasks['TODO'] = [
-          {
-            id: '1',
-            titulo: 'Criar wireframes',
-            descricao: 'Desenvolver wireframes das principais páginas',
-            prioridade: 'ALTA',
-            responsavel: 'João Silva',
-            dataVencimento: '2024-02-15',
-            status: 'TODO'
+        
+        // Distribuir tarefas pelos status
+        tasksData.forEach(task => {
+          if (initialTasks[task.status]) {
+            initialTasks[task.status].push(task);
           }
-        ];
-        initialTasks['IN_PROGRESS'] = [
-          {
-            id: '3',
-            titulo: 'Desenvolver homepage',
-            descricao: 'Implementar a página inicial do site',
-            prioridade: 'ALTA',
-            responsavel: 'Pedro Costa',
-            dataVencimento: '2024-02-20',
-            status: 'IN_PROGRESS'
-          }
-        ];
-
-        setProject(mockProject);
+        });
+        
         setTasks(initialTasks);
+        
+        // Buscar usuários para o select de responsável
+        // Por enquanto, vamos simular até ter o endpoint
+        setUserOptions([
+          { value: '', label: 'Selecione um responsável' },
+          { value: '1', label: 'João Silva' },
+          { value: '2', label: 'Pedro Costa' },
+          { value: '3', label: 'Maria Santos' }
+        ]);
       } catch (err) {
         setError('Erro ao carregar dados do projeto');
         console.error(err);
@@ -186,22 +172,30 @@ const ProjectKanban = () => {
       }));
     } else {
       // Mover entre colunas diferentes
+      const updatedTask = { ...draggedTask, status: destination.droppableId };
       const newSourceTasks = sourceColumn.filter(task => task.id !== draggableId);
       const newDestTasks = [...destColumn];
-      newDestTasks.splice(destination.index, 0, { 
-        ...draggedTask, 
-        status: destination.droppableId 
-      });
+      newDestTasks.splice(destination.index, 0, updatedTask);
 
       setTasks(prev => ({
         ...prev,
         [source.droppableId]: newSourceTasks,
         [destination.droppableId]: newDestTasks
       }));
+      
+      // Atualizar status da tarefa na API
+      try {
+        await authService.updateTaskStatus(draggedTask.id, destination.droppableId);
+      } catch (error) {
+        console.error('Erro ao atualizar status da tarefa:', error);
+        // Reverter mudança em caso de erro
+        setTasks(prev => ({
+          ...prev,
+          [source.droppableId]: sourceColumn,
+          [destination.droppableId]: destColumn
+        }));
+      }
     }
-
-    // Aqui você faria a chamada para a API para atualizar o status da tarefa
-    console.log(`Tarefa "${draggedTask.titulo}" movida para ${destination.droppableId}`);
   };
 
   const handleStatusesChange = (newStatuses) => {
@@ -214,11 +208,11 @@ const ProjectKanban = () => {
 
   const handleCreateTask = (columnId) => {
     setNewTask({
-      titulo: '',
+      nome: '',
       descricao: '',
-      prioridade: 'MEDIA',
-      dataVencimento: '',
-      responsavel: '',
+      dataInicio: '',
+      dataTermino: '',
+      responsavelId: '',
       status: columnId
     });
     setEditingTask(null);
@@ -232,73 +226,80 @@ const ProjectKanban = () => {
   };
 
   const handleSaveTask = () => {
-    if (!newTask.titulo.trim()) return;
+    if (!newTask.nome.trim()) return;
 
-    const taskId = editingTask ? editingTask.id : Date.now().toString();
-    const taskData = {
-      ...newTask,
-      id: taskId
+    const taskPayload = {
+      nome: newTask.nome,
+      descricao: newTask.descricao,
+      status: newTask.status,
+      dataInicio: newTask.dataInicio || null,
+      dataTermino: newTask.dataTermino || null,
+      responsavel: newTask.responsavelId ? { id: parseInt(newTask.responsavelId) } : null
     };
 
-    if (editingTask) {
-      // Remover da coluna anterior se o status mudou
-      const oldStatus = editingTask.status;
-      const newStatus = taskData.status;
-      
-      setTasks(prev => {
-        const newTasks = {};
-        
-        // Criar cópias de todas as colunas
-        Object.keys(prev).forEach(key => {
-          newTasks[key] = [...prev[key]];
-        });
-        
-        // Remover da coluna anterior
-        newTasks[oldStatus] = newTasks[oldStatus].filter(task => task.id !== taskId);
-        
-        // Adicionar na nova coluna
-        if (!newTasks[newStatus]) newTasks[newStatus] = [];
-        const existingIndex = newTasks[newStatus].findIndex(task => task.id === taskId);
-        if (existingIndex >= 0) {
-          newTasks[newStatus][existingIndex] = taskData;
+    const saveTask = async () => {
+      try {
+        if (editingTask) {
+          const updatedTask = await authService.updateTask(editingTask.id, taskPayload);
+          
+          // Atualizar tarefa no estado local
+          setTasks(prev => {
+            const newTasks = {};
+            Object.keys(prev).forEach(key => {
+              newTasks[key] = prev[key].map(task => 
+                task.id === editingTask.id ? updatedTask : task
+              );
+            });
+            return newTasks;
+          });
         } else {
-          newTasks[newStatus].push(taskData);
+          const createdTask = await authService.createTask(project.id, taskPayload);
+          
+          // Adicionar nova tarefa ao estado local
+          setTasks(prev => ({
+            ...prev,
+            [createdTask.status]: [...(prev[createdTask.status] || []), createdTask]
+          }));
         }
         
-        return newTasks;
-      });
-    } else {
-      // Criar nova tarefa
-      setTasks(prev => ({
-        ...prev,
-        [taskData.status]: [...(prev[taskData.status] || []), taskData]
-      }));
-    }
-
-    setShowTaskModal(false);
-    setEditingTask(null);
-    setNewTask({
-      titulo: '',
-      descricao: '',
-      prioridade: 'MEDIA',
-      status: 'TODO',
-      dataVencimento: '',
-      responsavel: ''
-    });
+        setShowTaskModal(false);
+        setEditingTask(null);
+        setNewTask({
+          nome: '',
+          descricao: '',
+          status: 'TODO',
+          dataInicio: '',
+          dataTermino: '',
+          responsavelId: ''
+        });
+      } catch (error) {
+        console.error('Erro ao salvar tarefa:', error);
+        alert('Erro ao salvar tarefa. Tente novamente.');
+      }
+    };
+    
+    saveTask();
   };
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'BAIXA':
-        return '#10b981';
-      case 'MEDIA':
-        return '#f59e0b';
-      case 'ALTA':
-        return '#ef4444';
-      case 'URGENTE':
-        return '#dc2626';
-      default:
-        return '#6b7280';
+  const handleDeleteTask = async (taskId) => {
+    if (!window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
+      return;
+    }
+
+    try {
+      await authService.deleteTask(taskId);
+      
+      // Remover tarefa do estado local
+      setTasks(prev => {
+        const newTasks = {};
+        Object.keys(prev).forEach(key => {
+          newTasks[key] = prev[key].filter(task => task.id !== taskId);
+        });
+        return newTasks;
+      });
+    } catch (error) {
+      console.error('Erro ao excluir tarefa:', error);
+      alert('Erro ao excluir tarefa. Tente novamente.');
     }
   };
 
@@ -428,7 +429,7 @@ const ProjectKanban = () => {
                                 onDoubleClick={() => handleEditTask(task)}
                               >
                                 <TaskTitle $isDarkMode={isDarkMode}>
-                                  {task.titulo}
+                                  {task.nome}
                                 </TaskTitle>
                                 {task.descricao && (
                                   <TaskDescription $isDarkMode={isDarkMode}>
@@ -436,23 +437,23 @@ const ProjectKanban = () => {
                                   </TaskDescription>
                                 )}
                                 <TaskMeta>
-                                  <TaskPriority
-                                    $color={getPriorityColor(task.prioridade)}
-                                    $isDarkMode={isDarkMode}
-                                  >
-                                    {task.prioridade}
-                                  </TaskPriority>
                                   {task.responsavel && (
                                     <TaskAssignee $isDarkMode={isDarkMode}>
                                       <span className="material-symbols-outlined">person</span>
-                                      {task.responsavel}
+                                      {task.responsavel.nome}
                                     </TaskAssignee>
                                   )}
-                                  {task.dataVencimento && (
-                                    <TaskDueDate $isDarkMode={isDarkMode}>
+                                  {task.dataInicio && (
+                                    <TaskDate $isDarkMode={isDarkMode}>
+                                      <span className="material-symbols-outlined">event</span>
+                                      Início: {formatDate(task.dataInicio)}
+                                    </TaskDate>
+                                  )}
+                                  {task.dataTermino && (
+                                    <TaskDate $isDarkMode={isDarkMode}>
                                       <span className="material-symbols-outlined">schedule</span>
-                                      {formatDate(task.dataVencimento)}
-                                    </TaskDueDate>
+                                      Prazo: {formatDate(task.dataTermino)}
+                                    </TaskDate>
                                   )}
                                 </TaskMeta>
                                 
@@ -463,7 +464,9 @@ const ProjectKanban = () => {
                                   right: '0.5rem',
                                   opacity: 0,
                                   transition: 'opacity 0.2s ease',
-                                  pointerEvents: 'auto'
+                                  pointerEvents: 'auto',
+                                  display: 'flex',
+                                  gap: '0.25rem'
                                 }}
                                 className="task-edit-button"
                                 >
@@ -473,8 +476,8 @@ const ProjectKanban = () => {
                                       handleEditTask(task);
                                     }}
                                     style={{
-                                      width: '24px',
-                                      height: '24px',
+                                      width: '20px',
+                                      height: '20px',
                                       borderRadius: '4px',
                                       background: isDarkMode ? 'rgba(78, 86, 105, 0.8)' : 'rgba(255, 255, 255, 0.9)',
                                       border: 'none',
@@ -486,8 +489,31 @@ const ProjectKanban = () => {
                                       transition: 'all 0.2s ease'
                                     }}
                                   >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>
+                                    <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
                                       edit
+                                    </span>
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteTask(task.id);
+                                    }}
+                                    style={{
+                                      width: '20px',
+                                      height: '20px',
+                                      borderRadius: '4px',
+                                      background: isDarkMode ? 'rgba(239, 68, 68, 0.8)' : 'rgba(239, 68, 68, 0.9)',
+                                      border: 'none',
+                                      color: 'white',
+                                      display: 'flex',
+                                      alignItems: 'center',
+                                      justifyContent: 'center',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s ease'
+                                    }}
+                                  >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
+                                      delete
                                     </span>
                                   </button>
                                 </div>
@@ -515,11 +541,11 @@ const ProjectKanban = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <Input
             id="taskTitle"
-            label="Título da tarefa"
+            label="Nome da tarefa"
             type="text"
-            value={newTask.titulo}
-            onChange={(e) => handleTaskInputChange('titulo', e.target.value)}
-            placeholder="Digite o título da tarefa"
+            value={newTask.nome}
+            onChange={(e) => handleTaskInputChange('nome', e.target.value)}
+            placeholder="Digite o nome da tarefa"
             required
             $isDarkMode={isDarkMode}
           />
@@ -565,31 +591,30 @@ const ProjectKanban = () => {
             />
           </div>
 
-          <Select
-            id="taskPriority"
-            label="Prioridade"
-            value={newTask.prioridade}
-            onChange={(e) => handleTaskInputChange('prioridade', e.target.value)}
-            options={priorityOptions}
-            $isDarkMode={isDarkMode}
-          />
-
           <Input
-            id="taskAssignee"
-            label="Responsável"
-            type="text"
-            value={newTask.responsavel}
-            onChange={(e) => handleTaskInputChange('responsavel', e.target.value)}
-            placeholder="Nome do responsável"
-            $isDarkMode={isDarkMode}
-          />
-
-          <Input
-            id="taskDueDate"
-            label="Data de vencimento"
+            id="taskStartDate"
+            label="Data de início"
             type="date"
-            value={newTask.dataVencimento}
-            onChange={(e) => handleTaskInputChange('dataVencimento', e.target.value)}
+            value={newTask.dataInicio}
+            onChange={(e) => handleTaskInputChange('dataInicio', e.target.value)}
+            $isDarkMode={isDarkMode}
+          />
+
+          <Input
+            id="taskEndDate"
+            label="Data de término"
+            type="date"
+            value={newTask.dataTermino}
+            onChange={(e) => handleTaskInputChange('dataTermino', e.target.value)}
+            $isDarkMode={isDarkMode}
+          />
+
+          <Select
+            id="taskResponsavel"
+            label="Responsável"
+            value={newTask.responsavelId}
+            onChange={(e) => handleTaskInputChange('responsavelId', e.target.value)}
+            options={userOptions}
             $isDarkMode={isDarkMode}
           />
 

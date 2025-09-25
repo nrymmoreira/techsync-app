@@ -383,23 +383,6 @@ export const TaskMeta = styled.div`
   pointer-events: none;
 `;
 
-export const TaskPriority = styled.div`
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  background: ${props => `${props.$color}20`};
-  color: ${props => props.$color};
-  width: fit-content;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  pointer-events: none;
-`;
-
 export const TaskAssignee = styled.div`
   display: flex;
   align-items: center;
@@ -421,7 +404,7 @@ export const TaskAssignee = styled.div`
   }
 `;
 
-export const TaskDueDate = styled.div`
+export const TaskDate = styled.div`
   display: flex;
   align-items: center;
   gap: 0.375rem;

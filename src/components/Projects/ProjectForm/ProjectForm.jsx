@@ -39,14 +39,13 @@ const ProjectForm = () => {
 
   const [formData, setFormData] = useState({
     nome: '',
-    clienteId: '',
+    clientId: '',
     dataInicio: '',
-    dataFim: '',
+    dataTermino: '',
     descricao: '',
-    observacoes: ''
+    status: 'PENDENTE'
   });
 
-  const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [clientOptions, setClientOptions] = useState([
@@ -63,31 +62,16 @@ const ProjectForm = () => {
         ]);
 
         if (isEditing) {
-          // Simular dados do projeto para edição
-          const mockProject = {
-            id: parseInt(id),
-            nome: 'Website Corporativo',
-            cliente: { id: 1, nome: 'TechCorp Ltd' },
-            dataInicio: '2024-01-15',
-            dataFim: '2024-03-15',
-            descricao: 'Desenvolvimento de website corporativo moderno e responsivo',
-            observacoes: 'Cliente prefere cores azuis e layout minimalista'
-          };
+          const projectData = await authService.getProjectById(id);
 
           setFormData({
-            nome: mockProject.nome,
-            clienteId: String(mockProject.cliente.id),
-            dataInicio: mockProject.dataInicio,
-            dataFim: mockProject.dataFim,
-            descricao: mockProject.descricao,
-            observacoes: mockProject.observacoes
+            nome: projectData.nome,
+            clientId: String(projectData.cliente.id),
+            dataInicio: projectData.dataInicio,
+            dataTermino: projectData.dataTermino,
+            descricao: projectData.descricao,
+            status: projectData.status
           });
-
-          // Simular arquivos do projeto
-          setFiles([
-            { id: 1, name: 'briefing.pdf', size: '2.5 MB', type: 'application/pdf' },
-            { id: 2, name: 'wireframes.fig', size: '15.2 MB', type: 'application/figma' }
-          ]);
         }
       } catch (error) {
         console.error(error);
@@ -103,23 +87,23 @@ const ProjectForm = () => {
       newErrors.nome = 'Nome do projeto é obrigatório';
     }
 
-    if (!formData.clienteId) {
-      newErrors.clienteId = 'Cliente é obrigatório';
+    if (!formData.clientId) {
+      newErrors.clientId = 'Cliente é obrigatório';
     }
 
     if (!formData.dataInicio) {
       newErrors.dataInicio = 'Data de início é obrigatória';
     }
 
-    if (!formData.dataFim) {
-      newErrors.dataFim = 'Data de prazo é obrigatória';
+    if (!formData.dataTermino) {
+      newErrors.dataTermino = 'Data de término é obrigatória';
     }
 
-    if (formData.dataInicio && formData.dataFim) {
+    if (formData.dataInicio && formData.dataTermino) {
       const startDate = new Date(formData.dataInicio);
-      const endDate = new Date(formData.dataFim);
+      const endDate = new Date(formData.dataTermino);
       if (endDate <= startDate) {
-        newErrors.dataFim = 'Data de prazo deve ser posterior à data de início';
+        newErrors.dataTermino = 'Data de término deve ser posterior à data de início';
       }
     }
 
@@ -135,22 +119,6 @@ const ProjectForm = () => {
     }
   };
 
-  const handleFileUpload = (event) => {
-    const uploadedFiles = Array.from(event.target.files);
-    const newFiles = uploadedFiles.map(file => ({
-      id: Date.now() + Math.random(),
-      name: file.name,
-      size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-      type: file.type,
-      file: file
-    }));
-    setFiles(prev => [...prev, ...newFiles]);
-  };
-
-  const removeFile = (fileId) => {
-    setFiles(prev => prev.filter(file => file.id !== fileId));
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -161,20 +129,17 @@ const ProjectForm = () => {
     try {
       const projectData = {
         nome: formData.nome,
-        cliente: { id: Number(formData.clienteId) },
+        cliente: { id: Number(formData.clientId) },
         dataInicio: formData.dataInicio,
-        dataFim: formData.dataFim,
+        dataTermino: formData.dataTermino,
         descricao: formData.descricao,
-        observacoes: formData.observacoes,
-        status: 'PENDENTE'
+        status: formData.status || 'PENDENTE'
       };
 
       if (isEditing) {
-        // await authService.updateProject(id, projectData);
-        console.log('Projeto atualizado:', projectData);
+        await authService.updateProject(id, projectData);
       } else {
-        // await authService.createProject(projectData);
-        console.log('Projeto criado:', projectData);
+        await authService.createProject(projectData);
       }
       
       navigate('/projetos');
@@ -243,12 +208,12 @@ const ProjectForm = () => {
               />
 
               <Select
-                id="clienteId"
+                id="clientId"
                 label="Cliente"
-                value={formData.clienteId}
-                onChange={(e) => handleInputChange('clienteId', e.target.value)}
+                value={formData.clientId}
+                onChange={(e) => handleInputChange('clientId', e.target.value)}
                 options={clientOptions}
-                error={errors.clienteId}
+                error={errors.clientId}
                 placeholder="Selecione um cliente"
                 required
                 $isDarkMode={isDarkMode}
@@ -269,12 +234,12 @@ const ProjectForm = () => {
               />
 
               <Input
-                id="dataFim"
-                label="Data de prazo"
+                id="dataTermino"
+                label="Data de término"
                 type="date"
-                value={formData.dataFim}
-                onChange={(e) => handleInputChange('dataFim', e.target.value)}
-                error={errors.dataFim}
+                value={formData.dataTermino}
+                onChange={(e) => handleInputChange('dataTermino', e.target.value)}
+                error={errors.dataTermino}
                 icon="event_available"
                 required
                 $isDarkMode={isDarkMode}
@@ -297,79 +262,6 @@ const ProjectForm = () => {
               </div>
             </FormGrid>
           </FormSection>
-
-          <FilesSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Arquivos</SectionTitle>
-            <SectionDescription $isDarkMode={isDarkMode}>
-              Anexe documentos, imagens e outros arquivos relacionados ao projeto
-            </SectionDescription>
-
-            <FileUploadArea $isDarkMode={isDarkMode}>
-              <input
-                type="file"
-                multiple
-                onChange={handleFileUpload}
-                style={{ display: 'none' }}
-                id="fileUpload"
-                disabled={isLoading}
-              />
-              <label htmlFor="fileUpload" style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.7 }}>
-                  cloud_upload
-                </span>
-                <span style={{ fontSize: '0.9375rem', fontWeight: '500' }}>
-                  Clique para selecionar arquivos
-                </span>
-                <span style={{ fontSize: '0.8125rem', opacity: 0.7, marginTop: '0.25rem' }}>
-                  ou arraste e solte aqui
-                </span>
-              </label>
-            </FileUploadArea>
-
-            {files.length > 0 && (
-              <FileList>
-                {files.map((file) => (
-                  <FileItem key={file.id} $isDarkMode={isDarkMode}>
-                    <FileInfo>
-                      <span className="material-symbols-outlined">
-                        {file.type.includes('pdf') ? 'picture_as_pdf' : 
-                         file.type.includes('image') ? 'image' : 'description'}
-                      </span>
-                      <div>
-                        <div style={{ fontWeight: '500' }}>{file.name}</div>
-                        <div style={{ fontSize: '0.8125rem', opacity: 0.7 }}>{file.size}</div>
-                      </div>
-                    </FileInfo>
-                    <FileActions>
-                      <button
-                        type="button"
-                        onClick={() => removeFile(file.id)}
-                        title="Remover arquivo"
-                      >
-                        <span className="material-symbols-outlined">delete</span>
-                      </button>
-                    </FileActions>
-                  </FileItem>
-                ))}
-              </FileList>
-            )}
-          </FilesSection>
-
-          <ObservationsSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>Observações</SectionTitle>
-            <SectionDescription $isDarkMode={isDarkMode}>
-              Notas e informações adicionais sobre o projeto
-            </SectionDescription>
-
-            <ObservationsTextarea
-              value={formData.observacoes}
-              onChange={(e) => handleInputChange('observacoes', e.target.value)}
-              placeholder="Adicione observações ou notas sobre o projeto..."
-              rows={4}
-              $isDarkMode={isDarkMode}
-              disabled={isLoading}
-            />
-          </ObservationsSection>
 
           <FormActions>
             <CancelButton

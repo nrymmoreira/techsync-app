@@ -310,6 +310,108 @@ export const authService = {
       );
     }
   },
+  // ===================== PROJETOS =====================
+  getAllProjects: async () => {
+    try {
+      const response = await api.get("/api/projetos");
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar projetos."
+      );
+    }
+  },
+  getProjectById: async (id) => {
+    try {
+      const response = await api.get(`/api/projetos/${id}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar dados do projeto."
+      );
+    }
+  },
+  createProject: async (projectData) => {
+    try {
+      const response = await api.post("/api/projetos", projectData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao criar projeto."
+      );
+    }
+  },
+  updateProject: async (id, projectData) => {
+    try {
+      const response = await api.put(`/api/projetos/${id}`, projectData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar projeto."
+      );
+    }
+  },
+  deleteProject: async (id) => {
+    try {
+      await api.delete(`/api/projetos/${id}`);
+      return { success: true };
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao excluir projeto."
+      );
+    }
+  },
+  // ===================== TAREFAS =====================
+  getProjectTasks: async (projectId) => {
+    try {
+      const response = await api.get(`/api/projetos/${projectId}/tarefas`);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar tarefas do projeto."
+      );
+    }
+  },
+  createTask: async (projectId, taskData) => {
+    try {
+      const response = await api.post(`/api/projetos/${projectId}/tarefas`, taskData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao criar tarefa."
+      );
+    }
+  },
+  updateTask: async (taskId, taskData) => {
+    try {
+      const response = await api.put(`/api/tarefas/${taskId}`, taskData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar tarefa."
+      );
+    }
+  },
+  deleteTask: async (taskId) => {
+    try {
+      await api.delete(`/api/tarefas/${taskId}`);
+      return { success: true };
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao excluir tarefa."
+      );
+    }
+  },
+  updateTaskStatus: async (taskId, status) => {
+    try {
+      const response = await api.patch(`/api/tarefas/${taskId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar status da tarefa."
+      );
+    }
+  },
 };
 
 export default api;
