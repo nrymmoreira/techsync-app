@@ -46,7 +46,6 @@ import {
   TaskTitle,
   TaskDescription,
   TaskMeta,
-  TaskPriority,
   TaskAssignee,
   TaskDate,
   EmptyColumn,
