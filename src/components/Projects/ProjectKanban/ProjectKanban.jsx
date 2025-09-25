@@ -1,7 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
@@ -31,7 +48,7 @@ import {
   TaskMeta,
   TaskPriority,
   TaskAssignee,
-  TaskDueDate,
+  TaskDate,
   EmptyColumn,
   EmptyColumnIcon,
   EmptyColumnText,
@@ -40,6 +57,126 @@ import {
   KanbanActions,
   StatusManagerSection
 } from './ProjectKanban.styles';
+
+// Componente para tarefa arrastável
+const SortableTask = ({ task, isDarkMode, onEdit, onDelete, formatDate }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <TaskCard
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      $isDragging={isDragging}
+      $isDarkMode={isDarkMode}
+      onDoubleClick={() => onEdit(task)}
+    >
+      <TaskTitle $isDarkMode={isDarkMode}>
+        {task.nome}
+      </TaskTitle>
+      {task.descricao && (
+        <TaskDescription $isDarkMode={isDarkMode}>
+          {task.descricao}
+        </TaskDescription>
+      )}
+      <TaskMeta>
+        {task.responsavel && (
+          <TaskAssignee $isDarkMode={isDarkMode}>
+            <span className="material-symbols-outlined">person</span>
+            {task.responsavel.nome}
+          </TaskAssignee>
+        )}
+        {task.dataInicio && (
+          <TaskDate $isDarkMode={isDarkMode}>
+            <span className="material-symbols-outlined">event</span>
+            Início: {formatDate(task.dataInicio)}
+          </TaskDate>
+        )}
+        {task.dataTermino && (
+          <TaskDate $isDarkMode={isDarkMode}>
+            <span className="material-symbols-outlined">schedule</span>
+            Prazo: {formatDate(task.dataTermino)}
+          </TaskDate>
+        )}
+      </TaskMeta>
+      
+      {/* Botão de edição visível apenas no hover */}
+      <div style={{
+        position: 'absolute',
+        top: '0.5rem',
+        right: '0.5rem',
+        opacity: 0,
+        transition: 'opacity 0.2s ease',
+        pointerEvents: 'auto',
+        display: 'flex',
+        gap: '0.25rem'
+      }}
+      className="task-edit-button"
+      >
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onEdit(task);
+          }}
+          style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '4px',
+            background: isDarkMode ? 'rgba(78, 86, 105, 0.8)' : 'rgba(255, 255, 255, 0.9)',
+            border: 'none',
+            color: isDarkMode ? '#F5F5F5' : '#1E293B',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
+            edit
+          </span>
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(task.id);
+          }}
+          style={{
+            width: '20px',
+            height: '20px',
+            borderRadius: '4px',
+            background: isDarkMode ? 'rgba(239, 68, 68, 0.8)' : 'rgba(239, 68, 68, 0.9)',
+            border: 'none',
+            color: 'white',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
+            delete
+          </span>
+        </button>
+      </div>
+    </TaskCard>
+  );
+};
 
 const ProjectKanban = () => {
   const navigate = useNavigate();
@@ -64,6 +201,7 @@ const ProjectKanban = () => {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showStatusManager, setShowStatusManager] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
+  const [activeId, setActiveId] = useState(null);
   const [newTask, setNewTask] = useState({
     nome: '',
     descricao: '',
@@ -81,6 +219,13 @@ const ProjectKanban = () => {
     value: status.id,
     label: status.title
   }));
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   useEffect(() => {
     const fetchProjectData = async () => {
@@ -139,63 +284,135 @@ const ProjectKanban = () => {
     });
   }, [statuses]);
 
-  const handleDragEnd = async (result) => {
-    const { destination, source, draggableId } = result;
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
 
-    if (!destination) return;
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    setActiveId(null);
 
-    if (
-      destination.droppableId === source.droppableId &&
-      destination.index === source.index
-    ) {
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    // Encontrar a tarefa que está sendo arrastada
+    let sourceColumn = null;
+    let draggedTask = null;
+
+    for (const [columnId, columnTasks] of Object.entries(tasks)) {
+      const task = columnTasks.find(t => t.id === activeId);
+      if (task) {
+        sourceColumn = columnId;
+        draggedTask = task;
+        break;
+      }
+    }
+
+    if (!draggedTask || !sourceColumn) return;
+
+    // Determinar a coluna de destino
+    let targetColumn = null;
+    
+    // Se over.id é uma coluna
+    if (statuses.some(status => status.id === overId)) {
+      targetColumn = overId;
+    } else {
+      // Se over.id é uma tarefa, encontrar sua coluna
+      for (const [columnId, columnTasks] of Object.entries(tasks)) {
+        if (columnTasks.some(t => t.id === overId)) {
+          targetColumn = columnId;
+          break;
+        }
+      }
+    }
+
+    if (!targetColumn || sourceColumn === targetColumn) return;
+
+    // Atualizar o estado local
+    const updatedTask = { ...draggedTask, status: targetColumn };
+    const newSourceTasks = tasks[sourceColumn].filter(task => task.id !== activeId);
+    const newTargetTasks = [...tasks[targetColumn], updatedTask];
+
+    setTasks(prev => ({
+      ...prev,
+      [sourceColumn]: newSourceTasks,
+      [targetColumn]: newTargetTasks
+    }));
+
+    // Atualizar status da tarefa na API
+    try {
+      await authService.updateTaskStatus(draggedTask.id, targetColumn);
+    } catch (error) {
+      console.error('Erro ao atualizar status da tarefa:', error);
+      // Reverter mudança em caso de erro
+      setTasks(prev => ({
+        ...prev,
+        [sourceColumn]: tasks[sourceColumn],
+        [targetColumn]: tasks[targetColumn]
+      }));
+    }
+  };
+
+  const handleDragOver = (event) => {
+    const { active, over } = event;
+    
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    // Encontrar colunas
+    const activeColumn = findColumn(activeId);
+    const overColumn = findColumn(overId);
+
+    if (!activeColumn || !overColumn || activeColumn === overColumn) {
       return;
     }
 
-    const sourceColumn = [...(tasks[source.droppableId] || [])];
-    const destColumn = source.droppableId === destination.droppableId 
-      ? sourceColumn 
-      : [...(tasks[destination.droppableId] || [])];
-      
-    const draggedTask = sourceColumn.find(task => task.id === draggableId);
+    setTasks(prev => {
+      const activeItems = prev[activeColumn];
+      const overItems = prev[overColumn];
 
-    if (!draggedTask) return;
+      const activeIndex = activeItems.findIndex(item => item.id === activeId);
+      const overIndex = overItems.findIndex(item => item.id === overId);
 
-    if (source.droppableId === destination.droppableId) {
-      // Reordenar dentro da mesma coluna
-      const newTasks = [...sourceColumn];
-      const [removed] = newTasks.splice(source.index, 1);
-      newTasks.splice(destination.index, 0, removed);
-      
-      setTasks(prev => ({
+      let newIndex;
+      if (overId in prev) {
+        newIndex = overItems.length + 1;
+      } else {
+        const isBelowOverItem = over && overIndex < overItems.length - 1;
+        const modifier = isBelowOverItem ? 1 : 0;
+        newIndex = overIndex >= 0 ? overIndex + modifier : overItems.length + 1;
+      }
+
+      const activeTask = activeItems[activeIndex];
+      const updatedTask = { ...activeTask, status: overColumn };
+
+      return {
         ...prev,
-        [source.droppableId]: newTasks
-      }));
-    } else {
-      // Mover entre colunas diferentes
-      const updatedTask = { ...draggedTask, status: destination.droppableId };
-      const newSourceTasks = sourceColumn.filter(task => task.id !== draggableId);
-      const newDestTasks = [...destColumn];
-      newDestTasks.splice(destination.index, 0, updatedTask);
+        [activeColumn]: activeItems.filter(item => item.id !== activeId),
+        [overColumn]: [
+          ...overItems.slice(0, newIndex),
+          updatedTask,
+          ...overItems.slice(newIndex)
+        ]
+      };
+    });
+  };
 
-      setTasks(prev => ({
-        ...prev,
-        [source.droppableId]: newSourceTasks,
-        [destination.droppableId]: newDestTasks
-      }));
-      
-      // Atualizar status da tarefa na API
-      try {
-        await authService.updateTaskStatus(draggedTask.id, destination.droppableId);
-      } catch (error) {
-        console.error('Erro ao atualizar status da tarefa:', error);
-        // Reverter mudança em caso de erro
-        setTasks(prev => ({
-          ...prev,
-          [source.droppableId]: sourceColumn,
-          [destination.droppableId]: destColumn
-        }));
+  const findColumn = (id) => {
+    if (statuses.some(status => status.id === id)) {
+      return id;
+    }
+
+    for (const [columnId, columnTasks] of Object.entries(tasks)) {
+      if (columnTasks.some(task => task.id === id)) {
+        return columnId;
       }
     }
+    return null;
   };
 
   const handleStatusesChange = (newStatuses) => {
@@ -380,7 +597,13 @@ const ProjectKanban = () => {
           </HeaderActions>
         </KanbanHeader>
 
-        <DragDropContext onDragEnd={handleDragEnd}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
           <KanbanBoard>
             {statuses.map((column) => (
               <Column key={column.id} $isDarkMode={isDarkMode}>
@@ -401,135 +624,66 @@ const ProjectKanban = () => {
                   Adicionar tarefa
                 </AddTaskButton>
 
-                <Droppable droppableId={column.id}>
-                  {(provided, snapshot) => (
-                    <TasksList
-                      ref={provided.innerRef}
-                      {...provided.droppableProps}
-                      $isDraggingOver={snapshot.isDraggingOver}
-                      $isDarkMode={isDarkMode}
-                    >
-                      {(tasks[column.id] || []).length === 0 ? (
-                        <EmptyColumn $isDarkMode={isDarkMode}>
-                          <EmptyColumnIcon className="material-symbols-outlined">
-                            task_alt
-                          </EmptyColumnIcon>
-                          <EmptyColumnText>Nenhuma tarefa</EmptyColumnText>
-                        </EmptyColumn>
-                      ) : (
-                        (tasks[column.id] || []).map((task, index) => (
-                          <Draggable key={task.id} draggableId={task.id} index={index}>
-                            {(provided, snapshot) => (
-                              <TaskCard
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                $isDragging={snapshot.isDragging}
-                                $isDarkMode={isDarkMode}
-                                onDoubleClick={() => handleEditTask(task)}
-                              >
-                                <TaskTitle $isDarkMode={isDarkMode}>
-                                  {task.nome}
-                                </TaskTitle>
-                                {task.descricao && (
-                                  <TaskDescription $isDarkMode={isDarkMode}>
-                                    {task.descricao}
-                                  </TaskDescription>
-                                )}
-                                <TaskMeta>
-                                  {task.responsavel && (
-                                    <TaskAssignee $isDarkMode={isDarkMode}>
-                                      <span className="material-symbols-outlined">person</span>
-                                      {task.responsavel.nome}
-                                    </TaskAssignee>
-                                  )}
-                                  {task.dataInicio && (
-                                    <TaskDate $isDarkMode={isDarkMode}>
-                                      <span className="material-symbols-outlined">event</span>
-                                      Início: {formatDate(task.dataInicio)}
-                                    </TaskDate>
-                                  )}
-                                  {task.dataTermino && (
-                                    <TaskDate $isDarkMode={isDarkMode}>
-                                      <span className="material-symbols-outlined">schedule</span>
-                                      Prazo: {formatDate(task.dataTermino)}
-                                    </TaskDate>
-                                  )}
-                                </TaskMeta>
-                                
-                                {/* Botão de edição visível apenas no hover */}
-                                <div style={{
-                                  position: 'absolute',
-                                  top: '0.5rem',
-                                  right: '0.5rem',
-                                  opacity: 0,
-                                  transition: 'opacity 0.2s ease',
-                                  pointerEvents: 'auto',
-                                  display: 'flex',
-                                  gap: '0.25rem'
-                                }}
-                                className="task-edit-button"
-                                >
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleEditTask(task);
-                                    }}
-                                    style={{
-                                      width: '20px',
-                                      height: '20px',
-                                      borderRadius: '4px',
-                                      background: isDarkMode ? 'rgba(78, 86, 105, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-                                      border: 'none',
-                                      color: isDarkMode ? '#F5F5F5' : '#1E293B',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.2s ease'
-                                    }}
-                                  >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
-                                      edit
-                                    </span>
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteTask(task.id);
-                                    }}
-                                    style={{
-                                      width: '20px',
-                                      height: '20px',
-                                      borderRadius: '4px',
-                                      background: isDarkMode ? 'rgba(239, 68, 68, 0.8)' : 'rgba(239, 68, 68, 0.9)',
-                                      border: 'none',
-                                      color: 'white',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.2s ease'
-                                    }}
-                                  >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
-                                      delete
-                                    </span>
-                                  </button>
-                                </div>
-                              </TaskCard>
-                            )}
-                          </Draggable>
-                        ))
-                      )}
-                      {provided.placeholder}
-                    </TasksList>
-                  )}
-                </Droppable>
+                <SortableContext
+                  items={tasks[column.id].map(task => task.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <TasksList
+                    $isDarkMode={isDarkMode}
+                    style={{
+                      minHeight: '200px',
+                      padding: '0.5rem',
+                    }}
+                  >
+                    {(tasks[column.id] || []).length === 0 ? (
+                      <EmptyColumn $isDarkMode={isDarkMode}>
+                        <EmptyColumnIcon className="material-symbols-outlined">
+                          task_alt
+                        </EmptyColumnIcon>
+                        <EmptyColumnText>Nenhuma tarefa</EmptyColumnText>
+                      </EmptyColumn>
+                    ) : (
+                      (tasks[column.id] || []).map((task) => (
+                        <SortableTask
+                          key={task.id}
+                          task={task}
+                          isDarkMode={isDarkMode}
+                          onEdit={handleEditTask}
+                          onDelete={handleDeleteTask}
+                          formatDate={formatDate}
+                        />
+                      ))
+                    )}
+                  </TasksList>
+                </SortableContext>
               </Column>
             ))}
           </KanbanBoard>
-        </DragDropContext>
+
+          <DragOverlay>
+            {activeId ? (
+              <TaskCard $isDarkMode={isDarkMode} style={{ opacity: 0.8 }}>
+                {(() => {
+                  const task = Object.values(tasks)
+                    .flat()
+                    .find(t => t.id === activeId);
+                  return task ? (
+                    <>
+                      <TaskTitle $isDarkMode={isDarkMode}>
+                        {task.nome}
+                      </TaskTitle>
+                      {task.descricao && (
+                        <TaskDescription $isDarkMode={isDarkMode}>
+                          {task.descricao}
+                        </TaskDescription>
+                      )}
+                    </>
+                  ) : null;
+                })()}
+              </TaskCard>
+            ) : null}
+          </DragOverlay>
+        </DndContext>
       </KanbanContent>
 
       <Modal
