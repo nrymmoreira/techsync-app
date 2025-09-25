@@ -15,15 +15,10 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import {
-  useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
-import Input from '../../Input/Input';
-import Modal from '../../Modal/Modal';
-import Select from '../../Select/Select';
+import TaskCard from '../../Tasks/TaskCard/TaskCard';
+import TaskModal from '../../Tasks/TaskModal/TaskModal';
 import StatusManager from '../StatusManager/StatusManager';
 import { authService } from '../../../services/api';
 import {
@@ -42,140 +37,12 @@ import {
   ColumnCount,
   AddTaskButton,
   TasksList,
-  TaskCard,
-  TaskTitle,
-  TaskDescription,
-  TaskMeta,
-  TaskAssignee,
-  TaskDate,
   EmptyColumn,
   EmptyColumnIcon,
   EmptyColumnText,
   LoadingState,
   ErrorState,
-  KanbanActions,
-  StatusManagerSection
 } from './ProjectKanban.styles';
-
-// Componente para tarefa arrastável
-const SortableTask = ({ task, isDarkMode, onEdit, onDelete, formatDate }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  return (
-    <TaskCard
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      $isDragging={isDragging}
-      $isDarkMode={isDarkMode}
-      onDoubleClick={() => onEdit(task)}
-    >
-      <TaskTitle $isDarkMode={isDarkMode}>
-        {task.nome}
-      </TaskTitle>
-      {task.descricao && (
-        <TaskDescription $isDarkMode={isDarkMode}>
-          {task.descricao}
-        </TaskDescription>
-      )}
-      <TaskMeta>
-        {task.responsavel && (
-          <TaskAssignee $isDarkMode={isDarkMode}>
-            <span className="material-symbols-outlined">person</span>
-            {task.responsavel.nome}
-          </TaskAssignee>
-        )}
-        {task.dataInicio && (
-          <TaskDate $isDarkMode={isDarkMode}>
-            <span className="material-symbols-outlined">event</span>
-            Início: {formatDate(task.dataInicio)}
-          </TaskDate>
-        )}
-        {task.dataTermino && (
-          <TaskDate $isDarkMode={isDarkMode}>
-            <span className="material-symbols-outlined">schedule</span>
-            Prazo: {formatDate(task.dataTermino)}
-          </TaskDate>
-        )}
-      </TaskMeta>
-      
-      {/* Botão de edição visível apenas no hover */}
-      <div style={{
-        position: 'absolute',
-        top: '0.5rem',
-        right: '0.5rem',
-        opacity: 0,
-        transition: 'opacity 0.2s ease',
-        pointerEvents: 'auto',
-        display: 'flex',
-        gap: '0.25rem'
-      }}
-      className="task-edit-button"
-      >
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit(task);
-          }}
-          style={{
-            width: '20px',
-            height: '20px',
-            borderRadius: '4px',
-            background: isDarkMode ? 'rgba(78, 86, 105, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-            border: 'none',
-            color: isDarkMode ? '#F5F5F5' : '#1E293B',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
-            edit
-          </span>
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(task.id);
-          }}
-          style={{
-            width: '20px',
-            height: '20px',
-            borderRadius: '4px',
-            background: isDarkMode ? 'rgba(239, 68, 68, 0.8)' : 'rgba(239, 68, 68, 0.9)',
-            border: 'none',
-            color: 'white',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-        >
-          <span className="material-symbols-outlined" style={{ fontSize: '0.75rem' }}>
-            delete
-          </span>
-        </button>
-      </div>
-    </TaskCard>
-  );
-};
 
 const ProjectKanban = () => {
   const navigate = useNavigate();
@@ -643,7 +510,7 @@ const ProjectKanban = () => {
                       </EmptyColumn>
                     ) : (
                       (tasks[column.id] || []).map((task) => (
-                        <SortableTask
+                        <TaskCard
                           key={task.id}
                           task={task}
                           isDarkMode={isDarkMode}
@@ -661,138 +528,61 @@ const ProjectKanban = () => {
 
           <DragOverlay>
             {activeId ? (
-              <TaskCard $isDarkMode={isDarkMode} style={{ opacity: 0.8 }}>
+              <div style={{ 
+                background: isDarkMode ? 'rgba(78, 86, 105, 0.1)' : '#FFFFFF',
+                border: `1px solid ${isDarkMode ? '#F97316' : '#F97316'}`,
+                borderRadius: '8px',
+                padding: '1rem',
+                opacity: 0.8,
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)'
+              }}>
                 {(() => {
                   const task = Object.values(tasks)
                     .flat()
                     .find(t => t.id === activeId);
                   return task ? (
                     <>
-                      <TaskTitle $isDarkMode={isDarkMode}>
+                      <h4 style={{ 
+                        fontFamily: 'Inter, sans-serif',
+                        fontSize: '0.9375rem',
+                        fontWeight: '600',
+                        color: isDarkMode ? '#F5F5F5' : '#1E293B',
+                        margin: '0 0 0.5rem 0',
+                        lineHeight: '1.4'
+                      }}>
                         {task.nome}
-                      </TaskTitle>
+                      </h4>
                       {task.descricao && (
-                        <TaskDescription $isDarkMode={isDarkMode}>
+                        <p style={{
+                          fontFamily: 'Inter, sans-serif',
+                          fontSize: '0.8125rem',
+                          color: isDarkMode ? '#D9D9D9' : '#475569',
+                          margin: '0 0 0.75rem 0',
+                          lineHeight: '1.4'
+                        }}>
                           {task.descricao}
-                        </TaskDescription>
+                        </p>
                       )}
                     </>
                   ) : null;
                 })()}
-              </TaskCard>
+              </div>
             ) : null}
           </DragOverlay>
         </DndContext>
       </KanbanContent>
 
-      <Modal
+      <TaskModal
         isOpen={showTaskModal}
         onClose={() => setShowTaskModal(false)}
         title={editingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
+        task={newTask}
+        onTaskChange={handleTaskInputChange}
+        onSave={handleSaveTask}
+        statusOptions={statusOptions}
+        userOptions={userOptions}
         $isDarkMode={isDarkMode}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <Input
-            id="taskTitle"
-            label="Nome da tarefa"
-            type="text"
-            value={newTask.nome}
-            onChange={(e) => handleTaskInputChange('nome', e.target.value)}
-            placeholder="Digite o nome da tarefa"
-            required
-            $isDarkMode={isDarkMode}
-          />
-
-          <Select
-            id="taskStatus"
-            label="Status"
-            value={newTask.status}
-            onChange={(e) => handleTaskInputChange('status', e.target.value)}
-            options={statusOptions}
-            $isDarkMode={isDarkMode}
-          />
-
-          <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: isDarkMode ? '#F5F5F5' : '#1E293B'
-            }}>
-              Descrição
-            </label>
-            <textarea
-              value={newTask.descricao}
-              onChange={(e) => handleTaskInputChange('descricao', e.target.value)}
-              placeholder="Descreva a tarefa..."
-              rows={3}
-              style={{
-                width: '100%',
-                padding: '0.875rem 1rem',
-                borderRadius: '8px',
-                border: `2px solid ${isDarkMode ? 'rgba(78, 86, 105, 0.3)' : '#E2E8F0'}`,
-                backgroundColor: isDarkMode ? 'rgba(78, 86, 105, 0.1)' : '#FFFFFF',
-                color: isDarkMode ? '#F5F5F5' : '#1E293B',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '0.9375rem',
-                resize: 'vertical',
-                minHeight: '80px',
-                userSelect: 'text',
-                WebkitUserSelect: 'text'
-              }}
-            />
-          </div>
-
-          <Input
-            id="taskStartDate"
-            label="Data de início"
-            type="date"
-            value={newTask.dataInicio}
-            onChange={(e) => handleTaskInputChange('dataInicio', e.target.value)}
-            $isDarkMode={isDarkMode}
-          />
-
-          <Input
-            id="taskEndDate"
-            label="Data de término"
-            type="date"
-            value={newTask.dataTermino}
-            onChange={(e) => handleTaskInputChange('dataTermino', e.target.value)}
-            $isDarkMode={isDarkMode}
-          />
-
-          <Select
-            id="taskResponsavel"
-            label="Responsável"
-            value={newTask.responsavelId}
-            onChange={(e) => handleTaskInputChange('responsavelId', e.target.value)}
-            options={userOptions}
-            $isDarkMode={isDarkMode}
-          />
-
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
-            <Button
-              variant="secondary"
-              size="medium"
-              onClick={() => setShowTaskModal(false)}
-              $isDarkMode={isDarkMode}
-              style={{ flex: 1 }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              variant="primary"
-              size="medium"
-              onClick={handleSaveTask}
-              $isDarkMode={isDarkMode}
-              style={{ flex: 1 }}
-            >
-              {editingTask ? 'Salvar' : 'Criar'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
+      />
 
       <Modal
         isOpen={showStatusManager}
