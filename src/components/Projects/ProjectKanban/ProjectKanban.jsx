@@ -139,7 +139,7 @@ const ProjectKanban = () => {
     });
   }, [statuses]);
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
