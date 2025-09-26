@@ -74,42 +74,10 @@ const ProjectsList = () => {
           ...clients.map(c => ({ value: String(c.id), label: c.nome }))
         ]);
 
-        // Simular dados de projetos até implementar a API
-        const mockProjects = [
-          {
-            id: 1,
-            nome: 'Website Corporativo',
-            cliente: { id: 1, nome: 'TechCorp Ltd' },
-            status: 'EM_ANDAMENTO',
-            progresso: 65,
-            dataInicio: '2024-01-15',
-            dataFim: '2024-03-15',
-            createdAt: '2024-01-15T10:00:00Z'
-          },
-          {
-            id: 2,
-            nome: 'App Mobile',
-            cliente: { id: 2, nome: 'StartupXYZ' },
-            status: 'CONCLUIDO',
-            progresso: 100,
-            dataInicio: '2023-11-01',
-            dataFim: '2024-01-30',
-            createdAt: '2023-11-01T10:00:00Z'
-          },
-          {
-            id: 3,
-            nome: 'Sistema ERP',
-            cliente: { id: 3, nome: 'Empresa ABC' },
-            status: 'PENDENTE',
-            progresso: 0,
-            dataInicio: '2024-02-01',
-            dataFim: '2024-06-01',
-            createdAt: '2024-02-01T10:00:00Z'
-          }
-        ];
+        const projectsData = await authService.getAllProjects();
 
-        setProjects(mockProjects);
-        setFilteredProjects(mockProjects);
+        setProjects(projectsData);
+        setFilteredProjects(projectsData);
       } catch (error) {
         console.error('Erro ao carregar projetos:', error);
       } finally {
@@ -189,7 +157,7 @@ const ProjectsList = () => {
     if (!projectToDelete) return;
     
     try {
-      // await authService.deleteProject(projectToDelete.id);
+      await authService.deleteProject(projectToDelete.id);
       setProjects(prev => prev.filter(p => p.id !== projectToDelete.id));
       console.log('Projeto excluído:', projectToDelete.nome);
     } catch (error) {
@@ -199,6 +167,17 @@ const ProjectsList = () => {
       setProjectToDelete(null);
     }
   };
+
+  const calcularProgresso = (projeto) => {
+  if (!projeto.tarefas || projeto.tarefas.length === 0) {
+    return 0; // Sem tarefas, progresso é 0%
+  }
+
+  const total = projeto.tarefas.length;
+  const concluidas = projeto.tarefas.filter(t => t.status === "CONCLUIDO").length;
+
+  return (concluidas / total) * 100;
+}
 
   if (loading) {
     return (
@@ -350,9 +329,9 @@ const ProjectsList = () => {
                     <td>
                       <ProjectProgress>
                         <ProgressBar $isDarkMode={isDarkMode}>
-                          <ProgressFill $progress={project.progresso} $isDarkMode={isDarkMode} />
+                          <ProgressFill $progress={calcularProgresso(project)} $isDarkMode={isDarkMode} />
                         </ProgressBar>
-                        <ProgressText $isDarkMode={isDarkMode}>{project.progresso}%</ProgressText>
+                        <ProgressText $isDarkMode={isDarkMode}>{calcularProgresso(project)}%</ProgressText>
                       </ProjectProgress>
                     </td>
                     <td>

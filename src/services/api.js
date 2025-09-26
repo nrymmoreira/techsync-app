@@ -92,8 +92,6 @@ export const authService = {
         senha: password,
       });
 
-      debugger;
-
       if (loginResponse.data.token) {
         localStorage.setItem("techsync-token", loginResponse.data.token);
         localStorage.setItem("techsync-authenticated", "true");
@@ -194,6 +192,81 @@ export const authService = {
     } catch (error) {
       throw new Error(
         error.response?.data?.error || "Erro ao buscar clientes."
+      );
+    }
+  },
+  createProject: async (projectData, clienteId) => {
+    try {
+      const response = await api.post(`/api/projetos?clienteId=${clienteId}`, projectData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || "Erro ao criar projeto.");
+    }
+  },
+  updateProject: async (id, projectData) => {
+    try {
+      const response = await api.put(`/api/projetos/${id}`, projectData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao editar projetos."
+      );
+    }
+  },
+  getAllProjects: async () => {
+    try {
+      const response = await api.get("/api/projetos");
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar projetos."
+      );
+    }
+  },
+  getProject: async (id) => {
+    try {
+      const response = await api.get("/api/projetos/" + id);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || "Erro ao buscar projeto.");
+    }
+  },
+  deleteProject: async (id) => {
+    try {
+      await api.delete("/api/projetos/" + id);
+      return { success: true };
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao excluir projeto."
+      );
+    }
+  },
+  createTask: async (projectId, taskData) => {
+    try {
+      const response = await api.post(
+        `/api/tarefas?projetoId=${projectId}&usuarioId=1`,
+        taskData
+      );
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.error || "Erro ao criar tarefa.");
+    }
+  },
+  updateTask: async (taskId, taskData) => {
+    try {
+      const response = await api.put(`/api/tarefas/${taskId}`, taskData);
+      return response.data;
+    } catch (error){ 
+      throw new Error(error.response?.data?.error || "Erro ao editar tarefa.");
+    }
+  },
+  updateTaskStatus: async (taskId, status) => {
+    try {
+      const response = await api.put(`/api/tarefas/${taskId}/status?status=${status}`);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar status da tarefa."
       );
     }
   },

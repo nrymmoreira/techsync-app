@@ -126,11 +126,12 @@ export const HeaderActions = styled.div`
 `;
 
 export const KanbanBoard = styled.div`
-  display: grid;
+  display: flex;
   grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
   flex: 1;
   min-height: 0;
+  overflow-x: auto;
 
   @media (max-width: ${breakpoints.desktop}) {
     grid-template-columns: repeat(2, 1fr);
@@ -155,6 +156,7 @@ export const Column = styled.div`
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 400px;
 `;
 
 export const ColumnHeader = styled.div`

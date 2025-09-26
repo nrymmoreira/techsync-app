@@ -16,6 +16,7 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-colorful": "^5.6.1",
     "react-dom": "^18.3.1",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.2",
     "recharts": "^3.2.1",
     "remask": "^1.2.2",

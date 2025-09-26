@@ -392,33 +392,34 @@ export const MessageAvatar = styled.div`
 `;
 
 export const MessageContent = styled.div`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    if (props.$sender === 'user') {
+    if (props.$sender === "user") {
       return theme.colors.primary;
     }
     return theme.colors.surfaceHover;
   }};
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    if (props.$sender === 'user') {
-      return 'white';
+    if (props.$sender === "user") {
+      return "white";
     }
     return theme.colors.textPrimary;
   }};
   padding: 0.875rem 1.125rem;
-  border-radius: ${props => props.$sender === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px'};
+  border-radius: ${(props) =>
+    props.$sender === "user" ? "18px 18px 4px 18px" : "18px 18px 18px 4px"};
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
   line-height: 1.5;
   max-width: 280px;
   word-wrap: break-word;
-  box-shadow: 0 2px 8px ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.shadow;
-  }};
-
-  @media (max-width: ${breakpoints.mobile}) {
+  box-shadow: 0 2px 8px
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.shadow;
+    }};
+  whitespace: "pre-wrap"; @media (max-width: ${breakpoints.mobile}) {
     max-width: 240px;
     font-size: 0.875rem;
     padding: 0.75rem 1rem;

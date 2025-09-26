@@ -18,7 +18,7 @@ import {
   ColorOption
 } from './StatusManager.styles';
 
-const StatusManager = ({ statuses, onStatusesChange, $isDarkMode }) => {
+const StatusManager = ({ statuses, onStatusesChange, $isDarkMode, tasks, setTasks }) => {
   const { isDarkMode } = useTheme();
   const [showModal, setShowModal] = useState(false);
   const [editingStatus, setEditingStatus] = useState(null);
@@ -82,6 +82,11 @@ const StatusManager = ({ statuses, onStatusesChange, $isDarkMode }) => {
 
     setShowModal(false);
     setNewStatus({ id: '', title: '', color: '#3b82f6' });
+
+    setTasks({
+      ...tasks,
+      [statusId]: []
+    })
   };
 
   const handleDeleteStatus = (statusId) => {

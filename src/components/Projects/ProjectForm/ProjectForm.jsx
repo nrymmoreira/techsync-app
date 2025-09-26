@@ -43,7 +43,8 @@ const ProjectForm = () => {
     dataInicio: '',
     dataFim: '',
     descricao: '',
-    observacoes: ''
+    observacoes: '',
+    status: 'PENDENTE',
   });
 
   const [files, setFiles] = useState([]);
@@ -63,31 +64,19 @@ const ProjectForm = () => {
         ]);
 
         if (isEditing) {
-          // Simular dados do projeto para edição
-          const mockProject = {
-            id: parseInt(id),
-            nome: 'Website Corporativo',
-            cliente: { id: 1, nome: 'TechCorp Ltd' },
-            dataInicio: '2024-01-15',
-            dataFim: '2024-03-15',
-            descricao: 'Desenvolvimento de website corporativo moderno e responsivo',
-            observacoes: 'Cliente prefere cores azuis e layout minimalista'
-          };
-
+          const projectData = await authService.getProject(id);
           setFormData({
-            nome: mockProject.nome,
-            clienteId: String(mockProject.cliente.id),
-            dataInicio: mockProject.dataInicio,
-            dataFim: mockProject.dataFim,
-            descricao: mockProject.descricao,
-            observacoes: mockProject.observacoes
+            nome: projectData.nome,
+            clienteId: String(projectData.cliente.id),
+            dataInicio: projectData.dataInicio,
+            dataFim: projectData.dataTermino,
+            descricao: projectData.descricao,
+            observacoes: projectData.observacoes,
+            status: projectData.status,
           });
 
           // Simular arquivos do projeto
-          setFiles([
-            { id: 1, name: 'briefing.pdf', size: '2.5 MB', type: 'application/pdf' },
-            { id: 2, name: 'wireframes.fig', size: '15.2 MB', type: 'application/figma' }
-          ]);
+          setFiles([]);
         }
       } catch (error) {
         console.error(error);
@@ -159,24 +148,30 @@ const ProjectForm = () => {
     setIsLoading(true);
 
     try {
-      const projectData = {
+      const baseProjectData = {
         nome: formData.nome,
-        cliente: { id: Number(formData.clienteId) },
         dataInicio: formData.dataInicio,
-        dataFim: formData.dataFim,
+        dataTermino: formData.dataFim,
         descricao: formData.descricao,
         observacoes: formData.observacoes,
-        status: 'PENDENTE'
+        status: formData.status,
       };
 
       if (isEditing) {
-        // await authService.updateProject(id, projectData);
+        const projectData = {
+          ...baseProjectData,
+          cliente: { id: Number(formData.clienteId) },
+        };
+        await authService.updateProject(id, projectData);
         console.log('Projeto atualizado:', projectData);
       } else {
-        // await authService.createProject(projectData);
-        console.log('Projeto criado:', projectData);
+        await authService.createProject(
+          baseProjectData,
+          Number(formData.clienteId)
+        );
+        console.log('Projeto criado:', baseProjectData);
       }
-      
+
       navigate('/projetos');
     } catch (error) {
       setErrors({ api: 'Erro ao salvar projeto' });

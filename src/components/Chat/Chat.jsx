@@ -23,6 +23,7 @@ import {
   TypingDots,
 } from "./Chat.styles";
 import { Radius } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 const Chat = () => {
   const { isDarkMode } = useTheme();
@@ -383,7 +384,7 @@ const Chat = () => {
                       $sender={message.sender}
                       $isDarkMode={isDarkMode}
                     >
-                      {message.text}
+                      <ReactMarkdown>{message.text}</ReactMarkdown>
                     </MessageContent>
                     <MessageTime
                       $isDarkMode={isDarkMode}

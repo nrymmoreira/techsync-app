@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme } from '../../../contexts/ThemeContext';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import Navbar from '../../Navbar/Navbar';
-import Button from '../../Button/Button';
-import Input from '../../Input/Input';
-import Modal from '../../Modal/Modal';
-import Select from '../../Select/Select';
-import StatusManager from '../StatusManager/StatusManager';
-import { authService } from '../../../services/api';
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useTheme } from "../../../contexts/ThemeContext";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import Navbar from "../../Navbar/Navbar";
+import Button from "../../Button/Button";
+import Input from "../../Input/Input";
+import Modal from "../../Modal/Modal";
+import Select from "../../Select/Select";
+import StatusManager from "../StatusManager/StatusManager";
+import { authService } from "../../../services/api";
 import {
   KanbanContainer,
   KanbanContent,
@@ -38,101 +38,67 @@ import {
   LoadingState,
   ErrorState,
   KanbanActions,
-  StatusManagerSection
-} from './ProjectKanban.styles';
+  StatusManagerSection,
+} from "./ProjectKanban.styles";
 
 const ProjectKanban = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const { isDarkMode } = useTheme();
-  
+
   const [project, setProject] = useState(null);
   const [statuses, setStatuses] = useState([
-    { id: 'TODO', title: 'A Fazer', color: '#6b7280' },
-    { id: 'IN_PROGRESS', title: 'Em Progresso', color: '#3b82f6' },
-    { id: 'REVIEW', title: 'Em Revisão', color: '#f59e0b' },
-    { id: 'DONE', title: 'Concluído', color: '#10b981' }
+    { id: "TODO", title: "A Fazer", color: "#6b7280" },
+    { id: "IN_PROGRESS", title: "Em Progresso", color: "#3b82f6" },
+    { id: "REVIEW", title: "Em Revisão", color: "#f59e0b" },
+    { id: "DONE", title: "Concluído", color: "#10b981" },
   ]);
   const [tasks, setTasks] = useState({
-    'TODO': [],
-    'IN_PROGRESS': [],
-    'REVIEW': [],
-    'DONE': []
+    TODO: [],
+    IN_PROGRESS: [],
+    REVIEW: [],
+    DONE: [],
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showStatusManager, setShowStatusManager] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [newTask, setNewTask] = useState({
-    titulo: '',
-    descricao: '',
-    prioridade: 'MEDIA',
-    status: 'TODO',
-    dataVencimento: '',
-    responsavel: ''
+    nome: "",
+    descricao: "",
+    prioridade: "MEDIA",
+    status: "TODO",
+    dataTermino: "",
+    dataInicio: "",
   });
 
   const priorityOptions = [
-    { value: 'BAIXA', label: 'Baixa' },
-    { value: 'MEDIA', label: 'Média' },
-    { value: 'ALTA', label: 'Alta' },
-    { value: 'URGENTE', label: 'Urgente' }
+    { value: "BAIXA", label: "Baixa" },
+    { value: "MEDIA", label: "Média" },
+    { value: "ALTA", label: "Alta" },
+    { value: "URGENTE", label: "Urgente" },
   ];
 
-  const statusOptions = statuses.map(status => ({
+  const statusOptions = statuses.map((status) => ({
     value: status.id,
-    label: status.title
+    label: status.title,
   }));
 
   useEffect(() => {
     const fetchProjectData = async () => {
       try {
         setLoading(true);
-        
-        // Simular dados do projeto até implementar a API
-        const mockProject = {
-          id: parseInt(id),
-          nome: 'Website Corporativo',
-          cliente: { nome: 'TechCorp Ltd' },
-          status: 'EM_ANDAMENTO',
-          progresso: 65
-        };
+
+        const projectData = await authService.getProject(id);
 
         // Simular tarefas do projeto
-        const initialTasks = {};
-        statuses.forEach(status => {
-          initialTasks[status.id] = [];
-        });
+        const initialTasks = organizarTarefas(projectData.tarefas);
 
-        // Adicionar algumas tarefas de exemplo
-        initialTasks['TODO'] = [
-          {
-            id: '1',
-            titulo: 'Criar wireframes',
-            descricao: 'Desenvolver wireframes das principais páginas',
-            prioridade: 'ALTA',
-            responsavel: 'João Silva',
-            dataVencimento: '2024-02-15',
-            status: 'TODO'
-          }
-        ];
-        initialTasks['IN_PROGRESS'] = [
-          {
-            id: '3',
-            titulo: 'Desenvolver homepage',
-            descricao: 'Implementar a página inicial do site',
-            prioridade: 'ALTA',
-            responsavel: 'Pedro Costa',
-            dataVencimento: '2024-02-20',
-            status: 'IN_PROGRESS'
-          }
-        ];
-
-        setProject(mockProject);
+        setProject(projectData);
         setTasks(initialTasks);
       } catch (err) {
-        setError('Erro ao carregar dados do projeto');
+        setError("Erro ao carregar dados do projeto");
         console.error(err);
       } finally {
         setLoading(false);
@@ -144,16 +110,16 @@ const ProjectKanban = () => {
 
   // Atualizar tasks quando os status mudarem
   useEffect(() => {
-    setTasks(prevTasks => {
+    setTasks((prevTasks) => {
       const newTasks = {};
-      statuses.forEach(status => {
+      statuses.forEach((status) => {
         newTasks[status.id] = prevTasks[status.id] || [];
       });
       return newTasks;
     });
   }, [statuses]);
 
-  const handleDragEnd = (result) => {
+  const handleDragEnd = async (result) => {
     const { destination, source, draggableId } = result;
 
     if (!destination) return;
@@ -165,43 +131,56 @@ const ProjectKanban = () => {
       return;
     }
 
+    const originalTasks = { ...tasks };
+
     const sourceColumn = [...(tasks[source.droppableId] || [])];
-    const destColumn = source.droppableId === destination.droppableId 
-      ? sourceColumn 
-      : [...(tasks[destination.droppableId] || [])];
-      
-    const draggedTask = sourceColumn.find(task => task.id === draggableId);
+    const destColumn =
+      source.droppableId === destination.droppableId
+        ? sourceColumn
+        : [...(tasks[destination.droppableId] || [])];
+
+    const draggedTask = sourceColumn.find((task) => task.id === draggableId);
 
     if (!draggedTask) return;
 
+    // Optimistic state update
     if (source.droppableId === destination.droppableId) {
-      // Reordenar dentro da mesma coluna
       const newTasks = [...sourceColumn];
       const [removed] = newTasks.splice(source.index, 1);
       newTasks.splice(destination.index, 0, removed);
-      
-      setTasks(prev => ({
+
+      setTasks((prev) => ({
         ...prev,
-        [source.droppableId]: newTasks
+        [source.droppableId]: newTasks,
       }));
     } else {
-      // Mover entre colunas diferentes
-      const newSourceTasks = sourceColumn.filter(task => task.id !== draggableId);
+      const newSourceTasks = sourceColumn.filter(
+        (task) => task.id !== draggableId
+      );
       const newDestTasks = [...destColumn];
-      newDestTasks.splice(destination.index, 0, { 
-        ...draggedTask, 
-        status: destination.droppableId 
+      newDestTasks.splice(destination.index, 0, {
+        ...draggedTask,
+        status: destination.droppableId,
       });
 
-      setTasks(prev => ({
+      setTasks((prev) => ({
         ...prev,
         [source.droppableId]: newSourceTasks,
-        [destination.droppableId]: newDestTasks
+        [destination.droppableId]: newDestTasks,
       }));
     }
 
-    // Aqui você faria a chamada para a API para atualizar o status da tarefa
-    console.log(`Tarefa "${draggedTask.titulo}" movida para ${destination.droppableId}`);
+    try {
+      await authService.updateTaskStatus(draggableId, destination.droppableId);
+      console.log(
+        `Tarefa "${draggedTask.nome}" movida para ${destination.droppableId}`
+      );
+    } catch (error) {
+      console.error("Erro ao atualizar status da tarefa:", error);
+      // Revert state on error
+      setTasks(originalTasks);
+      alert("Ocorreu um erro ao mover a tarefa. Tente novamente.");
+    }
   };
 
   const handleStatusesChange = (newStatuses) => {
@@ -209,17 +188,16 @@ const ProjectKanban = () => {
   };
 
   const handleTaskInputChange = (field, value) => {
-    setNewTask(prev => ({ ...prev, [field]: value }));
+    setNewTask((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCreateTask = (columnId) => {
     setNewTask({
-      titulo: '',
-      descricao: '',
-      prioridade: 'MEDIA',
-      dataVencimento: '',
-      responsavel: '',
-      status: columnId
+      nome: "",
+      descricao: "",
+      prioridade: "MEDIA",
+      dataTermino: "",
+      status: columnId,
     });
     setEditingTask(null);
     setShowTaskModal(true);
@@ -231,81 +209,116 @@ const ProjectKanban = () => {
     setShowTaskModal(true);
   };
 
-  const handleSaveTask = () => {
-    if (!newTask.titulo.trim()) return;
+  const handleSaveTask = async () => {
+    if (!newTask.nome.trim()) return;
 
-    const taskId = editingTask ? editingTask.id : Date.now().toString();
-    const taskData = {
-      ...newTask,
-      id: taskId
-    };
+    const taskData = { ...newTask };
 
-    if (editingTask) {
-      // Remover da coluna anterior se o status mudou
-      const oldStatus = editingTask.status;
-      const newStatus = taskData.status;
-      
-      setTasks(prev => {
-        const newTasks = {};
-        
-        // Criar cópias de todas as colunas
-        Object.keys(prev).forEach(key => {
-          newTasks[key] = [...prev[key]];
+    try {
+      if (editingTask) {
+        // Atualizar na API
+        await authService.updateTask(editingTask.id, taskData);
+
+        // Atualizar estado local
+        setTasks((prev) => {
+          const newTasks = { ...prev };
+          const oldStatus = editingTask.status;
+          const newStatus = taskData.status;
+
+          if (oldStatus === newStatus) {
+            const column = newTasks[oldStatus];
+            const taskIndex = column.findIndex((t) => t.id === editingTask.id);
+            if (taskIndex !== -1) {
+              const newColumn = [...column];
+              newColumn[taskIndex] = taskData;
+              newTasks[oldStatus] = newColumn;
+            }
+          } else {
+            // Remover da coluna antiga
+            if (newTasks[oldStatus]) {
+              newTasks[oldStatus] = newTasks[oldStatus].filter(
+                (t) => t.id !== editingTask.id
+              );
+            }
+
+            // Adicionar na nova coluna (no início)
+            if (!newTasks[newStatus]) {
+              newTasks[newStatus] = [];
+            }
+            newTasks[newStatus] = [taskData, ...newTasks[newStatus]];
+          }
+          return newTasks;
         });
-        
-        // Remover da coluna anterior
-        newTasks[oldStatus] = newTasks[oldStatus].filter(task => task.id !== taskId);
-        
-        // Adicionar na nova coluna
-        if (!newTasks[newStatus]) newTasks[newStatus] = [];
-        const existingIndex = newTasks[newStatus].findIndex(task => task.id === taskId);
-        if (existingIndex >= 0) {
-          newTasks[newStatus][existingIndex] = taskData;
-        } else {
-          newTasks[newStatus].push(taskData);
-        }
-        
-        return newTasks;
-      });
-    } else {
-      // Criar nova tarefa
-      setTasks(prev => ({
-        ...prev,
-        [taskData.status]: [...(prev[taskData.status] || []), taskData]
-      }));
-    }
+      } else {
+        // Criar na API
+        const createdTask = await authService.createTask(project.id, newTask);
 
-    setShowTaskModal(false);
-    setEditingTask(null);
-    setNewTask({
-      titulo: '',
-      descricao: '',
-      prioridade: 'MEDIA',
-      status: 'TODO',
-      dataVencimento: '',
-      responsavel: ''
-    });
+        // Atualizar estado local
+        setTasks((prev) => ({
+          ...prev,
+          [createdTask.status]: [
+            { ...createdTask, id: String(createdTask.id) },
+            ...(prev[createdTask.status] || []),
+          ],
+        }));
+      }
+
+      setShowTaskModal(false);
+      setEditingTask(null);
+      setNewTask({
+        nome: "",
+        descricao: "",
+        prioridade: "MEDIA",
+        status: "TODO",
+        dataTermino: "",
+      });
+    } catch (err) {
+      console.error("Erro ao salvar tarefa:", err);
+      alert("Erro ao salvar a tarefa. Tente novamente.");
+    }
   };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'BAIXA':
-        return '#10b981';
-      case 'MEDIA':
-        return '#f59e0b';
-      case 'ALTA':
-        return '#ef4444';
-      case 'URGENTE':
-        return '#dc2626';
+      case "BAIXA":
+        return "#10b981";
+      case "MEDIA":
+        return "#f59e0b";
+      case "ALTA":
+        return "#ef4444";
+      case "URGENTE":
+        return "#dc2626";
       default:
-        return '#6b7280';
+        return "#6b7280";
     }
   };
 
+  const organizarTarefas = (tarefas) => {
+    const initialTasks = {};
+    statuses.forEach((status) => {
+      initialTasks[status.id] = [];
+    });
+
+    tarefas.forEach((tarefa) => {
+      // Adiciona ao objeto no formato desejado
+      initialTasks[tarefa.status].push({
+        id: String(tarefa.id),
+        nome: tarefa.nome,
+        descricao: tarefa.descricao,
+        prioridade: tarefa.prioridade,
+        dataInicio: tarefa.dataInicio,
+        dataTermino: tarefa.dataTermino,
+        status: tarefa.status,
+      });
+    });
+
+    return initialTasks;
+  };
+
   const formatDate = (dateString) => {
-    if (!dateString) return '';
+    if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
+    return date.toLocaleDateString("pt-BR");
   };
 
   if (loading) {
@@ -329,13 +342,13 @@ const ProjectKanban = () => {
         <KanbanContent>
           <ErrorState $isDarkMode={isDarkMode}>
             <span className="material-symbols-outlined">error</span>
-            {error || 'Projeto não encontrado'}
+            {error || "Projeto não encontrado"}
             <Button
               variant="primary"
               size="medium"
-              onClick={() => navigate('/projetos')}
+              onClick={() => navigate("/projetos")}
               $isDarkMode={isDarkMode}
-              style={{ marginTop: '1rem' }}
+              style={{ marginTop: "1rem" }}
             >
               Voltar para Projetos
             </Button>
@@ -350,12 +363,17 @@ const ProjectKanban = () => {
       <Navbar />
       <KanbanContent>
         <KanbanHeader>
-          <BackButton onClick={() => navigate('/projetos')} $isDarkMode={isDarkMode}>
+          <BackButton
+            onClick={() => navigate("/projetos")}
+            $isDarkMode={isDarkMode}
+          >
             <span className="material-symbols-outlined">arrow_back</span>
           </BackButton>
           <HeaderContent>
             <ProjectTitle $isDarkMode={isDarkMode}>{project.nome}</ProjectTitle>
-            <ProjectClient $isDarkMode={isDarkMode}>{project.cliente.nome}</ProjectClient>
+            <ProjectClient $isDarkMode={isDarkMode}>
+              {project.cliente.nome}
+            </ProjectClient>
           </HeaderContent>
           <HeaderActions>
             <Button
@@ -417,18 +435,23 @@ const ProjectKanban = () => {
                         </EmptyColumn>
                       ) : (
                         (tasks[column.id] || []).map((task, index) => (
-                          <Draggable key={task.id} draggableId={task.id} index={index}>
+                          <Draggable
+                            key={String(task.id)}
+                            draggableId={String(task.id)}
+                            index={index}
+                          >
                             {(provided, snapshot) => (
                               <TaskCard
                                 ref={provided.innerRef}
                                 {...provided.draggableProps}
                                 {...provided.dragHandleProps}
+                                style={provided.draggableProps.style}
                                 $isDragging={snapshot.isDragging}
                                 $isDarkMode={isDarkMode}
                                 onDoubleClick={() => handleEditTask(task)}
                               >
                                 <TaskTitle $isDarkMode={isDarkMode}>
-                                  {task.titulo}
+                                  {task.nome}
                                 </TaskTitle>
                                 {task.descricao && (
                                   <TaskDescription $isDarkMode={isDarkMode}>
@@ -442,30 +465,27 @@ const ProjectKanban = () => {
                                   >
                                     {task.prioridade}
                                   </TaskPriority>
-                                  {task.responsavel && (
-                                    <TaskAssignee $isDarkMode={isDarkMode}>
-                                      <span className="material-symbols-outlined">person</span>
-                                      {task.responsavel}
-                                    </TaskAssignee>
-                                  )}
-                                  {task.dataVencimento && (
+                                  {task.dataTermino && (
                                     <TaskDueDate $isDarkMode={isDarkMode}>
-                                      <span className="material-symbols-outlined">schedule</span>
-                                      {formatDate(task.dataVencimento)}
+                                      <span className="material-symbols-outlined">
+                                        schedule
+                                      </span>
+                                      {formatDate(task.dataTermino)}
                                     </TaskDueDate>
                                   )}
                                 </TaskMeta>
-                                
+
                                 {/* Botão de edição visível apenas no hover */}
-                                <div style={{
-                                  position: 'absolute',
-                                  top: '0.5rem',
-                                  right: '0.5rem',
-                                  opacity: 0,
-                                  transition: 'opacity 0.2s ease',
-                                  pointerEvents: 'auto'
-                                }}
-                                className="task-edit-button"
+                                <div
+                                  style={{
+                                    position: "absolute",
+                                    top: "0.5rem",
+                                    right: "0.5rem",
+                                    opacity: 0,
+                                    transition: "opacity 0.2s ease",
+                                    pointerEvents: "auto",
+                                  }}
+                                  className="task-edit-button"
                                 >
                                   <button
                                     onClick={(e) => {
@@ -473,20 +493,25 @@ const ProjectKanban = () => {
                                       handleEditTask(task);
                                     }}
                                     style={{
-                                      width: '24px',
-                                      height: '24px',
-                                      borderRadius: '4px',
-                                      background: isDarkMode ? 'rgba(78, 86, 105, 0.8)' : 'rgba(255, 255, 255, 0.9)',
-                                      border: 'none',
-                                      color: isDarkMode ? '#F5F5F5' : '#1E293B',
-                                      display: 'flex',
-                                      alignItems: 'center',
-                                      justifyContent: 'center',
-                                      cursor: 'pointer',
-                                      transition: 'all 0.2s ease'
+                                      width: "24px",
+                                      height: "24px",
+                                      borderRadius: "4px",
+                                      background: isDarkMode
+                                        ? "rgba(78, 86, 105, 0.8)"
+                                        : "rgba(255, 255, 255, 0.9)",
+                                      border: "none",
+                                      color: isDarkMode ? "#F5F5F5" : "#1E293B",
+                                      display: "flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                      cursor: "pointer",
+                                      transition: "all 0.2s ease",
                                     }}
                                   >
-                                    <span className="material-symbols-outlined" style={{ fontSize: '0.875rem' }}>
+                                    <span
+                                      className="material-symbols-outlined"
+                                      style={{ fontSize: "0.875rem" }}
+                                    >
                                       edit
                                     </span>
                                   </button>
@@ -509,16 +534,16 @@ const ProjectKanban = () => {
       <Modal
         isOpen={showTaskModal}
         onClose={() => setShowTaskModal(false)}
-        title={editingTask ? 'Editar Tarefa' : 'Nova Tarefa'}
+        title={editingTask ? "Editar Tarefa" : "Nova Tarefa"}
         $isDarkMode={isDarkMode}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <Input
             id="taskTitle"
             label="Título da tarefa"
             type="text"
-            value={newTask.titulo}
-            onChange={(e) => handleTaskInputChange('titulo', e.target.value)}
+            value={newTask.nome}
+            onChange={(e) => handleTaskInputChange("nome", e.target.value)}
             placeholder="Digite o título da tarefa"
             required
             $isDarkMode={isDarkMode}
@@ -528,39 +553,47 @@ const ProjectKanban = () => {
             id="taskStatus"
             label="Status"
             value={newTask.status}
-            onChange={(e) => handleTaskInputChange('status', e.target.value)}
+            onChange={(e) => handleTaskInputChange("status", e.target.value)}
             options={statusOptions}
             $isDarkMode={isDarkMode}
           />
 
           <div>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '0.5rem',
-              fontSize: '0.875rem',
-              fontWeight: '500',
-              color: isDarkMode ? '#F5F5F5' : '#1E293B'
-            }}>
+            <label
+              style={{
+                display: "block",
+                marginBottom: "0.5rem",
+                fontSize: "0.875rem",
+                fontWeight: "500",
+                color: isDarkMode ? "#F5F5F5" : "#1E293B",
+              }}
+            >
               Descrição
             </label>
             <textarea
               value={newTask.descricao}
-              onChange={(e) => handleTaskInputChange('descricao', e.target.value)}
+              onChange={(e) =>
+                handleTaskInputChange("descricao", e.target.value)
+              }
               placeholder="Descreva a tarefa..."
               rows={3}
               style={{
-                width: '100%',
-                padding: '0.875rem 1rem',
-                borderRadius: '8px',
-                border: `2px solid ${isDarkMode ? 'rgba(78, 86, 105, 0.3)' : '#E2E8F0'}`,
-                backgroundColor: isDarkMode ? 'rgba(78, 86, 105, 0.1)' : '#FFFFFF',
-                color: isDarkMode ? '#F5F5F5' : '#1E293B',
-                fontFamily: 'Inter, sans-serif',
-                fontSize: '0.9375rem',
-                resize: 'vertical',
-                minHeight: '80px',
-                userSelect: 'text',
-                WebkitUserSelect: 'text'
+                width: "100%",
+                padding: "0.875rem 1rem",
+                borderRadius: "8px",
+                border: `2px solid ${
+                  isDarkMode ? "rgba(78, 86, 105, 0.3)" : "#E2E8F0"
+                }`,
+                backgroundColor: isDarkMode
+                  ? "rgba(78, 86, 105, 0.1)"
+                  : "#FFFFFF",
+                color: isDarkMode ? "#F5F5F5" : "#1E293B",
+                fontFamily: "Inter, sans-serif",
+                fontSize: "0.9375rem",
+                resize: "vertical",
+                minHeight: "80px",
+                userSelect: "text",
+                WebkitUserSelect: "text",
               }}
             />
           </div>
@@ -569,18 +602,21 @@ const ProjectKanban = () => {
             id="taskPriority"
             label="Prioridade"
             value={newTask.prioridade}
-            onChange={(e) => handleTaskInputChange('prioridade', e.target.value)}
+            onChange={(e) =>
+              handleTaskInputChange("prioridade", e.target.value)
+            }
             options={priorityOptions}
             $isDarkMode={isDarkMode}
           />
 
           <Input
-            id="taskAssignee"
-            label="Responsável"
-            type="text"
-            value={newTask.responsavel}
-            onChange={(e) => handleTaskInputChange('responsavel', e.target.value)}
-            placeholder="Nome do responsável"
+            id="taskInitDate"
+            label="Data de inicio"
+            type="date"
+            value={newTask.dataInicio}
+            onChange={(e) =>
+              handleTaskInputChange("dataInicio", e.target.value)
+            }
             $isDarkMode={isDarkMode}
           />
 
@@ -588,12 +624,14 @@ const ProjectKanban = () => {
             id="taskDueDate"
             label="Data de vencimento"
             type="date"
-            value={newTask.dataVencimento}
-            onChange={(e) => handleTaskInputChange('dataVencimento', e.target.value)}
+            value={newTask.dataTermino}
+            onChange={(e) =>
+              handleTaskInputChange("dataTermino", e.target.value)
+            }
             $isDarkMode={isDarkMode}
           />
 
-          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+          <div style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
             <Button
               variant="secondary"
               size="medium"
@@ -610,7 +648,7 @@ const ProjectKanban = () => {
               $isDarkMode={isDarkMode}
               style={{ flex: 1 }}
             >
-              {editingTask ? 'Salvar' : 'Criar'}
+              {editingTask ? "Salvar" : "Criar"}
             </Button>
           </div>
         </div>
@@ -626,6 +664,8 @@ const ProjectKanban = () => {
           statuses={statuses}
           onStatusesChange={handleStatusesChange}
           $isDarkMode={isDarkMode}
+          tasks={tasks}
+          setTasks={setTasks}
         />
       </Modal>
     </KanbanContainer>
