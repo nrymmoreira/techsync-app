@@ -383,6 +383,73 @@ export const authService = {
       );
     }
   },
+
+  // ===================== FINANCEIRO =====================
+  getAllTransactions: async () => {
+    try {
+      const response = await api.get("/api/financeiro/transacoes");
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar transações."
+      );
+    }
+  },
+
+  createTransaction: async (transactionData) => {
+    try {
+      const response = await api.post("/api/financeiro/transacoes", transactionData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao criar transação."
+      );
+    }
+  },
+
+  updateTransaction: async (id, transactionData) => {
+    try {
+      const response = await api.put(`/api/financeiro/transacoes/${id}`, transactionData);
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao atualizar transação."
+      );
+    }
+  },
+
+  deleteTransaction: async (id) => {
+    try {
+      await api.delete(`/api/financeiro/transacoes/${id}`);
+      return { success: true };
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao excluir transação."
+      );
+    }
+  },
+
+  getFinancialMetrics: async () => {
+    try {
+      const response = await api.get("/api/financeiro/metricas");
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar métricas financeiras."
+      );
+    }
+  },
+
+  getFinancialChartData: async () => {
+    try {
+      const response = await api.get("/api/financeiro/graficos");
+      return response.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.error || "Erro ao buscar dados dos gráficos."
+      );
+    }
+  },
 };
 
 export default api;

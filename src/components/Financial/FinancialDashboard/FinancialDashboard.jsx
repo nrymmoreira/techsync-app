@@ -5,7 +5,7 @@ import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import PieChart from '../../Charts/PieChart/PieChart';
 import BarChart from '../../Charts/BarChart/BarChart';
-import { financialData } from '../../../services/demoData';
+import { financialService } from '../../../services/financialData';
 import {
   DashboardContainer,
   DashboardContent,
@@ -47,37 +47,29 @@ const FinancialDashboard = () => {
   const [chartData, setChartData] = useState({});
   const [recentTransactions, setRecentTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    const loadFinancialData = () => {
+    const loadFinancialData = async () => {
       try {
         setLoading(true);
         
-        // Carregar métricas
-        const metricsData = financialData.getMetrics();
+        // Carregar métricas da API
+        const metricsData = await authService.getFinancialMetrics();
         setMetrics(metricsData);
         
-        // Carregar dados dos gráficos
-        const charts = financialData.getChartData();
+        // Carregar dados dos gráficos da API
+        const charts = await authService.getFinancialChartData();
         setChartData(charts);
         
-        // Combinar receitas e despesas para transações recentes
-        const allTransactions = [
-          ...financialData.projectRevenues.map(item => ({
-            ...item,
-            descricao: `Receita - ${item.projectName}`,
-            categoria: 'RECEITA'
-          })),
-          ...financialData.expenses
-        ].sort((a, b) => {
-          const dateA = new Date(a.dataPagamento || a.dataVencimento);
-          const dateB = new Date(b.dataPagamento || b.dataVencimento);
-          return dateB - dateA;
-        });
+        // Carregar transações recentes da API
+        const allTransactions = await authService.getAllTransactions();
         
+        // Pegar apenas as 8 mais recentes
         setRecentTransactions(allTransactions.slice(0, 8));
       } catch (error) {
         console.error('Erro ao carregar dados financeiros:', error);
+        setError('Erro ao carregar dados financeiros');
       } finally {
         setLoading(false);
       }
@@ -232,7 +224,7 @@ const FinancialDashboard = () => {
               <MetricLabel $isDarkMode={isDarkMode}>A Receber</MetricLabel>
               <MetricTrend $isPositive={false} $isDarkMode={isDarkMode}>
                 <span className="material-symbols-outlined">schedule</span>
-                {financialData.projectRevenues.filter(r => r.statusPagamento === 'PENDENTE').length} pendentes
+                Pendentes
               </MetricTrend>
             </MetricContent>
           </MetricCard>
@@ -242,22 +234,46 @@ const FinancialDashboard = () => {
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Receitas vs Despesas</ChartTitle>
             <ChartContent>
-              <PieChart 
-                data={chartData.revenueExpenseData} 
-                title="Receitas vs Despesas" 
-              />
+              {chartData.revenueExpenseData && chartData.revenueExpenseData.length > 0 ? (
+                <PieChart 
+                  data={chartData.revenueExpenseData} 
+                  title="Receitas vs Despesas" 
+                />
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'inherit'
+                }}>
+                  Nenhum dado disponível
+                </div>
+              )}
             </ChartContent>
           </ChartCard>
 
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Receitas por Projeto</ChartTitle>
             <ChartContent>
-              <BarChart 
-                data={chartData.projectRevenueData} 
-                title="Receitas por Projeto"
-                dataKey="value"
-                nameKey="name"
-              />
+              {chartData.projectRevenueData && chartData.projectRevenueData.length > 0 ? (
+                <BarChart 
+                  data={chartData.projectRevenueData} 
+                  title="Receitas por Projeto"
+                  dataKey="value"
+                  nameKey="name"
+                />
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'inherit'
+                }}>
+                  Nenhum dado disponível
+                </div>
+              )}
             </ChartContent>
           </ChartCard>
         </ChartsSection>
@@ -266,22 +282,46 @@ const FinancialDashboard = () => {
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Despesas por Categoria</ChartTitle>
             <ChartContent>
-              <PieChart 
-                data={chartData.expensesByCategory} 
-                title="Despesas por Categoria" 
-              />
+              {chartData.expensesByCategory && chartData.expensesByCategory.length > 0 ? (
+                <PieChart 
+                  data={chartData.expensesByCategory} 
+                  title="Despesas por Categoria" 
+                />
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'inherit'
+                }}>
+                  Nenhum dado disponível
+                </div>
+              )}
             </ChartContent>
           </ChartCard>
 
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Fluxo de Caixa</ChartTitle>
             <ChartContent>
-              <BarChart 
-                data={chartData.cashFlowData} 
-                title="Fluxo de Caixa"
-                dataKey="lucro"
-                nameKey="name"
-              />
+              {chartData.cashFlowData && chartData.cashFlowData.length > 0 ? (
+                <BarChart 
+                  data={chartData.cashFlowData} 
+                  title="Fluxo de Caixa"
+                  dataKey="lucro"
+                  nameKey="name"
+                />
+              ) : (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: 'inherit'
+                }}>
+                  Nenhum dado disponível
+                </div>
+              )}
             </ChartContent>
           </ChartCard>
         </ChartsSection>

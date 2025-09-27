@@ -4,7 +4,7 @@ import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Select from '../../Select/Select';
-import { financialData } from '../../../services/demoData';
+import { financialService } from '../../../services/financialData';
 import {
   TransactionsContainer,
   TransactionsContent,
@@ -56,32 +56,20 @@ const TransactionsList = () => {
   ];
 
   useEffect(() => {
-    const loadTransactions = () => {
+    const loadTransactions = async () => {
       try {
         setLoading(true);
         
-        // Combinar receitas e despesas
-        const allTransactions = [
-          ...financialData.projectRevenues.map(item => ({
-            ...item,
-            descricao: `Receita - ${item.projectName}`,
-            categoria: 'RECEITA',
-            tipo: 'RECEITA'
-          })),
-          ...financialData.expenses.map(item => ({
-            ...item,
-            tipo: 'DESPESA'
-          }))
-        ].sort((a, b) => {
-          const dateA = new Date(a.dataPagamento || a.dataVencimento);
-          const dateB = new Date(b.dataPagamento || b.dataVencimento);
-          return dateB - dateA;
-        });
+        // Buscar transações da API
+        const allTransactions = await authService.getAllTransactions();
         
         setTransactions(allTransactions);
         setFilteredTransactions(allTransactions);
       } catch (error) {
         console.error('Erro ao carregar transações:', error);
+        // Manter arrays vazios em caso de erro
+        setTransactions([]);
+        setFilteredTransactions([]);
       } finally {
         setLoading(false);
       }

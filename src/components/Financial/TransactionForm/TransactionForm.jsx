@@ -5,7 +5,8 @@ import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import Select from '../../Select/Select';
-import { financialData } from '../../../services/demoData';
+import { financialService } from '../../../services/financialData';
+import { authService } from '../../../services/api';
 import {
   FormContainer,
   FormContent,
@@ -43,6 +44,9 @@ const TransactionForm = () => {
 
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [projectOptions, setProjectOptions] = useState([
+    { value: '', label: 'Selecione um projeto (opcional)' }
+  ]);
 
   const typeOptions = [
     { value: 'RECEITA', label: 'Receita' },
@@ -54,15 +58,26 @@ const TransactionForm = () => {
     { value: 'PAGO', label: 'Pago' }
   ];
 
-  const expenseCategories = financialData.expenseCategories;
+  const expenseCategories = financialService.expenseCategories;
 
-  const projectOptions = [
-    { value: '', label: 'Selecione um projeto (opcional)' },
-    ...financialData.projects.map(p => ({ 
-      value: String(p.id), 
-      label: p.nome 
-    }))
-  ];
+  useEffect(() => {
+    const loadProjects = async () => {
+      try {
+        const projects = await authService.getAllProjects();
+        setProjectOptions([
+          { value: '', label: 'Selecione um projeto (opcional)' },
+          ...projects.map(p => ({ 
+            value: String(p.id), 
+            label: p.nome 
+          }))
+        ]);
+      } catch (error) {
+        console.error('Erro ao carregar projetos:', error);
+      }
+    };
+
+    loadProjects();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -112,11 +127,10 @@ const TransactionForm = () => {
     setIsLoading(true);
 
     try {
-      // Simular salvamento
+      // TODO: Implementar salvamento real na API
       console.log('Salvando transação:', formData);
       
-      // Em uma implementação real, aqui seria feita a chamada para a API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await authService.createTransaction(formData);
       
       navigate('/financeiro/transacoes');
     } catch (error) {
