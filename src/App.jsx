@@ -20,6 +20,9 @@ import ProjectsDashboard from "./components/Projects/ProjectsDashboard/ProjectsD
 import ProjectsList from "./components/Projects/ProjectsList/ProjectsList";
 import ProjectForm from "./components/Projects/ProjectForm/ProjectForm";
 import ProjectKanban from "./components/Projects/ProjectKanban/ProjectKanban";
+import FinancialDashboard from "./components/Financial/FinancialDashboard/FinancialDashboard";
+import TransactionsList from "./components/Financial/TransactionsList/TransactionsList";
+import TransactionForm from "./components/Financial/TransactionForm/TransactionForm";
 
 const isAuthenticated = () => {
   return localStorage.getItem('techsync-authenticated') === 'true';
@@ -153,6 +156,38 @@ const AppContent = () => {
           element={
             <PrivateRoute>
               <ProjectKanban />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/financeiro"
+          element={
+            <PrivateRoute>
+              <FinancialDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/financeiro/transacoes"
+          element={
+            <PrivateRoute>
+              <TransactionsList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/financeiro/nova-transacao"
+          element={
+            <PrivateRoute>
+              <TransactionForm />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/financeiro/transacoes/:id/editar"
+          element={
+            <PrivateRoute>
+              <TransactionForm />
             </PrivateRoute>
           }
         />

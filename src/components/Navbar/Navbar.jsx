@@ -172,6 +172,14 @@ const Navbar = () => {
               <NavIcon className="material-symbols-outlined">folder_managed</NavIcon>
               <NavText>Projetos</NavText>
             </NavItem>
+            <NavItem
+              $active={location.pathname.startsWith('/financeiro')}
+              $isDarkMode={isDarkMode}
+              onClick={() => navigate('/financeiro')}
+            >
+              <NavIcon className="material-symbols-outlined">account_balance_wallet</NavIcon>
+              <NavText>Financeiro</NavText>
+            </NavItem>
           </NavSection>
 
           <UserSection>
