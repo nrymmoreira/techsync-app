@@ -71,10 +71,11 @@ const Select = ({
           {required && <span aria-label="obrigatório"> *</span>}
         </SelectLabel>
       )}
-      
-      <div style={{ position: 'relative' }}>
+
+      <div style={{ position: "relative" }}>
         <SelectButton
           id={id}
+          type="button"
           onClick={handleToggle}
           onKeyDown={handleKeyDown}
           $isOpen={isOpen}
@@ -87,11 +88,9 @@ const Select = ({
           aria-haspopup="listbox"
           aria-invalid={!!error}
         >
-          <span>
-            {selectedOption ? selectedOption.label : placeholder}
-          </span>
-          <SelectIcon 
-            className="material-symbols-outlined" 
+          <span>{selectedOption ? selectedOption.label : placeholder}</span>
+          <SelectIcon
+            className="material-symbols-outlined"
             $isOpen={isOpen}
             $isDarkMode={$isDarkMode}
           >
@@ -117,11 +116,7 @@ const Select = ({
         )}
       </div>
 
-      {error && (
-        <ErrorMessage $isDarkMode={$isDarkMode}>
-          {error}
-        </ErrorMessage>
-      )}
+      {error && <ErrorMessage $isDarkMode={$isDarkMode}>{error}</ErrorMessage>}
     </SelectContainer>
   );
 };

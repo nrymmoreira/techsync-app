@@ -59,44 +59,23 @@ const ProjectsDashboard = () => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Simular dados até implementar a API
-        const mockProjects = [
-          {
-            id: 1,
-            nome: 'Website Corporativo',
-            cliente: { nome: 'TechCorp Ltd' },
-            status: 'EM_ANDAMENTO',
-            progresso: 65,
-            dataInicio: '2024-01-15',
-            dataFim: '2024-03-15'
-          },
-          {
-            id: 2,
-            nome: 'App Mobile',
-            cliente: { nome: 'StartupXYZ' },
-            status: 'CONCLUIDO',
-            progresso: 100,
-            dataInicio: '2023-11-01',
-            dataFim: '2024-01-30'
-          },
-          {
-            id: 3,
-            nome: 'Sistema ERP',
-            cliente: { nome: 'Empresa ABC' },
-            status: 'PENDENTE',
-            progresso: 0,
-            dataInicio: '2024-02-01',
-            dataFim: '2024-06-01'
-          }
-        ];
-
-        setProjects(mockProjects);
+        
+        // Buscar projetos reais
+        const projectsData = await authService.getAllProjects();
+        
+        // Calcular progresso baseado nas tarefas
+        const projectsWithProgress = projectsData.map(project => ({
+          ...project,
+          progresso: calculateProjectProgress(project.tarefas || [])
+        }));
+        
+        setProjects(projectsWithProgress);
         
         const metricsData = {
-          total: mockProjects.length,
-          inProgress: mockProjects.filter(p => p.status === 'EM_ANDAMENTO').length,
-          completed: mockProjects.filter(p => p.status === 'CONCLUIDO').length,
-          pending: mockProjects.filter(p => p.status === 'PENDENTE').length
+          total: projectsWithProgress.length,
+          inProgress: projectsWithProgress.filter(p => p.status === 'EM_ANDAMENTO').length,
+          completed: projectsWithProgress.filter(p => p.status === 'CONCLUIDO').length,
+          pending: projectsWithProgress.filter(p => p.status === 'PENDENTE').length
         };
         
         setMetrics(metricsData);
@@ -109,6 +88,12 @@ const ProjectsDashboard = () => {
 
     fetchDashboardData();
   }, []);
+
+  const calculateProjectProgress = (tasks) => {
+    if (!tasks || tasks.length === 0) return 0;
+    const completedTasks = tasks.filter(task => task.status === 'DONE' || task.status === 'CONCLUIDO');
+    return Math.round((completedTasks.length / tasks.length) * 100);
+  };
 
   // Dados para os gráficos
   const pieChartData = [

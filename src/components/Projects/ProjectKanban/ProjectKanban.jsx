@@ -300,7 +300,17 @@ const ProjectKanban = () => {
     });
 
     tarefas.forEach((tarefa) => {
-      // Adiciona ao objeto no formato desejado
+      if (!initialTasks[tarefa.status]) {
+        initialTasks[tarefa.status] = [];
+
+        const statusesAux = [ ...statuses ];
+        statusesAux.push({ id: tarefa.status, title: tarefa.status, color: "#6b7280" })
+
+        setStatuses([
+          ...statusesAux
+        ])
+      }
+
       initialTasks[tarefa.status].push({
         id: String(tarefa.id),
         nome: tarefa.nome,
