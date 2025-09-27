@@ -66,7 +66,7 @@ const HomePage = () => {
       icon: 'account_balance_wallet',
       title: 'Gerenciar Financeiro',
       description: 'Gerencie suas entradas e saídas e controle o saldo dos seus projetos.',
-      action: () => console.log('Navigate to financial')
+      action: () => navigate('/financeiro')
     }
   ];
 
@@ -95,9 +95,9 @@ const HomePage = () => {
                 <CardButton 
                   onClick={feature.action} 
                   $isDarkMode={isDarkMode}
-                  $isActive={feature.id === 'clients' || feature.id === 'budgets' || feature.id === 'projects'}
+                  $isActive={feature.id === 'clients' || feature.id === 'budgets' || feature.id === 'projects' || feature.id === 'financial'}
                 >
-                  {feature.id === 'clients' || feature.id === 'budgets' || feature.id === 'projects' ? 'Acessar' : 'Em breve'}
+                  {feature.id === 'clients' || feature.id === 'budgets' || feature.id === 'projects' || feature.id === 'financial' ? 'Acessar' : 'Em breve'}
                 </CardButton>
               </FeatureCard>
             ))}
