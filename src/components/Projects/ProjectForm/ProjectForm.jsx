@@ -47,6 +47,13 @@ const ProjectForm = () => {
     status: 'PENDENTE',
   });
 
+  const status = [
+    { value: 'PENDENTE', label: 'Pendente' },
+    { value: 'EM_ANDAMENTO', label: 'Em Andamento' },
+    { value: 'CONCLUIDO', label: 'Concluído' },
+    { value: 'CANCELADO', label: 'Cancelado' },
+  ]
+
   const [files, setFiles] = useState([]);
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -190,19 +197,19 @@ const ProjectForm = () => {
       <FormContent>
         <FormHeader>
           <BackButton
-            onClick={() => navigate('/projetos')}
+            onClick={() => navigate("/projetos")}
             $isDarkMode={isDarkMode}
           >
             <span className="material-symbols-outlined">arrow_back</span>
           </BackButton>
           <HeaderContent>
             <PageTitle $isDarkMode={isDarkMode}>
-              {isEditing ? 'Editar Projeto' : 'Novo Projeto'}
+              {isEditing ? "Editar Projeto" : "Novo Projeto"}
             </PageTitle>
             <PageDescription $isDarkMode={isDarkMode}>
               {isEditing
-                ? 'Atualize as informações do projeto'
-                : 'Preencha os dados do novo projeto'}
+                ? "Atualize as informações do projeto"
+                : "Preencha os dados do novo projeto"}
             </PageDescription>
           </HeaderContent>
         </FormHeader>
@@ -217,7 +224,13 @@ const ProjectForm = () => {
             </SectionDescription>
 
             {errors.api && (
-              <div style={{ color: '#ef4444', fontSize: '0.8125rem', marginBottom: '1rem' }}>
+              <div
+                style={{
+                  color: "#ef4444",
+                  fontSize: "0.8125rem",
+                  marginBottom: "1rem",
+                }}
+              >
                 {errors.api}
               </div>
             )}
@@ -228,7 +241,7 @@ const ProjectForm = () => {
                 label="Nome do projeto"
                 type="text"
                 value={formData.nome}
-                onChange={(e) => handleInputChange('nome', e.target.value)}
+                onChange={(e) => handleInputChange("nome", e.target.value)}
                 error={errors.nome}
                 placeholder="Ex: Website Corporativo"
                 icon="folder_managed"
@@ -241,7 +254,7 @@ const ProjectForm = () => {
                 id="clienteId"
                 label="Cliente"
                 value={formData.clienteId}
-                onChange={(e) => handleInputChange('clienteId', e.target.value)}
+                onChange={(e) => handleInputChange("clienteId", e.target.value)}
                 options={clientOptions}
                 error={errors.clienteId}
                 placeholder="Selecione um cliente"
@@ -255,7 +268,9 @@ const ProjectForm = () => {
                 label="Data de início"
                 type="date"
                 value={formData.dataInicio}
-                onChange={(e) => handleInputChange('dataInicio', e.target.value)}
+                onChange={(e) =>
+                  handleInputChange("dataInicio", e.target.value)
+                }
                 error={errors.dataInicio}
                 icon="event"
                 required
@@ -268,7 +283,7 @@ const ProjectForm = () => {
                 label="Data de prazo"
                 type="date"
                 value={formData.dataFim}
-                onChange={(e) => handleInputChange('dataFim', e.target.value)}
+                onChange={(e) => handleInputChange("dataFim", e.target.value)}
                 error={errors.dataFim}
                 icon="event_available"
                 required
@@ -276,13 +291,28 @@ const ProjectForm = () => {
                 disabled={isLoading}
               />
 
-              <div style={{ gridColumn: '1 / -1' }}>
+              <Select
+                id="status"
+                label="Status"
+                value={formData.status}
+                onChange={(e) => handleInputChange("status", e.target.value)}
+                options={status}
+                error={errors.status}
+                placeholder="Selecione um status"
+                required
+                $isDarkMode={isDarkMode}
+                disabled={isLoading}
+              />
+
+              <div style={{ gridColumn: "1 / -1" }}>
                 <Input
                   id="descricao"
                   label="Descrição do projeto"
                   type="text"
                   value={formData.descricao}
-                  onChange={(e) => handleInputChange('descricao', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("descricao", e.target.value)
+                  }
                   error={errors.descricao}
                   placeholder="Descreva brevemente o projeto"
                   icon="description"
@@ -296,7 +326,8 @@ const ProjectForm = () => {
           <FilesSection $isDarkMode={isDarkMode}>
             <SectionTitle $isDarkMode={isDarkMode}>Arquivos</SectionTitle>
             <SectionDescription $isDarkMode={isDarkMode}>
-              Anexe documentos, imagens e outros arquivos relacionados ao projeto
+              Anexe documentos, imagens e outros arquivos relacionados ao
+              projeto
             </SectionDescription>
 
             <FileUploadArea $isDarkMode={isDarkMode}>
@@ -304,18 +335,42 @@ const ProjectForm = () => {
                 type="file"
                 multiple
                 onChange={handleFileUpload}
-                style={{ display: 'none' }}
+                style={{ display: "none" }}
                 id="fileUpload"
                 disabled={isLoading}
               />
-              <label htmlFor="fileUpload" style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                <span className="material-symbols-outlined" style={{ fontSize: '2rem', marginBottom: '0.5rem', opacity: 0.7 }}>
+              <label
+                htmlFor="fileUpload"
+                style={{
+                  cursor: "pointer",
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{
+                    fontSize: "2rem",
+                    marginBottom: "0.5rem",
+                    opacity: 0.7,
+                  }}
+                >
                   cloud_upload
                 </span>
-                <span style={{ fontSize: '0.9375rem', fontWeight: '500' }}>
+                <span style={{ fontSize: "0.9375rem", fontWeight: "500" }}>
                   Clique para selecionar arquivos
                 </span>
-                <span style={{ fontSize: '0.8125rem', opacity: 0.7, marginTop: '0.25rem' }}>
+                <span
+                  style={{
+                    fontSize: "0.8125rem",
+                    opacity: 0.7,
+                    marginTop: "0.25rem",
+                  }}
+                >
                   ou arraste e solte aqui
                 </span>
               </label>
@@ -327,12 +382,17 @@ const ProjectForm = () => {
                   <FileItem key={file.id} $isDarkMode={isDarkMode}>
                     <FileInfo>
                       <span className="material-symbols-outlined">
-                        {file.type.includes('pdf') ? 'picture_as_pdf' : 
-                         file.type.includes('image') ? 'image' : 'description'}
+                        {file.type.includes("pdf")
+                          ? "picture_as_pdf"
+                          : file.type.includes("image")
+                          ? "image"
+                          : "description"}
                       </span>
                       <div>
-                        <div style={{ fontWeight: '500' }}>{file.name}</div>
-                        <div style={{ fontSize: '0.8125rem', opacity: 0.7 }}>{file.size}</div>
+                        <div style={{ fontWeight: "500" }}>{file.name}</div>
+                        <div style={{ fontSize: "0.8125rem", opacity: 0.7 }}>
+                          {file.size}
+                        </div>
                       </div>
                     </FileInfo>
                     <FileActions>
@@ -341,7 +401,9 @@ const ProjectForm = () => {
                         onClick={() => removeFile(file.id)}
                         title="Remover arquivo"
                       >
-                        <span className="material-symbols-outlined">delete</span>
+                        <span className="material-symbols-outlined">
+                          delete
+                        </span>
                       </button>
                     </FileActions>
                   </FileItem>
@@ -358,7 +420,7 @@ const ProjectForm = () => {
 
             <ObservationsTextarea
               value={formData.observacoes}
-              onChange={(e) => handleInputChange('observacoes', e.target.value)}
+              onChange={(e) => handleInputChange("observacoes", e.target.value)}
               placeholder="Adicione observações ou notas sobre o projeto..."
               rows={4}
               $isDarkMode={isDarkMode}
@@ -381,10 +443,10 @@ const ProjectForm = () => {
               disabled={isLoading}
             >
               {isLoading
-                ? 'Salvando...'
+                ? "Salvando..."
                 : isEditing
-                ? 'Salvar Alterações'
-                : 'Criar Projeto'}
+                ? "Salvar Alterações"
+                : "Criar Projeto"}
             </SaveButton>
           </FormActions>
         </form>
