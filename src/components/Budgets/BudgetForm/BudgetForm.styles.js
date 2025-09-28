@@ -297,7 +297,7 @@ export const SummaryGrid = styled.div`
   padding: 1rem;
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceHover;
+    return theme.colors.shadow;
   }};
   border-radius: 8px;
 `;

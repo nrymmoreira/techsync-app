@@ -397,7 +397,7 @@ const BudgetForm = () => {
               />
             </FormGrid>
 
-            <SummaryGrid>
+            <SummaryGrid isDarkMode={isDarkMode}>
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Subtotal:</SummaryLabel>
                 <SummaryValue $isDarkMode={isDarkMode}>

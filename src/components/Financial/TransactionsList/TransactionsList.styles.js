@@ -1,11 +1,11 @@
-import styled from 'styled-components';
-import { getTheme } from '../../../styles/themes';
-import { fonts, breakpoints } from '../../../styles/GlobalStyles';
+import styled from "styled-components";
+import { getTheme } from "../../../styles/themes";
+import { fonts, breakpoints } from "../../../styles/GlobalStyles";
 
 export const TransactionsContainer = styled.main`
   min-height: 100vh;
   padding-top: 80px;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.background;
   }};
@@ -45,7 +45,7 @@ export const PageTitle = styled.h1`
   font-family: ${fonts.primary};
   font-size: 2rem;
   font-weight: 700;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -59,7 +59,7 @@ export const PageTitle = styled.h1`
 export const PageDescription = styled.p`
   font-family: ${fonts.secondary};
   font-size: 1rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
@@ -108,16 +108,17 @@ export const SearchInput = styled.input`
   height: 48px;
   padding: 0 1rem 0 3rem;
   box-sizing: border-box;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 2px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 2px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 8px;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -125,16 +126,16 @@ export const SearchInput = styled.input`
   font-size: 0.9375rem;
   transition: all 0.3s ease;
 
-  background-image: ${props => {
+  background-image: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    const color = theme.colors.textSecondary.replace('#', '');
+    const color = theme.colors.textSecondary.replace("#", "");
     return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%23${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cpath d='m21 21-4.35-4.35'%3E%3C/path%3E%3C/svg%3E")`;
   }};
   background-repeat: no-repeat;
   background-position: 1rem center;
 
   &::placeholder {
-    color: ${props => {
+    color: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.textSecondary;
     }};
@@ -142,14 +143,15 @@ export const SearchInput = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${props => {
+    border-color: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.primary;
     }};
-    box-shadow: 0 0 0 3px ${props => {
-      const theme = getTheme(props.$isDarkMode);
-      return theme.colors.primaryLight;
-    }};
+    box-shadow: 0 0 0 3px
+      ${(props) => {
+        const theme = getTheme(props.$isDarkMode);
+        return theme.colors.primaryLight;
+      }};
   }
 
   @media (max-width: ${breakpoints.mobile}) {
@@ -161,10 +163,11 @@ export const SearchInput = styled.input`
 export const TableContainer = styled.div`
   overflow-x: auto;
   border-radius: 12px;
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
 
   @media (max-width: ${breakpoints.mobile}) {
     margin: 0 -1rem;
@@ -176,7 +179,7 @@ export const TableContainer = styled.div`
 
 export const TransactionsTable = styled.table`
   width: 100%;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
@@ -189,13 +192,18 @@ export const TransactionsTable = styled.table`
 `;
 
 export const TableHeader = styled.thead`
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceHover;
   }};
-  border-bottom: 1px solid ${props => {
+  border-bottom: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
+    return theme.colors.textPrimary;
   }};
 `;
 
@@ -205,10 +213,6 @@ export const TableHeaderCell = styled.th`
   font-family: ${fonts.secondary};
   font-weight: 600;
   font-size: 0.875rem;
-  color: ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.textPrimary;
-  }};
 
   @media (max-width: ${breakpoints.tablet}) {
     padding: 0.75rem 0.5rem;
@@ -221,13 +225,14 @@ export const TableBody = styled.tbody``;
 export const TransactionRow = styled.tr`
   cursor: pointer;
   transition: all 0.3s ease;
-  border-bottom: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border-bottom: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
 
   &:hover {
-    background: ${props => {
+    background: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.surfaceHover;
     }};
@@ -240,7 +245,7 @@ export const TransactionRow = styled.tr`
   td {
     padding: 1rem;
     vertical-align: middle;
-    color: ${props => {
+    color: ${(props) => {
       const theme = getTheme(props.$isDarkMode);
       return theme.colors.textSecondary;
     }};
@@ -257,7 +262,7 @@ export const TransactionDescription = styled.div`
   font-family: ${fonts.secondary};
   font-weight: 600;
   font-size: 0.9375rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -271,12 +276,12 @@ export const TransactionDescription = styled.div`
 export const TransactionCategory = styled.div`
   font-family: ${fonts.secondary};
   font-size: 0.875rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};
   padding: 0.25rem 0.75rem;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surfaceHover;
   }};
@@ -288,9 +293,11 @@ export const TransactionAmount = styled.div`
   font-family: ${fonts.secondary};
   font-size: 1rem;
   font-weight: 700;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    return props.$type === 'RECEITA' ? theme.colors.success : theme.colors.error;
+    return props.$type === "RECEITA"
+      ? theme.colors.success
+      : theme.colors.error;
   }};
   text-align: right;
 
@@ -308,23 +315,23 @@ export const TransactionStatus = styled.div`
   font-family: ${fonts.secondary};
   font-size: 0.8125rem;
   font-weight: 500;
-  
-  ${props => {
+
+  ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     switch (props.$status) {
-      case 'success':
+      case "success":
         return `
           background: ${theme.colors.success}20;
           color: ${theme.colors.success};
           border: 1px solid ${theme.colors.success}40;
         `;
-      case 'warning':
+      case "warning":
         return `
           background: ${theme.colors.warning}20;
           color: ${theme.colors.warning};
           border: 1px solid ${theme.colors.warning}40;
         `;
-      case 'error':
+      case "error":
         return `
           background: ${theme.colors.error}20;
           color: ${theme.colors.error};
@@ -352,20 +359,21 @@ export const EmptyState = styled.div`
   justify-content: center;
   padding: 4rem 2rem;
   text-align: center;
-  background: ${props => {
+  background: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.surface;
   }};
-  border: 1px solid ${props => {
-    const theme = getTheme(props.$isDarkMode);
-    return theme.colors.surfaceBorder;
-  }};
+  border: 1px solid
+    ${(props) => {
+      const theme = getTheme(props.$isDarkMode);
+      return theme.colors.surfaceBorder;
+    }};
   border-radius: 12px;
 `;
 
 export const EmptyStateIcon = styled.span`
   font-size: 4rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textTertiary;
   }};
@@ -377,7 +385,7 @@ export const EmptyStateTitle = styled.h3`
   font-family: ${fonts.primary};
   font-size: 1.25rem;
   font-weight: 600;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textPrimary;
   }};
@@ -387,7 +395,7 @@ export const EmptyStateTitle = styled.h3`
 export const EmptyStateDescription = styled.p`
   font-family: ${fonts.secondary};
   font-size: 0.9375rem;
-  color: ${props => {
+  color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.textSecondary;
   }};

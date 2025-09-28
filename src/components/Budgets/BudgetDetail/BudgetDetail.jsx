@@ -77,7 +77,8 @@ const BudgetDetail = () => {
 
   const handleStatusUpdate = async () => {
     try {
-      await authService.updateBudget(id, { status: newStatus });
+      const budgetData = { ...budget, status: newStatus };
+      await authService.updateBudget(id, budgetData);
       setBudget((prev) => ({ ...prev, status: newStatus }));
     } catch (error) {
       console.error(error);
@@ -124,7 +125,7 @@ const BudgetDetail = () => {
 
   const calculateSubtotal = () => {
     return (
-      budget?.services.reduce((total, service) => total + service.value, 0) || 0
+      budget?.servicos.reduce((total, service) => total + service.value, 0) || 0
     );
   };
 
@@ -267,13 +268,13 @@ const BudgetDetail = () => {
               <InfoItem>
                 <InfoLabel $isDarkMode={isDarkMode}>Cliente</InfoLabel>
                 <InfoValue $isDarkMode={isDarkMode}>
-                  {budget.clientName}
+                  {budget.cliente.nome}
                 </InfoValue>
               </InfoItem>
               <InfoItem>
                 <InfoLabel $isDarkMode={isDarkMode}>Valor Total</InfoLabel>
                 <InfoValue $isDarkMode={isDarkMode} $isHighlight={true}>
-                  {formatCurrency(budget.totalValue)}
+                  {formatCurrency(budget.valor)}
                 </InfoValue>
               </InfoItem>
               <InfoItem>
@@ -288,13 +289,13 @@ const BudgetDetail = () => {
           <ServicesSection $isDarkMode={isDarkMode}>
             <SectionTitle $isDarkMode={isDarkMode}>Serviços</SectionTitle>
             <ServicesList>
-              {budget.services.map((service) => (
+              {budget.servicos.map((service) => (
                 <ServiceItem key={service.id} $isDarkMode={isDarkMode}>
                   <ServiceName $isDarkMode={isDarkMode}>
-                    {service.name}
+                    {service.descricao}
                   </ServiceName>
                   <ServiceValue $isDarkMode={isDarkMode}>
-                    {formatCurrency(service.value)}
+                    {formatCurrency(service.valor)}
                   </ServiceValue>
                 </ServiceItem>
               ))}
@@ -316,14 +317,14 @@ const BudgetDetail = () => {
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Desconto:</SummaryLabel>
                 <SummaryValue $isDarkMode={isDarkMode}>
-                  - {formatCurrency(budget.discount)}
+                  - {formatCurrency(0)}
                 </SummaryValue>
               </SummaryItem>
 
               <SummaryItem>
                 <SummaryLabel $isDarkMode={isDarkMode}>Total:</SummaryLabel>
                 <TotalValue $isDarkMode={isDarkMode}>
-                  {formatCurrency(budget.totalValue)}
+                  {formatCurrency(budget.valor)}
                 </TotalValue>
               </SummaryItem>
             </SummaryGrid>
