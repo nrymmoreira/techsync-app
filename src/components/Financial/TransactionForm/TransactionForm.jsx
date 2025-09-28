@@ -5,7 +5,6 @@ import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import Select from '../../Select/Select';
-import { financialService } from '../../../services/financialData';
 import { authService } from '../../../services/api';
 import {
   FormContainer,
@@ -58,7 +57,14 @@ const TransactionForm = () => {
     { value: 'PAGO', label: 'Pago' }
   ];
 
-  const expenseCategories = financialService.expenseCategories;
+  const expenseCategories = [
+    { value: 'SOFTWARE', label: 'Software e Licenças' },
+    { value: 'INFRAESTRUTURA', label: 'Infraestrutura' },
+    { value: 'SERVICOS', label: 'Serviços Terceirizados' },
+    { value: 'EQUIPAMENTOS', label: 'Equipamentos' },
+    { value: 'MARKETING', label: 'Marketing' },
+    { value: 'OUTROS', label: 'Outros' }
+  ];
 
   useEffect(() => {
     const loadProjects = async () => {
@@ -127,10 +133,10 @@ const TransactionForm = () => {
     setIsLoading(true);
 
     try {
-      // TODO: Implementar salvamento real na API
-      console.log('Salvando transação:', formData);
+      console.log('Dados do formulário:', formData);
       
-      await authService.createTransaction(formData);
+      // Aqui será implementada a integração com a API
+      // await authService.createTransaction(formData);
       
       navigate('/financeiro/transacoes');
     } catch (error) {
