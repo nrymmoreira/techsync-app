@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import Select from '../../Select/Select';
-import { financialService } from '../../../services/financialData';
 import {
   TransactionsContainer,
   TransactionsContent,
@@ -15,17 +14,6 @@ import {
   HeaderActions,
   FiltersSection,
   SearchInput,
-  TableContainer,
-  TransactionsTable,
-  TableHeader,
-  TableHeaderCell,
-  TableBody,
-  TransactionRow,
-  TransactionInfo,
-  TransactionDescription,
-  TransactionCategory,
-  TransactionAmount,
-  TransactionStatus,
   EmptyState,
   EmptyStateIcon,
   EmptyStateTitle,
@@ -35,12 +23,9 @@ import {
 const TransactionsList = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const [transactions, setTransactions] = useState([]);
-  const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [loading, setLoading] = useState(true);
 
   const typeOptions = [
     { value: 'all', label: 'Todos os tipos' },
@@ -54,109 +39,6 @@ const TransactionsList = () => {
     { value: 'PENDENTE', label: 'Pendente' },
     { value: 'VENCIDO', label: 'Vencido' }
   ];
-
-  useEffect(() => {
-    const loadTransactions = async () => {
-      try {
-        setLoading(true);
-        
-        // Buscar transações da API
-        const allTransactions = await authService.getAllTransactions();
-        
-        setTransactions(allTransactions);
-        setFilteredTransactions(allTransactions);
-      } catch (error) {
-        console.error('Erro ao carregar transações:', error);
-        // Manter arrays vazios em caso de erro
-        setTransactions([]);
-        setFilteredTransactions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadTransactions();
-  }, []);
-
-  useEffect(() => {
-    let filtered = transactions.filter((transaction) => {
-      const searchLower = searchTerm.toLowerCase().trim();
-
-      const matchesSearch = !searchLower ||
-        transaction.descricao.toLowerCase().includes(searchLower) ||
-        (transaction.projectName && transaction.projectName.toLowerCase().includes(searchLower)) ||
-        (transaction.clientName && transaction.clientName.toLowerCase().includes(searchLower));
-
-      const matchesType = typeFilter === 'all' || transaction.tipo === typeFilter;
-      const matchesStatus = statusFilter === 'all' || transaction.statusPagamento === statusFilter;
-
-      return matchesSearch && matchesType && matchesStatus;
-    });
-
-    setFilteredTransactions(filtered);
-  }, [transactions, searchTerm, typeFilter, statusFilter]);
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Pendente';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PAGO':
-        return 'success';
-      case 'PENDENTE':
-        return 'warning';
-      case 'VENCIDO':
-        return 'error';
-      default:
-        return 'info';
-    }
-  };
-
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      'PAGO': 'Pago',
-      'PENDENTE': 'Pendente',
-      'VENCIDO': 'Vencido'
-    };
-    return statusMap[status] || status;
-  };
-
-  const getCategoryLabel = (categoria) => {
-    const categoryMap = {
-      'RECEITA': 'Receita',
-      'SOFTWARE': 'Software',
-      'INFRAESTRUTURA': 'Infraestrutura',
-      'SERVICOS': 'Serviços',
-      'EQUIPAMENTOS': 'Equipamentos',
-      'MARKETING': 'Marketing',
-      'OUTROS': 'Outros'
-    };
-    return categoryMap[categoria] || categoria;
-  };
-
-  if (loading) {
-    return (
-      <TransactionsContainer $isDarkMode={isDarkMode}>
-        <Navbar />
-        <TransactionsContent>
-          <EmptyState $isDarkMode={isDarkMode}>
-            <EmptyStateIcon className="material-symbols-outlined">hourglass_empty</EmptyStateIcon>
-            <EmptyStateTitle $isDarkMode={isDarkMode}>Carregando transações...</EmptyStateTitle>
-          </EmptyState>
-        </TransactionsContent>
-      </TransactionsContainer>
-    );
-  }
 
   return (
     <TransactionsContainer $isDarkMode={isDarkMode}>
@@ -225,103 +107,25 @@ const TransactionsList = () => {
           </div>
         </FiltersSection>
 
-        {filteredTransactions.length === 0 ? (
-          <EmptyState $isDarkMode={isDarkMode}>
-            <EmptyStateIcon className="material-symbols-outlined">receipt_long</EmptyStateIcon>
-            <EmptyStateTitle $isDarkMode={isDarkMode}>
-              {searchTerm || typeFilter !== 'all' || statusFilter !== 'all'
-                ? 'Nenhuma transação encontrada'
-                : 'Nenhuma transação registrada'}
-            </EmptyStateTitle>
-            <EmptyStateDescription $isDarkMode={isDarkMode}>
-              {searchTerm || typeFilter !== 'all' || statusFilter !== 'all'
-                ? 'Tente ajustar os filtros de busca'
-                : 'Comece registrando sua primeira transação'}
-            </EmptyStateDescription>
-            {!searchTerm && typeFilter === 'all' && statusFilter === 'all' && (
-              <Button
-                variant="primary"
-                size="medium"
-                icon="add"
-                onClick={() => navigate('/financeiro/nova-transacao')}
-                $isDarkMode={isDarkMode}
-                style={{ marginTop: '1rem' }}
-              >
-                Nova Transação
-              </Button>
-            )}
-          </EmptyState>
-        ) : (
-          <TableContainer>
-            <TransactionsTable $isDarkMode={isDarkMode}>
-              <TableHeader $isDarkMode={isDarkMode}>
-                <tr>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Descrição</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Categoria</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Valor</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Status</TableHeaderCell>
-                  <TableHeaderCell $isDarkMode={isDarkMode}>Data</TableHeaderCell>
-                </tr>
-              </TableHeader>
-              <TableBody>
-                {filteredTransactions.map((transaction) => (
-                  <TransactionRow
-                    key={`${transaction.tipo}-${transaction.id}`}
-                    $isDarkMode={isDarkMode}
-                  >
-                    <td>
-                      <TransactionInfo>
-                        <TransactionDescription $isDarkMode={isDarkMode}>
-                          {transaction.descricao}
-                        </TransactionDescription>
-                        {transaction.clientName && (
-                          <div style={{ 
-                            fontSize: '0.8125rem', 
-                            color: 'inherit',
-                            opacity: 0.7,
-                            marginTop: '0.25rem'
-                          }}>
-                            Cliente: {transaction.clientName}
-                          </div>
-                        )}
-                      </TransactionInfo>
-                    </td>
-                    <td>
-                      <TransactionCategory $isDarkMode={isDarkMode}>
-                        {getCategoryLabel(transaction.categoria)}
-                      </TransactionCategory>
-                    </td>
-                    <td>
-                      <TransactionAmount 
-                        $type={transaction.tipo}
-                        $isDarkMode={isDarkMode}
-                      >
-                        {transaction.tipo === 'DESPESA' ? '-' : '+'}
-                        {formatCurrency(transaction.valor)}
-                      </TransactionAmount>
-                    </td>
-                    <td>
-                      <TransactionStatus
-                        $status={getStatusColor(transaction.statusPagamento)}
-                        $isDarkMode={isDarkMode}
-                      >
-                        {getStatusLabel(transaction.statusPagamento)}
-                      </TransactionStatus>
-                    </td>
-                    <td>
-                      <span style={{ fontSize: '0.875rem', color: 'inherit' }}>
-                        {transaction.dataPagamento ? 
-                          formatDate(transaction.dataPagamento) : 
-                          formatDate(transaction.dataVencimento)
-                        }
-                      </span>
-                    </td>
-                  </TransactionRow>
-                ))}
-              </TableBody>
-            </TransactionsTable>
-          </TableContainer>
-        )}
+        <EmptyState $isDarkMode={isDarkMode}>
+          <EmptyStateIcon className="material-symbols-outlined">receipt_long</EmptyStateIcon>
+          <EmptyStateTitle $isDarkMode={isDarkMode}>
+            Nenhuma transação registrada
+          </EmptyStateTitle>
+          <EmptyStateDescription $isDarkMode={isDarkMode}>
+            Comece registrando sua primeira transação
+          </EmptyStateDescription>
+          <Button
+            variant="primary"
+            size="medium"
+            icon="add"
+            onClick={() => navigate('/financeiro/nova-transacao')}
+            $isDarkMode={isDarkMode}
+            style={{ marginTop: '1rem' }}
+          >
+            Nova Transação
+          </Button>
+        </EmptyState>
       </TransactionsContent>
     </TransactionsContainer>
   );

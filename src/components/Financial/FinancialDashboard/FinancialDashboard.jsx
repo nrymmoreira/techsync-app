@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
 import Button from '../../Button/Button';
 import PieChart from '../../Charts/PieChart/PieChart';
 import BarChart from '../../Charts/BarChart/BarChart';
-import { financialService } from '../../../services/financialData';
 import {
   DashboardContainer,
   DashboardContent,
@@ -43,89 +42,6 @@ import {
 const FinancialDashboard = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const [metrics, setMetrics] = useState({});
-  const [chartData, setChartData] = useState({});
-  const [recentTransactions, setRecentTransactions] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const loadFinancialData = async () => {
-      try {
-        setLoading(true);
-        
-        // Carregar métricas da API
-        const metricsData = await authService.getFinancialMetrics();
-        setMetrics(metricsData);
-        
-        // Carregar dados dos gráficos da API
-        const charts = await authService.getFinancialChartData();
-        setChartData(charts);
-        
-        // Carregar transações recentes da API
-        const allTransactions = await authService.getAllTransactions();
-        
-        // Pegar apenas as 8 mais recentes
-        setRecentTransactions(allTransactions.slice(0, 8));
-      } catch (error) {
-        console.error('Erro ao carregar dados financeiros:', error);
-        setError('Erro ao carregar dados financeiros');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFinancialData();
-  }, []);
-
-  const formatCurrency = (value) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value);
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return 'Pendente';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'PAGO':
-        return 'success';
-      case 'PENDENTE':
-        return 'warning';
-      case 'VENCIDO':
-        return 'error';
-      default:
-        return 'info';
-    }
-  };
-
-  const getStatusLabel = (status) => {
-    const statusMap = {
-      'PAGO': 'Pago',
-      'PENDENTE': 'Pendente',
-      'VENCIDO': 'Vencido'
-    };
-    return statusMap[status] || status;
-  };
-
-  if (loading) {
-    return (
-      <DashboardContainer $isDarkMode={isDarkMode}>
-        <Navbar />
-        <DashboardContent>
-          <EmptyState $isDarkMode={isDarkMode}>
-            <EmptyStateIcon className="material-symbols-outlined">hourglass_empty</EmptyStateIcon>
-            <EmptyStateTitle $isDarkMode={isDarkMode}>Carregando dashboard financeiro...</EmptyStateTitle>
-          </EmptyState>
-        </DashboardContent>
-      </DashboardContainer>
-    );
-  }
 
   return (
     <DashboardContainer $isDarkMode={isDarkMode}>
@@ -169,12 +85,12 @@ const FinancialDashboard = () => {
             </MetricIcon>
             <MetricContent>
               <MetricValue $isDarkMode={isDarkMode}>
-                {formatCurrency(metrics.receitasPagas)}
+                R$ 0,00
               </MetricValue>
               <MetricLabel $isDarkMode={isDarkMode}>Receitas Recebidas</MetricLabel>
               <MetricTrend $isPositive={true} $isDarkMode={isDarkMode}>
                 <span className="material-symbols-outlined">arrow_upward</span>
-                +12% vs mês anterior
+                Aguardando dados
               </MetricTrend>
             </MetricContent>
           </MetricCard>
@@ -185,12 +101,12 @@ const FinancialDashboard = () => {
             </MetricIcon>
             <MetricContent>
               <MetricValue $isDarkMode={isDarkMode}>
-                {formatCurrency(metrics.despesasPagas)}
+                R$ 0,00
               </MetricValue>
               <MetricLabel $isDarkMode={isDarkMode}>Despesas Pagas</MetricLabel>
               <MetricTrend $isPositive={false} $isDarkMode={isDarkMode}>
                 <span className="material-symbols-outlined">arrow_downward</span>
-                +5% vs mês anterior
+                Aguardando dados
               </MetricTrend>
             </MetricContent>
           </MetricCard>
@@ -201,14 +117,12 @@ const FinancialDashboard = () => {
             </MetricIcon>
             <MetricContent>
               <MetricValue $isDarkMode={isDarkMode}>
-                {formatCurrency(metrics.lucroLiquido)}
+                R$ 0,00
               </MetricValue>
               <MetricLabel $isDarkMode={isDarkMode}>Lucro Líquido</MetricLabel>
-              <MetricTrend $isPositive={metrics.lucroLiquido > 0} $isDarkMode={isDarkMode}>
-                <span className="material-symbols-outlined">
-                  {metrics.lucroLiquido > 0 ? 'arrow_upward' : 'arrow_downward'}
-                </span>
-                Margem: {metrics.margemLucro.toFixed(1)}%
+              <MetricTrend $isPositive={true} $isDarkMode={isDarkMode}>
+                <span className="material-symbols-outlined">arrow_upward</span>
+                Margem: 0%
               </MetricTrend>
             </MetricContent>
           </MetricCard>
@@ -219,7 +133,7 @@ const FinancialDashboard = () => {
             </MetricIcon>
             <MetricContent>
               <MetricValue $isDarkMode={isDarkMode}>
-                {formatCurrency(metrics.receitasPendentes)}
+                R$ 0,00
               </MetricValue>
               <MetricLabel $isDarkMode={isDarkMode}>A Receber</MetricLabel>
               <MetricTrend $isPositive={false} $isDarkMode={isDarkMode}>
@@ -234,46 +148,30 @@ const FinancialDashboard = () => {
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Receitas vs Despesas</ChartTitle>
             <ChartContent>
-              {chartData.revenueExpenseData && chartData.revenueExpenseData.length > 0 ? (
-                <PieChart 
-                  data={chartData.revenueExpenseData} 
-                  title="Receitas vs Despesas" 
-                />
-              ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'inherit'
-                }}>
-                  Nenhum dado disponível
-                </div>
-              )}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%',
+                color: 'inherit'
+              }}>
+                Nenhum dado disponível
+              </div>
             </ChartContent>
           </ChartCard>
 
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Receitas por Projeto</ChartTitle>
             <ChartContent>
-              {chartData.projectRevenueData && chartData.projectRevenueData.length > 0 ? (
-                <BarChart 
-                  data={chartData.projectRevenueData} 
-                  title="Receitas por Projeto"
-                  dataKey="value"
-                  nameKey="name"
-                />
-              ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'inherit'
-                }}>
-                  Nenhum dado disponível
-                </div>
-              )}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%',
+                color: 'inherit'
+              }}>
+                Nenhum dado disponível
+              </div>
             </ChartContent>
           </ChartCard>
         </ChartsSection>
@@ -282,46 +180,30 @@ const FinancialDashboard = () => {
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Despesas por Categoria</ChartTitle>
             <ChartContent>
-              {chartData.expensesByCategory && chartData.expensesByCategory.length > 0 ? (
-                <PieChart 
-                  data={chartData.expensesByCategory} 
-                  title="Despesas por Categoria" 
-                />
-              ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'inherit'
-                }}>
-                  Nenhum dado disponível
-                </div>
-              )}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%',
+                color: 'inherit'
+              }}>
+                Nenhum dado disponível
+              </div>
             </ChartContent>
           </ChartCard>
 
           <ChartCard $isDarkMode={isDarkMode}>
             <ChartTitle $isDarkMode={isDarkMode}>Fluxo de Caixa</ChartTitle>
             <ChartContent>
-              {chartData.cashFlowData && chartData.cashFlowData.length > 0 ? (
-                <BarChart 
-                  data={chartData.cashFlowData} 
-                  title="Fluxo de Caixa"
-                  dataKey="lucro"
-                  nameKey="name"
-                />
-              ) : (
-                <div style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'inherit'
-                }}>
-                  Nenhum dado disponível
-                </div>
-              )}
+              <div style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                height: '100%',
+                color: 'inherit'
+              }}>
+                Nenhum dado disponível
+              </div>
             </ChartContent>
           </ChartCard>
         </ChartsSection>
@@ -329,41 +211,23 @@ const FinancialDashboard = () => {
         <RecentTransactionsSection $isDarkMode={isDarkMode}>
           <SectionTitle $isDarkMode={isDarkMode}>Transações Recentes</SectionTitle>
           
-          <TransactionsList>
-            {recentTransactions.map((transaction) => (
-              <TransactionItem
-                key={`${transaction.tipo}-${transaction.id}`}
-                $isDarkMode={isDarkMode}
-              >
-                <TransactionInfo>
-                  <TransactionDescription $isDarkMode={isDarkMode}>
-                    {transaction.descricao || `Receita - ${transaction.projectName}`}
-                  </TransactionDescription>
-                  <TransactionDate $isDarkMode={isDarkMode}>
-                    {transaction.dataPagamento ? 
-                      `Pago em ${formatDate(transaction.dataPagamento)}` : 
-                      `Vence em ${formatDate(transaction.dataVencimento)}`
-                    }
-                  </TransactionDate>
-                </TransactionInfo>
-                
-                <TransactionAmount 
-                  $type={transaction.tipo}
-                  $isDarkMode={isDarkMode}
-                >
-                  {transaction.tipo === 'DESPESA' ? '-' : '+'}
-                  {formatCurrency(transaction.valor)}
-                </TransactionAmount>
-                
-                <TransactionStatus
-                  $status={getStatusColor(transaction.statusPagamento)}
-                  $isDarkMode={isDarkMode}
-                >
-                  {getStatusLabel(transaction.statusPagamento)}
-                </TransactionStatus>
-              </TransactionItem>
-            ))}
-          </TransactionsList>
+          <EmptyState $isDarkMode={isDarkMode}>
+            <EmptyStateIcon className="material-symbols-outlined">receipt_long</EmptyStateIcon>
+            <EmptyStateTitle $isDarkMode={isDarkMode}>Nenhuma transação registrada</EmptyStateTitle>
+            <EmptyStateDescription $isDarkMode={isDarkMode}>
+              Comece registrando sua primeira transação
+            </EmptyStateDescription>
+            <Button
+              variant="primary"
+              size="medium"
+              icon="add"
+              onClick={() => navigate('/financeiro/nova-transacao')}
+              $isDarkMode={isDarkMode}
+              style={{ marginTop: '1rem' }}
+            >
+              Nova Transação
+            </Button>
+          </EmptyState>
         </RecentTransactionsSection>
       </DashboardContent>
     </DashboardContainer>
