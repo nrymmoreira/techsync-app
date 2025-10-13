@@ -24,6 +24,7 @@ import {
 } from "./Chat.styles";
 import { Radius } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { processarPergunta } from "../../services/chat";
 
 const Chat = () => {
   const { isDarkMode } = useTheme();
@@ -119,25 +120,30 @@ const Chat = () => {
   setIsTyping(true);
 
   try {
-    const response = await fetch("http://localhost:8080/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_input: text }),
+    // const response = await fetch("http://localhost:8080/chat", {
+    //   method: "POST",
+    //   headers: { "Content-Type": "application/json" },
+    //   body: JSON.stringify({ user_input: text }),
+    // });
+
+    // const data = await response.json();
+
+   
+    processarPergunta(text).then((data) => {
+      const systemMessage = {
+        id: Date.now() + 1,
+        text:
+          data ||
+          "Desculpe, não consegui entender sua pergunta.",
+        sender: "system",
+        timestamp: new Date().toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+
+      setMessages((prev) => [...prev, systemMessage]);
     });
-
-    const data = await response.json();
-
-    const systemMessage = {
-      id: Date.now() + 1,
-      text: data.candidates[0].content.parts[0].text || "Desculpe, não consegui entender sua pergunta.",
-      sender: "system",
-      timestamp: new Date().toLocaleTimeString("pt-BR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
-    setMessages((prev) => [...prev, systemMessage]);
   } catch (error) {
     console.error(error);
     setMessages((prev) => [
