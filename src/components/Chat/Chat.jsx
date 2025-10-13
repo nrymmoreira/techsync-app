@@ -119,16 +119,7 @@ const Chat = () => {
   setInputValue("");
   setIsTyping(true);
 
-  try {
-    // const response = await fetch("http://localhost:8080/chat", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ user_input: text }),
-    // });
-
-    // const data = await response.json();
-
-   
+  try {   
     processarPergunta(text).then((data) => {
       const systemMessage = {
         id: Date.now() + 1,
