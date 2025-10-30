@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useTheme } from '../../../contexts/ThemeContext';
 import { getTheme } from '../../../styles/themes';

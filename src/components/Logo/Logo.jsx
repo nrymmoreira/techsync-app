@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { LogoContainer, LogoImage } from './Logo.styles';
 
 const Logo = ({ size = 'large', ...props }) => {

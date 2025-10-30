@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import Input from "../Input/Input";
 import Button from "../Button/Button";
 import { useToast } from "../UI/toast";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
+import Layout from "../Layout/Layout";
 
 const Page = styled.div`
-  padding: 32px 24px;
+  padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
 `;
 
 const Container = styled.div`
-  max-width: 980px;
+  max-width: var(--faq-container-max-width, 980px);
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 export default function Support() {
@@ -36,12 +38,13 @@ export default function Support() {
   };
 
   return (
-    <Page>
+    <Layout>
+      <Page $isDarkMode={isDarkMode}>
       <Container>
         <h2 style={{ color: theme.colors.textPrimary }}>Solicitações de suporte</h2>
         <p style={{ color: theme.colors.textSecondary }}>Abra um chamado ou veja o status das solicitações</p>
 
-        <form onSubmit={handleSubmit} style={{ marginTop: 20, maxWidth: 720 }}>
+  <form onSubmit={handleSubmit} style={{ marginTop: 16, maxWidth: 720 }}>
           <div style={{ marginBottom: 12 }}>
             <Input
               id="support-subject"
@@ -70,6 +73,7 @@ export default function Support() {
           </div>
         </form>
       </Container>
-    </Page>
+      </Page>
+    </Layout>
   );
 }

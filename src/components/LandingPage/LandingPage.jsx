@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../contexts/ThemeContext';
 import Logo from '../Logo/Logo';

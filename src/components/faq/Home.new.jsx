@@ -1,27 +1,30 @@
-import React from "react";
+// React automatic JSX runtime in use — explicit import not required
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { BookOpen, MessageCircle, Mail } from "lucide-react";
-import SearchBar from "./SearchBar";
+// import SearchBar from "./SearchBar";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
+import Layout from "../Layout/Layout";
 
 const Page = styled.div`
-  min-height: calc(100vh - 64px);
-  padding: 48px 24px;
+  /* use navbar height variable so pages sit directly under the fixed navbar */
+  min-height: calc(100vh - var(--navbar-height, 64px));
+  padding: 24px 24px 48px; /* smaller top padding because Layout offsets by the navbar height */
   background: ${(p) => getTheme(p.$isDarkMode).colors.background};
 `;
 
 const Container = styled.div`
-  max-width: 1024px;
+  max-width: var(--faq-container-max-width, 1024px);
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 const Title = styled.h1`
   font-size: 2.5rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: rem;
   letter-spacing: -0.025em;
 
   @media (max-width: 640px) {
@@ -30,12 +33,13 @@ const Title = styled.h1`
 `;
 
 const SearchContainer = styled.div`
-  max-width: 32rem;
-  margin: 2rem auto;
+  max-width: var(--faq-search-max-width, 48rem);
+  margin: 1.25rem auto 2rem;
+  width: 100%;
 `;
 
 const Pills = styled.div`
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -60,13 +64,13 @@ const Pill = styled(Link)`
 `;
 
 const Cards = styled.div`
-  margin-top: 4rem;
+  margin-top: 2rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--faq-gap, 1.5rem);
 
   @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   }
 `;
 
@@ -74,7 +78,7 @@ const Card = styled(Link)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: var(--faq-card-padding, 1.5rem);
   border-radius: 0.75rem;
   background: ${(p) => getTheme(p.$isDarkMode).colors.surface};
   border: 1px solid ${(p) => getTheme(p.$isDarkMode).colors.surfaceBorder};
@@ -124,7 +128,8 @@ export default function FAQHome() {
   };
 
   return (
-    <Page $isDarkMode={isDarkMode}>
+    <Layout>
+      <Page $isDarkMode={isDarkMode}>
       <Container>
         <Title style={{ color: theme.colors.textPrimary }}>Central de Ajuda</Title>
 
@@ -178,6 +183,7 @@ export default function FAQHome() {
           </Card>
         </Cards>
       </Container>
-    </Page>
+      </Page>
+    </Layout>
   );
 }

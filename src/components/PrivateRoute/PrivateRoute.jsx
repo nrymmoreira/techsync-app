@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { Navigate } from 'react-router-dom';
 
 // For now, we'll simulate authentication with localStorage

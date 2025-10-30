@@ -1,21 +1,23 @@
-import React from "react";
+// React automatic JSX runtime in use — explicit import not required
 import { useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
+import Layout from "../Layout/Layout";
 
 const Page = styled.div`
-  padding: 32px 24px;
+  padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
 `;
 
 const Container = styled.div`
-  max-width: 980px;
+  max-width: var(--faq-container-max-width, 980px);
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 const Item = styled(Link)`
   display: block;
-  padding: 12px;
+  padding: var(--faq-card-padding, 12px);
   border-radius: 8px;
   background: ${(p) => p.$bg};
   margin-bottom: 8px;
@@ -35,7 +37,8 @@ export default function Category() {
   ];
 
   return (
-    <Page>
+    <Layout>
+      <Page $isDarkMode={isDarkMode}>
       <Container>
         <h2 style={{ color: theme.colors.textPrimary }}>Categoria: {category}</h2>
         <p style={{ color: theme.colors.textSecondary }}>Artigos nesta categoria</p>
@@ -48,6 +51,7 @@ export default function Category() {
           ))}
         </div>
       </Container>
-    </Page>
+      </Page>
+    </Layout>
   );
 }

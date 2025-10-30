@@ -1,22 +1,24 @@
-import React from "react";
+import { useMemo, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useToast } from "../UI/toast";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
+import Layout from "../Layout/Layout";
 
 const Page = styled.div`
-  padding: 32px 24px;
+  padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
 `;
 
 const Container = styled.div`
-  max-width: 980px;
+  max-width: var(--faq-container-max-width, 980px);
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 function useQuery() {
   const { search } = useLocation();
-  return React.useMemo(() => new URLSearchParams(search), [search]);
+  return useMemo(() => new URLSearchParams(search), [search]);
 }
 
 export default function SearchResults() {
@@ -39,7 +41,7 @@ export default function SearchResults() {
     ? dataset.filter((item) => item.title.toLowerCase().includes(q.toLowerCase()))
     : [];
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (q && results.length === 0) {
       push(`Nenhum resultado encontrado para "${q}".`, { duration: 3000, variant: 'info' });
     }
@@ -47,7 +49,8 @@ export default function SearchResults() {
   }, [q, results.length]);
 
   return (
-    <Page>
+    <Layout>
+      <Page $isDarkMode={isDarkMode}>
       <Container>
         <h2 style={{ color: theme.colors.textPrimary }}>Resultados da busca</h2>
         <p style={{ color: theme.colors.textSecondary }}>Busca: <strong>{q}</strong></p>
@@ -57,13 +60,14 @@ export default function SearchResults() {
         ) : (
           <ul>
             {results.map((r) => (
-              <li key={r.id} style={{ margin: '10px 0' }}>
+              <li key={r.id} style={{ margin: '12px 0' }}>
                 <Link to={`/faq/base-conhecimento/${r.category}/${r.id}`} style={{ color: theme.colors.primary }}>{r.title}</Link>
               </li>
             ))}
           </ul>
         )}
       </Container>
-    </Page>
+      </Page>
+    </Layout>
   );
 }

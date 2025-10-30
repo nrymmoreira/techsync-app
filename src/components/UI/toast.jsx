@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { getTheme } from '../../styles/themes';
 import { useTheme } from '../../contexts/ThemeContext';

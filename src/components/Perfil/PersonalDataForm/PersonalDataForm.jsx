@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Input from '../../Input/Input';
 import Button from '../../Button/Button';

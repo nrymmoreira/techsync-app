@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { CheckboxContainer, CheckboxInput, CheckboxLabel, CheckboxIcon } from './Checkbox.styles';
 
 const Checkbox = ({ 

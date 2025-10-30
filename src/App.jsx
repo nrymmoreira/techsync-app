@@ -1,4 +1,4 @@
-import React from "react";
+// React automatic JSX runtime in use — explicit import not required
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ThemeProvider, useTheme } from "./contexts/ThemeContext";
 import { GlobalStyle } from "./styles/GlobalStyles";

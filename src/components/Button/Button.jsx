@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { StyledButton, ButtonIcon } from './Button.styles';
 
 const Button = ({ 

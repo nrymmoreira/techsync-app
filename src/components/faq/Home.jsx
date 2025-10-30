@@ -1,24 +1,28 @@
-import React from "react";
+// React automatic JSX runtime in use — explicit import not required
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { BookOpen, MessageCircle, Mail } from "lucide-react";
 import SearchBar from "./SearchBar";
+import Layout from "../Layout/Layout";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 
 const Page = styled.div`
-  min-height: calc(100vh - 64px);
-  padding: 48px 24px;
+  /* use navbar height variable so pages sit directly under the fixed navbar */
+  min-height: calc(100vh - var(--navbar-height, 64px));
+  padding: 24px 20px 48px; /* smaller top padding because Layout already offsets by navbar height */
   background: ${(p) => getTheme(p.$isDarkMode).colors.background};
 `;
 
 const Container = styled.div`
-  max-width: 1024px;
+  max-width: var(--faq-container-max-width, 1120px);
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 const Title = styled.h1`
-  font-size: 2.5rem;
+  padding: 90px 0 20px;
+  font-size: 3.5rem;
   font-weight: bold;
   text-align: center;
   margin-bottom: 1rem;
@@ -30,16 +34,33 @@ const Title = styled.h1`
 `;
 
 const SearchContainer = styled.div`
-  max-width: 32rem;
-  margin: 2rem auto;
+  max-width: 50rem;
+  margin: 1.25rem auto 2rem;
+  width: 100%;
 `;
 
 const Pills = styled.div`
   margin-top: 2rem;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  gap: 2.5rem;
+  overflow-x: auto;
+  padding: 0.25rem 4px;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.08);
+    border-radius: 999px;
+  }
+  @media (min-width: 640px) {
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: visible;
+  }
 `;
 
 const Pill = styled(Link)`
@@ -49,9 +70,9 @@ const Pill = styled(Link)`
   border: 1px solid ${(p) => getTheme(p.$isDarkMode).colors.surfaceBorder};
   background: ${(p) => getTheme(p.$isDarkMode).colors.surface};
   color: ${(p) => getTheme(p.$isDarkMode).colors.textPrimary};
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s;
+  font-size: 0.900rem;
+  font-weight: 600;
+  transition: all 0.3s;
 
   &:hover {
     background: ${(p) => getTheme(p.$isDarkMode).colors.surfaceHover};
@@ -60,41 +81,43 @@ const Pill = styled(Link)`
 `;
 
 const Cards = styled.div`
-  margin-top: 4rem;
+  margin-top: 3rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  }
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--faq-gap, 1.25rem);
+  align-items: start;
 `;
 
 const Card = styled(Link)`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2rem;
+  padding: var(--faq-card-padding, 1.5rem);
   border-radius: 0.75rem;
   background: ${(p) => getTheme(p.$isDarkMode).colors.surface};
   border: 1px solid ${(p) => getTheme(p.$isDarkMode).colors.surfaceBorder};
   text-align: center;
   color: ${(p) => getTheme(p.$isDarkMode).colors.textPrimary};
-  transition: all 0.2s;
+  transition: transform 0.28s ease, box-shadow 0.18s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px ${(p) => getTheme(p.$isDarkMode).colors.shadow};
+    transform: translateY(-6px);
+    box-shadow: 0 10px 30px ${(p) => getTheme(p.$isDarkMode).colors.shadow};
   }
+
+  h3 { margin: 8px 0 6px; }
+  p { margin: 0; font-size: 0.9rem; }
 `;
 
 const CardIcon = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   display: inline-flex;
-  padding: 1rem;
-  border-radius: 0.5rem;
+  padding: 1.5rem;
+  border-radius: 0.6rem;
   background: ${(p) => getTheme(p.$isDarkMode).colors.primaryLight};
   color: ${(p) => getTheme(p.$isDarkMode).colors.primary};
+  align-items: center;
+  justify-content: center;
 `;
 
 export default function FAQHome() {
@@ -124,13 +147,14 @@ export default function FAQHome() {
   };
 
   return (
-    <Page>
+    <Layout>
+      <Page $isDarkMode={isDarkMode}>
       <Container>
         <Title style={{ color: theme.colors.textPrimary }}>Central de Ajuda</Title>
 
-        <div style={{ maxWidth: 640 }}>
+        <SearchContainer>
           <SearchBar />
-        </div>
+        </SearchContainer>
 
         <Pills>
           {categories.map((category) => (
@@ -166,6 +190,7 @@ export default function FAQHome() {
           </Card>
         </Cards>
       </Container>
-    </Page>
+      </Page>
+    </Layout>
   );
 }

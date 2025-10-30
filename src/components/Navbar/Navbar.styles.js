@@ -3,11 +3,14 @@ import { getTheme } from '../../styles/themes';
 import { fonts, breakpoints } from '../../styles/GlobalStyles';
 
 export const NavbarContainer = styled.nav`
+  /* expose navbar height for layouts to consume */
+  --navbar-height: 64px;
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
+  // height: var(--navbar-height);
   background: ${props => {
     const theme = getTheme(props.$isDarkMode);
     return theme.colors.background;

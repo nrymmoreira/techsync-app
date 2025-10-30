@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import styled from 'styled-components';
 import { getTheme } from '../../styles/themes';
 

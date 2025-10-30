@@ -1,4 +1,4 @@
-import React from "react";
+// React automatic JSX runtime in use — explicit import not required
 import Navbar from "../Navbar/Navbar";
 
 const Configuracoes = () => {

@@ -1,16 +1,18 @@
-import React from "react";
+// React automatic JSX runtime in use — explicit import not required
 import { useParams, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
+import Layout from "../Layout/Layout";
 
 const Page = styled.div`
-  padding: 32px 24px;
+  padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
 `;
 
 const Container = styled.div`
-  max-width: 980px;
+  max-width: var(--faq-container-max-width, 980px);
   margin: 0 auto;
+  padding: 0 16px;
 `;
 
 export default function Article() {
@@ -30,12 +32,13 @@ export default function Article() {
   ];
 
   return (
-    <Page>
+    <Layout>
+      <Page $isDarkMode={isDarkMode}>
       <Container>
         <h2 style={{ color: theme.colors.textPrimary }}>{content.title}</h2>
         <p style={{ color: theme.colors.textSecondary }}>Categoria: {category}</p>
 
-        <article style={{ marginTop: 18 }}>
+        <article style={{ marginTop: 16 }}>
           <p style={{ color: theme.colors.textPrimary }}>{content.body}</p>
         </article>
 
@@ -50,6 +53,7 @@ export default function Article() {
           </ul>
         </section>
       </Container>
-    </Page>
+      </Page>
+    </Layout>
   );
 }

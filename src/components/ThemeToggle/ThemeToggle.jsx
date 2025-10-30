@@ -1,4 +1,4 @@
-import React from 'react';
+// React automatic JSX runtime in use — explicit import not required
 import { useTheme } from '../../contexts/ThemeContext';
 import { ToggleContainer, ToggleButton, ToggleIcon } from './ThemeToggle.styles';
 
