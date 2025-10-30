@@ -23,9 +23,18 @@ import ProjectKanban from "./components/Projects/ProjectKanban/ProjectKanban";
 import FinancialDashboard from "./components/Financial/FinancialDashboard/FinancialDashboard";
 import TransactionsList from "./components/Financial/TransactionsList/TransactionsList";
 import TransactionForm from "./components/Financial/TransactionForm/TransactionForm";
+import FAQHome from "./components/FAQ/Home";
+import ToastProvider from "./components/UI/toast";
+import BaseKnowledge from "./components/FAQ/BaseKnowledge";
+import SearchResults from "./components/FAQ/SearchResults";
+import Support from "./components/FAQ/Support";
+import Category from "./components/FAQ/Category";
+import Article from "./components/FAQ/Article";
+import Question from "./components/FAQ/Question";
+import ChatAssistant from "./components/FAQ/ChatAssistant";
 
 const isAuthenticated = () => {
-  return localStorage.getItem('techsync-authenticated') === 'true';
+  return localStorage.getItem("techsync-authenticated") === "true";
 };
 
 const AppContent = () => {
@@ -191,8 +200,75 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/faq"
+          element={
+            <PrivateRoute>
+              <FAQHome />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/base-conhecimento"
+          element={
+            <PrivateRoute>
+              <BaseKnowledge />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/base-conhecimento/:category"
+          element={
+            <PrivateRoute>
+              <Category />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/base-conhecimento/:category/:article"
+          element={
+            <PrivateRoute>
+              <Article />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/base-conhecimento/:category/:article/:question"
+          element={
+            <PrivateRoute>
+              <Question />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/busca"
+          element={
+            <PrivateRoute>
+              <SearchResults />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/chat-assistente"
+          element={
+            <PrivateRoute>
+              <ChatAssistant />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/faq/suporte"
+          element={
+            <PrivateRoute>
+              <Support />
+            </PrivateRoute>
+          }
+        />
+        
+         
+
       </Routes>
-      
+
       {/* Chat disponível em todas as páginas quando logado */}
       {isAuthenticated() && <Chat />}
     </>
@@ -202,9 +278,11 @@ const AppContent = () => {
 function App() {
   return (
     <ThemeProvider>
-      <Router>
-        <AppContent />
-      </Router>
+      <ToastProvider>
+        <Router>
+          <AppContent />
+        </Router>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

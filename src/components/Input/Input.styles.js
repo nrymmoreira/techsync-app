@@ -36,8 +36,13 @@ export const InputLabel = styled.label`
 
 export const InputField = styled.input`
   width: 100%;
+  /* left padding when has icon; right padding increases if password toggle or a clear button ($hasClear) is present */
   padding: ${props => props.$hasIcon ? '0.875rem 1rem 0.875rem 3rem' : '0.875rem 1rem'};
-  padding-right: ${props => props.$isPasswordType ? '3rem' : '1rem'};
+  padding-right: ${props => {
+    if (props.$isPasswordType) return '3rem';
+    if (props.$hasClear) return '2.5rem';
+    return '1rem';
+  }};
   font-family: ${fonts.secondary};
   font-size: 1rem;
   background: ${props => {
@@ -136,7 +141,11 @@ export const InputField = styled.input`
   @media (max-width: ${breakpoints.mobile}) {
     font-size: 0.9375rem;
     padding: ${props => props.$hasIcon ? '0.75rem 0.875rem 0.75rem 2.75rem' : '0.75rem 0.875rem'};
-    padding-right: ${props => props.$isPasswordType ? '2.75rem' : '0.875rem'};
+    padding-right: ${props => {
+      if (props.$isPasswordType) return '2.75rem';
+      if (props.$hasClear) return '2.25rem';
+      return '0.875rem';
+    }};
   }
 `;
 

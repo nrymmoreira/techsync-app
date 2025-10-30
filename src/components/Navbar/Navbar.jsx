@@ -36,12 +36,15 @@ const Navbar = () => {
 
   // Carrega os dados do usuário do localStorage ao montar o componente
   useEffect(() => {
-    const storedUser = localStorage.getItem('techsync-user');
+    const storedUser = localStorage.getItem("techsync-user");
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
-        console.error("Erro ao fazer parse dos dados do usuário do localStorage:", e);
+        console.error(
+          "Erro ao fazer parse dos dados do usuário do localStorage:",
+          e
+        );
         // Opcional: Se os dados estiverem corrompidos, desloga o usuário
         handleLogout();
       }
@@ -60,29 +63,29 @@ const Navbar = () => {
 
   const menuItems = [
     {
-      id: 'home',
-      label: 'Home',
-      icon: 'dashboard',
-      path: '/home'
+      id: "home",
+      label: "Home",
+      icon: "dashboard",
+      path: "/home",
     },
     {
-      id: 'clients',
-      label: 'Clientes',
-      icon: 'group',
-      path: '/clientes'
+      id: "clients",
+      label: "Clientes",
+      icon: "group",
+      path: "/clientes",
     },
     {
-      id: 'profile',
-      label: 'Perfil',
-      icon: 'person',
-      path: '/perfil'
+      id: "profile",
+      label: "Perfil",
+      icon: "person",
+      path: "/perfil",
     },
     {
-      id: 'logout',
-      label: 'Sair',
-      icon: 'logout',
-      action: handleLogout
-    }
+      id: "logout",
+      label: "Sair",
+      icon: "logout",
+      action: handleLogout,
+    },
   ];
 
   const handleMenuItemClick = (item) => {
@@ -95,9 +98,9 @@ const Navbar = () => {
   };
 
   const handleUserDropdownClick = (action) => {
-    if (action === 'profile') {
-      navigate('/perfil');
-    } else if (action === 'logout') {
+    if (action === "profile") {
+      navigate("/perfil");
+    } else if (action === "logout") {
       handleLogout();
     }
     setIsUserDropdownOpen(false);
@@ -117,11 +120,11 @@ const Navbar = () => {
 
   // --- Funções para obter dados do usuário
   const getUserName = () => {
-    return user ? user.nome : 'Usuário'; // Retorna o nome do usuário ou um padrão
+    return user ? user.nome : "Usuário"; // Retorna o nome do usuário ou um padrão
   };
 
   const getUserAvatarInitial = () => {
-    return user && user.nome ? user.nome.charAt(0).toUpperCase() : 'U'; // Pega a primeira letra do nome
+    return user && user.nome ? user.nome.charAt(0).toUpperCase() : "U"; // Pega a primeira letra do nome
   };
   // -----------------------------------
 
@@ -129,7 +132,7 @@ const Navbar = () => {
     <>
       <NavbarContainer $isDarkMode={isDarkMode}>
         <NavbarContent>
-          <LogoSection onClick={() => navigate('/home')}>
+          <LogoSection onClick={() => navigate("/home")}>
             <LogoIcon
               className="material-symbols-outlined"
               $isDarkMode={isDarkMode}
@@ -141,44 +144,59 @@ const Navbar = () => {
 
           <NavSection>
             <NavItem
-              $active={location.pathname === '/home'}
+              $active={location.pathname === "/home"}
               $isDarkMode={isDarkMode}
-              onClick={() => navigate('/home')}
+              onClick={() => navigate("/home")}
             >
               <NavIcon className="material-symbols-outlined">dashboard</NavIcon>
               <NavText>Home</NavText>
             </NavItem>
             <NavItem
-              $active={location.pathname.startsWith('/clientes')}
+              $active={location.pathname.startsWith("/clientes")}
               $isDarkMode={isDarkMode}
-              onClick={() => navigate('/clientes')}
+              onClick={() => navigate("/clientes")}
             >
               <NavIcon className="material-symbols-outlined">group</NavIcon>
               <NavText>Clientes</NavText>
             </NavItem>
             <NavItem
-              $active={location.pathname.startsWith('/orcamentos')}
+              $active={location.pathname.startsWith("/orcamentos")}
               $isDarkMode={isDarkMode}
-              onClick={() => navigate('/orcamentos')}
+              onClick={() => navigate("/orcamentos")}
             >
-              <NavIcon className="material-symbols-outlined">receipt_long</NavIcon>
+              <NavIcon className="material-symbols-outlined">
+                receipt_long
+              </NavIcon>
               <NavText>Orçamentos</NavText>
             </NavItem>
             <NavItem
-              $active={location.pathname.startsWith('/projetos')}
+              $active={location.pathname.startsWith("/projetos")}
               $isDarkMode={isDarkMode}
-              onClick={() => navigate('/projetos')}
+              onClick={() => navigate("/projetos")}
             >
-              <NavIcon className="material-symbols-outlined">folder_managed</NavIcon>
+              <NavIcon className="material-symbols-outlined">
+                folder_managed
+              </NavIcon>
               <NavText>Projetos</NavText>
             </NavItem>
             <NavItem
-              $active={location.pathname.startsWith('/financeiro')}
+              $active={location.pathname.startsWith("/financeiro")}
               $isDarkMode={isDarkMode}
-              onClick={() => navigate('/financeiro')}
+              onClick={() => navigate("/financeiro")}
             >
-              <NavIcon className="material-symbols-outlined">account_balance_wallet</NavIcon>
+              <NavIcon className="material-symbols-outlined">
+                account_balance_wallet
+              </NavIcon>
               <NavText>Financeiro</NavText>
+            </NavItem>
+
+            <NavItem
+              $active={location.pathname.startsWith("/faq")}
+              $isDarkMode={isDarkMode}
+              onClick={() => navigate("/faq")}
+            >
+              <NavIcon className="material-symbols-outlined">help</NavIcon>
+              <NavText>FAQ</NavText>
             </NavItem>
           </NavSection>
 
@@ -192,30 +210,39 @@ const Navbar = () => {
               <span className="material-symbols-outlined">notifications</span>
             </NotificationButton>
 
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: "relative" }}>
               <UserButton
                 aria-label={`Perfil do usuário - ${getUserName()}`} // Usa o nome dinâmico
                 $isDarkMode={isDarkMode}
                 onClick={toggleUserDropdown}
               >
-                <UserAvatar $isDarkMode={isDarkMode}>{getUserAvatarInitial()}</UserAvatar> {/* Usa a inicial dinâmica */}
-                <UserName $isDarkMode={isDarkMode}>{getUserName()}</UserName> {/* Usa o nome dinâmico */}
-                <span className="material-symbols-outlined" style={{ fontSize: '1rem' }}>
-                  {isUserDropdownOpen ? 'expand_less' : 'expand_more'}
+                <UserAvatar $isDarkMode={isDarkMode}>
+                  {getUserAvatarInitial()}
+                </UserAvatar>{" "}
+                {/* Usa a inicial dinâmica */}
+                <UserName $isDarkMode={isDarkMode}>
+                  {getUserName()}
+                </UserName>{" "}
+                {/* Usa o nome dinâmico */}
+                <span
+                  className="material-symbols-outlined"
+                  style={{ fontSize: "1rem" }}
+                >
+                  {isUserDropdownOpen ? "expand_less" : "expand_more"}
                 </span>
               </UserButton>
 
               {isUserDropdownOpen && (
                 <UserDropdown $isDarkMode={isDarkMode}>
                   <UserDropdownItem
-                    onClick={() => handleUserDropdownClick('profile')}
+                    onClick={() => handleUserDropdownClick("profile")}
                     $isDarkMode={isDarkMode}
                   >
                     <span className="material-symbols-outlined">person</span>
                     Meu Perfil
                   </UserDropdownItem>
                   <UserDropdownItem
-                    onClick={() => handleUserDropdownClick('logout')}
+                    onClick={() => handleUserDropdownClick("logout")}
                     $isDarkMode={isDarkMode}
                     $isLogout={true}
                   >
@@ -232,7 +259,7 @@ const Navbar = () => {
               $isDarkMode={isDarkMode}
             >
               <span className="material-symbols-outlined">
-                {isMobileMenuOpen ? 'close' : 'menu'}
+                {isMobileMenuOpen ? "close" : "menu"}
               </span>
             </MobileMenuButton>
           </UserSection>
@@ -248,11 +275,9 @@ const Navbar = () => {
                 key={item.id}
                 onClick={() => handleMenuItemClick(item)}
                 $isDarkMode={isDarkMode}
-                $isLogout={item.id === 'logout'}
+                $isLogout={item.id === "logout"}
               >
-                <span className="material-symbols-outlined">
-                  {item.icon}
-                </span>
+                <span className="material-symbols-outlined">{item.icon}</span>
                 {item.label}
               </MobileMenuItem>
             ))}
