@@ -5,6 +5,7 @@ import { useToast } from "../UI/toast";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
+import helpContent from "../../data/helpContent";
 
 const Page = styled.div`
   padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
@@ -28,14 +29,19 @@ export default function SearchResults() {
   const { isDarkMode } = useTheme();
   const theme = getTheme(isDarkMode);
 
-  // Small in-memory dataset to simulate a search index
-  const dataset = [
-    { id: 1, title: "Como cadastrar um cliente", category: "clientes" },
-    { id: 2, title: "Criar orçamentos passo a passo", category: "orcamentos" },
-    { id: 3, title: "Configurar integrações", category: "integracoes" },
-    { id: 4, title: "Gerenciar projetos e tarefas", category: "projetos" },
-    { id: 5, title: "Emitir notas fiscais", category: "notas-fiscais" },
-  ];
+  // Build dataset from helpContent
+  const dataset = [];
+  Object.keys(helpContent).forEach((catKey) => {
+    const cat = helpContent[catKey];
+    cat.articles.forEach((a) => {
+      dataset.push({ type: 'article', category: catKey, title: a.title, slug: a.slug });
+      if (a.questions && a.questions.length) {
+        a.questions.forEach((ques, idx) => {
+          dataset.push({ type: 'question', category: catKey, title: ques.question, slug: a.slug, qIndex: idx });
+        });
+      }
+    });
+  });
 
   const results = q
     ? dataset.filter((item) => item.title.toLowerCase().includes(q.toLowerCase()))
@@ -59,9 +65,13 @@ export default function SearchResults() {
           <p style={{ color: theme.colors.textPrimary }}>Nenhum resultado encontrado.</p>
         ) : (
           <ul>
-            {results.map((r) => (
-              <li key={r.id} style={{ margin: '12px 0' }}>
-                <Link to={`/faq/base-conhecimento/${r.category}/${r.id}`} style={{ color: theme.colors.primary }}>{r.title}</Link>
+            {results.map((r, idx) => (
+              <li key={idx} style={{ margin: '12px 0' }}>
+                {r.type === 'article' ? (
+                  <Link to={`/faq/base-conhecimento/${r.category}/${r.slug}`} style={{ color: theme.colors.primary }}>{r.title}</Link>
+                ) : (
+                  <Link to={`/faq/base-conhecimento/${r.category}/${r.slug}/${r.qIndex}`} style={{ color: theme.colors.primary }}>{r.title}</Link>
+                )}
               </li>
             ))}
           </ul>

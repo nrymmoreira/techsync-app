@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
+import helpContent from "../../data/helpContent";
 
 const Page = styled.div`
   padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
@@ -39,23 +40,29 @@ export default function BaseKnowledge() {
     { id: 2, title: "Criar orçamentos passo a passo" },
     { id: 3, title: "Configurar integrações" },
   ];
+  // Build category list from helpContent
+  const categories = Object.keys(helpContent).map((key) => ({
+    slug: key,
+    title: helpContent[key].title,
+    count: helpContent[key].articles.reduce((acc, a) => acc + (a.count || 0), 0),
+  }));
 
   return (
     <Layout>
       <Page $isDarkMode={isDarkMode}>
-      <Container>
-        <h2 style={{ color: theme.colors.textPrimary }}>Base de conhecimento</h2>
-        <p style={{ color: theme.colors.textSecondary }}>Artigos e guias rápidos</p>
+        <Container>
+          <h2 style={{ color: theme.colors.textPrimary }}>Base de conhecimento</h2>
+          <p style={{ color: theme.colors.textSecondary }}>Artigos e guias rápidos</p>
 
-        <Grid>
-          {articles.map((a) => (
-            <ArticleCard key={a.id} to={`/faq/base-conhecimento/${a.id}`} $bg={theme.colors.surface}>
-              <strong style={{ color: theme.colors.textPrimary }}>{a.title}</strong>
-              <p style={{ marginTop: 8, fontSize: 13, color: theme.colors.textSecondary }}>Resumo breve do artigo</p>
-            </ArticleCard>
-          ))}
-        </Grid>
-      </Container>
+          <Grid>
+            {categories.map((c) => (
+              <ArticleCard key={c.slug} to={`/faq/base-conhecimento/${c.slug}`} $bg={theme.colors.surface}>
+                <strong style={{ color: theme.colors.textPrimary }}>{c.title}</strong>
+                <p style={{ marginTop: 8, fontSize: 13, color: theme.colors.textSecondary }}>{c.count} artigos</p>
+              </ArticleCard>
+            ))}
+          </Grid>
+        </Container>
       </Page>
     </Layout>
   );

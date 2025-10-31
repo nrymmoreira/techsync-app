@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
+import helpContent from "../../data/helpContent";
 
 const Page = styled.div`
   padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
@@ -20,16 +21,33 @@ export default function Article() {
   const { isDarkMode } = useTheme();
   const theme = getTheme(isDarkMode);
 
-  // Placeholder article content
-  const content = {
-    title: `Artigo ${article}`,
-    body: `Este é o conteúdo do artigo ${article} da categoria ${category}. Aqui você teria instruções, imagens e exemplos.`,
-  };
+  const categoryData = helpContent[category];
 
-  const questions = [
-    { id: "q1", text: "Como faço para X?" },
-    { id: "q2", text: "Por que Y acontece?" },
-  ];
+  if (!categoryData) {
+    return (
+      <Layout>
+        <Page $isDarkMode={isDarkMode}>
+          <Container>
+            <p style={{ color: theme.colors.textPrimary }}>Categoria não encontrada.</p>
+          </Container>
+        </Page>
+      </Layout>
+    );
+  }
+
+  const articleData = categoryData.articles.find((a) => a.slug === article);
+
+  if (!articleData) {
+    return (
+      <Layout>
+        <Page $isDarkMode={isDarkMode}>
+          <Container>
+            <p style={{ color: theme.colors.textPrimary }}>Artigo não encontrado.</p>
+          </Container>
+        </Page>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -39,15 +57,15 @@ export default function Article() {
         <p style={{ color: theme.colors.textSecondary }}>Categoria: {category}</p>
 
         <article style={{ marginTop: 16 }}>
-          <p style={{ color: theme.colors.textPrimary }}>{content.body}</p>
+          <p style={{ color: theme.colors.textPrimary }}>{articleData.questions && articleData.questions.length > 0 ? articleData.questions[0].answer : 'Nenhum conteúdo disponível.'}</p>
         </article>
 
         <section style={{ marginTop: 24 }}>
           <h3 style={{ color: theme.colors.textPrimary }}>Perguntas relacionadas</h3>
           <ul>
-            {questions.map((q) => (
-              <li key={q.id} style={{ margin: '8px 0' }}>
-                <Link to={`/faq/base-conhecimento/${category}/${article}/${q.id}`} style={{ color: theme.colors.primary }}>{q.text}</Link>
+            {articleData.questions.map((q, idx) => (
+              <li key={idx} style={{ margin: '8px 0' }}>
+                <Link to={`/faq/base-conhecimento/${category}/${article}/${idx}`} style={{ color: theme.colors.primary }}>{q.question}</Link>
               </li>
             ))}
           </ul>

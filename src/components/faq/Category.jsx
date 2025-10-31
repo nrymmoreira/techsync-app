@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
+import helpContent from "../../data/helpContent";
 
 const Page = styled.div`
   padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
@@ -30,11 +31,10 @@ export default function Category() {
   const theme = getTheme(isDarkMode);
 
   // Placeholder data
-  const articles = [
-    { id: "1", title: "Como usar a funcionalidade X" },
-    { id: "2", title: "Melhores práticas para Y" },
-    { id: "3", title: "Resolução de problemas comuns" },
-  ];
+  const categoryKey = category;
+  const data = helpContent[categoryKey];
+
+  const articles = data ? data.articles : [];
 
   return (
     <Layout>
@@ -44,11 +44,15 @@ export default function Category() {
         <p style={{ color: theme.colors.textSecondary }}>Artigos nesta categoria</p>
 
         <div style={{ marginTop: 16 }}>
-          {articles.map((a) => (
-            <Item key={a.id} to={`/faq/base-conhecimento/${category}/${a.id}`} $bg={theme.colors.surface}>
-              <strong style={{ color: theme.colors.textPrimary }}>{a.title}</strong>
-            </Item>
-          ))}
+          {articles.length === 0 ? (
+            <p style={{ color: theme.colors.textPrimary }}>Categoria não encontrada.</p>
+          ) : (
+            articles.map((a) => (
+              <Item key={a.slug} to={`/faq/base-conhecimento/${category}/${a.slug}`} $bg={theme.colors.surface}>
+                <strong style={{ color: theme.colors.textPrimary }}>{a.title}</strong>
+              </Item>
+            ))
+          )}
         </div>
       </Container>
       </Page>
