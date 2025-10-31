@@ -5,6 +5,8 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
 import helpContent from "../../data/helpContent";
+import { ChevronRight } from "lucide-react";
+import SearchBar from "./SearchBar";
 
 const Page = styled.div`
   padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
@@ -40,7 +42,18 @@ export default function Category() {
     <Layout>
       <Page $isDarkMode={isDarkMode}>
       <Container>
-        <h2 style={{ color: theme.colors.textPrimary }}>Categoria: {category}</h2>
+        <div className="mb-8">
+          <SearchBar />
+        </div>
+        <nav style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', color: theme.colors.textSecondary }}>
+          <Link to="/" style={{ color: theme.colors.textSecondary }}>Home</Link>
+          <ChevronRight size={14} />
+          <Link to="/faq" style={{ color: theme.colors.textSecondary }}>FAQ</Link>
+          <ChevronRight size={14} />
+          <span style={{ color: theme.colors.textPrimary }}>{data ? data.title : category}</span>
+        </nav>
+
+        <h2 style={{ color: theme.colors.textPrimary }}>{data ? data.title : `Categoria: ${category}`}</h2>
         <p style={{ color: theme.colors.textSecondary }}>Artigos nesta categoria</p>
 
         <div style={{ marginTop: 16 }}>
