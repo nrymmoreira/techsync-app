@@ -295,7 +295,7 @@ export const TransactionAmount = styled.div`
   font-weight: 700;
   color: ${(props) => {
     const theme = getTheme(props.$isDarkMode);
-    return props.$type === "RECEITA"
+    return props.$type === "ENTRADA"
       ? theme.colors.success
       : theme.colors.error;
   }};
@@ -390,6 +390,12 @@ export const EmptyStateTitle = styled.h3`
     return theme.colors.textPrimary;
   }};
   margin-bottom: 0.5rem;
+`;
+
+export const ActionButtons = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
 `;
 
 export const EmptyStateDescription = styled.p`

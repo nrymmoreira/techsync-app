@@ -11,6 +11,7 @@ const funcoesDisponiveis = [
   "getAllProjects",
   "getAllBudgets",
   "getAllTasks",
+  "getAllTransactions",
 ];
 
 async function identificarFuncoes(perguntaUsuario) {

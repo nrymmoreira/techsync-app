@@ -340,7 +340,7 @@ export const TransactionAmount = styled.div`
   font-weight: 700;
   color: ${props => {
     const theme = getTheme(props.$isDarkMode);
-    return props.$type === 'RECEITA' ? theme.colors.success : theme.colors.error;
+    return props.$type === 'ENTRADA' ? theme.colors.success : theme.colors.error;
   }};
   text-align: right;
 

@@ -39,6 +39,7 @@ const isAuthenticated = () => {
 
 const AppContent = () => {
   const { isDarkMode } = useTheme();
+  const routerWithChatPaths = ["/", "login", "/cadastro"];
 
   return (
     <>
@@ -193,7 +194,7 @@ const AppContent = () => {
           }
         />
         <Route
-          path="/financeiro/transacoes/:id/editar"
+          path="/financeiro/transacao/:id"
           element={
             <PrivateRoute>
               <TransactionForm />
@@ -264,13 +265,11 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
-        
-         
-
       </Routes>
 
       {/* Chat disponível em todas as páginas quando logado */}
-      {isAuthenticated() && <Chat />}
+      {isAuthenticated() &&
+        !routerWithChatPaths.includes(window.location.pathname) && <Chat />}
     </>
   );
 };

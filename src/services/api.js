@@ -41,7 +41,43 @@ api.interceptors.response.use(
   }
 );
 
+export const financialService = {
+  getAllTransactions: async () => {
+    const response = await api.get("/api/financeiro");
+    return response.data;
+  },
+
+  getTransactionById: async (id) => {
+    const response = await api.get(`/api/financeiro/${id}`);
+    return response.data;
+  },
+
+  createTransaction: async (transactionData) => {
+    const response = await api.post("/api/financeiro", transactionData);
+    return response.data;
+  },
+
+  updateTransaction: async (id, transactionData) => {
+    const response = await api.put(`/api/financeiro/${id}`, transactionData);
+    return response.data;
+  },
+
+  deleteTransaction: async (id) => {
+    await api.delete(`/api/financeiro/${id}`);
+  },
+
+  generateInvoiceNumber: () => {
+    // Gerando um número de nota fiscal temporário (simulado)
+    const date = new Date();
+    const timestamp = date.getTime();
+    const random = Math.floor(Math.random() * 1000);
+    return `NF-${timestamp}-${random}`;
+  }
+};
+
 export const authService = {
+
+  ...financialService,
   // --- NOVA FUNÇÃO QUE ORQUESTRA O REGISTO COMPLETO ---
   registerAndCreateCompany: async (userData, companyData) => {
     try {

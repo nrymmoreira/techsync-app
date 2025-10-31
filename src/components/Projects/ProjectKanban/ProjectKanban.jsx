@@ -197,6 +197,7 @@ const ProjectKanban = () => {
       descricao: "",
       prioridade: "MEDIA",
       dataTermino: "",
+      dataInicio: "",
       status: columnId,
     });
     setEditingTask(null);
@@ -251,14 +252,25 @@ const ProjectKanban = () => {
         });
       } else {
         // Criar na API
-        const createdTask = await authService.createTask(project.id, newTask);
+        const createdTask = await authService.createTask(project.id,  );
+
+        // Normalizar o objeto da tarefa para o estado
+        const newTaskForState = {
+          id: String(createdTask.id),
+          nome: createdTask.nome,
+          descricao: createdTask.descricao || "",
+          prioridade: createdTask.prioridade,
+          dataInicio: createdTask.dataInicio || "",
+          dataTermino: createdTask.dataTermino || "",
+          status: createdTask.status,
+        };
 
         // Atualizar estado local
         setTasks((prev) => ({
           ...prev,
-          [createdTask.status]: [
-            { ...createdTask, id: String(createdTask.id) },
-            ...(prev[createdTask.status] || []),
+          [newTaskForState.status]: [
+            newTaskForState,
+            ...(prev[newTaskForState.status] || []),
           ],
         }));
       }

@@ -2,10 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTheme } from '../../../contexts/ThemeContext';
 import Navbar from '../../Navbar/Navbar';
-import Button from '../../Button/Button';
 import Input from '../../Input/Input';
 import Select from '../../Select/Select';
-import { authService } from '../../../services/api';
+import { authService, financialService } from '../../../services/api';
 import {
   FormContainer,
   FormContent,
@@ -30,135 +29,117 @@ const TransactionForm = () => {
   const isEditing = Boolean(id);
 
   const [formData, setFormData] = useState({
-    tipo: 'DESPESA',
-    descricao: '',
+    nomeTransacao: '',
     valor: '',
-    categoria: '',
-    projectId: '',
-    dataVencimento: '',
-    dataPagamento: '',
-    statusPagamento: 'PENDENTE',
-    recorrente: false
+    tipo: 'ENTRADA',
+    dataTransacao: '',
+    clienteId: '',
   });
 
+  const [clients, setClients] = useState([]);
   const [errors, setErrors] = useState({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [projectOptions, setProjectOptions] = useState([
-    { value: '', label: 'Selecione um projeto (opcional)' }
-  ]);
+  const [isLoading, setIsLoading] = useState(isEditing); // Start loading if editing
 
   const typeOptions = [
-    { value: 'RECEITA', label: 'Receita' },
-    { value: 'DESPESA', label: 'Despesa' }
-  ];
-
-  const statusOptions = [
-    { value: 'PENDENTE', label: 'Pendente' },
-    { value: 'PAGO', label: 'Pago' }
-  ];
-
-  const expenseCategories = [
-    { value: 'SOFTWARE', label: 'Software e Licenças' },
-    { value: 'INFRAESTRUTURA', label: 'Infraestrutura' },
-    { value: 'SERVICOS', label: 'Serviços Terceirizados' },
-    { value: 'EQUIPAMENTOS', label: 'Equipamentos' },
-    { value: 'MARKETING', label: 'Marketing' },
-    { value: 'OUTROS', label: 'Outros' }
+    { value: 'ENTRADA', label: 'Entrada' },
+    { value: 'SAIDA', label: 'Saída' }
   ];
 
   useEffect(() => {
-    const loadProjects = async () => {
+    const loadInitialData = async () => {
       try {
-        const projects = await authService.getAllProjects();
-        setProjectOptions([
-          { value: '', label: 'Selecione um projeto (opcional)' },
-          ...projects.map(p => ({ 
-            value: String(p.id), 
-            label: p.nome 
-          }))
-        ]);
+        const clientsData = await authService.getAllClients();
+        setClients(clientsData || []);
+
+        if (isEditing) {
+          const transaction = await financialService.getTransactionById(id);
+          const formattedDate = transaction.dataTransacao 
+            ? transaction.dataTransacao.split('T')[0] 
+            : '';
+
+          setFormData({
+            nomeTransacao: transaction.nomeTransacao || '',
+            valor: transaction.valor || '',
+            tipo: transaction.tipo || 'ENTRADA',
+            dataTransacao: formattedDate,
+            clienteId: transaction.cliente?.id || '',
+          });
+        }
       } catch (error) {
-        console.error('Erro ao carregar projetos:', error);
+        console.error('Erro ao carregar dados:', error);
+        setErrors({ api: 'Falha ao carregar os dados. Tente novamente.' });
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    loadProjects();
-  }, []);
+    loadInitialData();
+  }, [id, isEditing]);
 
   const validateForm = () => {
     const newErrors = {};
-
-    if (!formData.descricao.trim()) {
-      newErrors.descricao = 'Descrição é obrigatória';
-    }
-
-    if (!formData.valor || parseFloat(formData.valor) <= 0) {
-      newErrors.valor = 'Valor deve ser maior que zero';
-    }
-
-    if (formData.tipo === 'DESPESA' && !formData.categoria) {
-      newErrors.categoria = 'Categoria é obrigatória para despesas';
-    }
-
-    if (!formData.dataVencimento) {
-      newErrors.dataVencimento = 'Data de vencimento é obrigatória';
-    }
-
-    if (formData.statusPagamento === 'PAGO' && !formData.dataPagamento) {
-      newErrors.dataPagamento = 'Data de pagamento é obrigatória quando status é "Pago"';
-    }
-
+    if (!formData.nomeTransacao.trim()) newErrors.nomeTransacao = 'O nome da transação é obrigatório';
+    if (!formData.valor || parseFloat(formData.valor) <= 0) newErrors.valor = 'O valor deve ser maior que zero';
+    if (!formData.dataTransacao) newErrors.dataTransacao = 'A data da transação é obrigatória';
+    if (!formData.clienteId) newErrors.clienteId = 'É obrigatório selecionar um cliente';
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
-    }
-
-    // Limpar data de pagamento se status não for PAGO
-    if (field === 'statusPagamento' && value !== 'PAGO') {
-      setFormData(prev => ({ ...prev, dataPagamento: '' }));
+      setErrors(prev => ({ ...prev, [field]: null }));
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!validateForm()) return;
 
     setIsLoading(true);
 
+    const selectedClient = clients.find(c => c.id === parseInt(formData.clienteId));
+    if (!selectedClient) {
+      setErrors({ api: 'Cliente selecionado não é válido.' });
+      setIsLoading(false);
+      return;
+    }
+
+    const transactionPayload = {
+      ...formData,
+      valor: parseFloat(formData.valor),
+      cliente: selectedClient,
+      numeroNotaFiscal: isEditing ? formData.numeroNotaFiscal : financialService.generateInvoiceNumber(),
+    };
+
     try {
-      console.log('Dados do formulário:', formData);
-      
-      // Aqui será implementada a integração com a API
-      // await authService.createTransaction(formData);
-      
+      if (isEditing) {
+        await financialService.updateTransaction(id, transactionPayload);
+      } else {
+        await financialService.createTransaction(transactionPayload);
+      }
       navigate('/financeiro/transacoes');
     } catch (error) {
-      setErrors({ api: 'Erro ao salvar transação' });
+      console.error('Erro ao salvar transação:', error);
+      setErrors({ api: 'Erro ao salvar a transação. Tente novamente.' });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleCancel = () => {
-    navigate('/financeiro/transacoes');
-  };
+  const clientOptions = clients.map(client => ({
+    value: client.id,
+    label: client.nome
+  }));
 
   return (
     <FormContainer $isDarkMode={isDarkMode}>
       <Navbar />
       <FormContent>
         <FormHeader>
-          <BackButton
-            onClick={() => navigate('/financeiro/transacoes')}
-            $isDarkMode={isDarkMode}
-          >
+          <BackButton onClick={() => navigate('/financeiro/transacoes')} $isDarkMode={isDarkMode}>
             <span className="material-symbols-outlined">arrow_back</span>
           </BackButton>
           <HeaderContent>
@@ -166,164 +147,101 @@ const TransactionForm = () => {
               {isEditing ? 'Editar Transação' : 'Nova Transação'}
             </PageTitle>
             <PageDescription $isDarkMode={isDarkMode}>
-              {isEditing
-                ? 'Atualize as informações da transação'
-                : 'Registre uma nova receita ou despesa'}
+              {isEditing ? 'Atualize as informações da transação' : 'Registre uma nova entrada ou saída'}
             </PageDescription>
           </HeaderContent>
         </FormHeader>
 
-        <form onSubmit={handleSubmit}>
-          <FormSection $isDarkMode={isDarkMode}>
-            <SectionTitle $isDarkMode={isDarkMode}>
-              Informações da Transação
-            </SectionTitle>
-            <SectionDescription $isDarkMode={isDarkMode}>
-              Dados principais da receita ou despesa
-            </SectionDescription>
+        {isLoading ? (
+          <p>Carregando dados da transação...</p>
+        ) : errors.api ? (
+          <div style={{ color: '#ef4444', fontSize: '0.8125rem', marginBottom: '1rem' }}>
+            {errors.api}
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            <FormSection $isDarkMode={isDarkMode}>
+              <SectionTitle $isDarkMode={isDarkMode}>Informações da Transação</SectionTitle>
+              <SectionDescription $isDarkMode={isDarkMode}>
+                Preencha os dados principais da transação financeira.
+              </SectionDescription>
 
-            {errors.api && (
-              <div style={{ color: '#ef4444', fontSize: '0.8125rem', marginBottom: '1rem' }}>
-                {errors.api}
-              </div>
-            )}
-
-            <FormGrid>
-              <Select
-                id="tipo"
-                label="Tipo"
-                value={formData.tipo}
-                onChange={(e) => handleInputChange('tipo', e.target.value)}
-                options={typeOptions}
-                error={errors.tipo}
-                required
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              <Input
-                id="descricao"
-                label="Descrição"
-                type="text"
-                value={formData.descricao}
-                onChange={(e) => handleInputChange('descricao', e.target.value)}
-                error={errors.descricao}
-                placeholder="Ex: Pagamento de hospedagem"
-                icon="description"
-                required
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              <Input
-                id="valor"
-                label="Valor"
-                type="number"
-                step="0.01"
-                min="0"
-                value={formData.valor}
-                onChange={(e) => handleInputChange('valor', e.target.value)}
-                error={errors.valor}
-                placeholder="0,00"
-                icon="attach_money"
-                required
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              {formData.tipo === 'DESPESA' && (
-                <Select
-                  id="categoria"
-                  label="Categoria"
-                  value={formData.categoria}
-                  onChange={(e) => handleInputChange('categoria', e.target.value)}
-                  options={expenseCategories}
-                  error={errors.categoria}
-                  placeholder="Selecione uma categoria"
-                  required
-                  $isDarkMode={isDarkMode}
-                  disabled={isLoading}
-                />
-              )}
-
-              {formData.tipo === 'RECEITA' && (
-                <Select
-                  id="projectId"
-                  label="Projeto"
-                  value={formData.projectId}
-                  onChange={(e) => handleInputChange('projectId', e.target.value)}
-                  options={projectOptions}
-                  error={errors.projectId}
-                  placeholder="Selecione um projeto"
-                  $isDarkMode={isDarkMode}
-                  disabled={isLoading}
-                />
-              )}
-
-              <Input
-                id="dataVencimento"
-                label="Data de Vencimento"
-                type="date"
-                value={formData.dataVencimento}
-                onChange={(e) => handleInputChange('dataVencimento', e.target.value)}
-                error={errors.dataVencimento}
-                icon="event"
-                required
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              <Select
-                id="statusPagamento"
-                label="Status do Pagamento"
-                value={formData.statusPagamento}
-                onChange={(e) => handleInputChange('statusPagamento', e.target.value)}
-                options={statusOptions}
-                error={errors.statusPagamento}
-                required
-                $isDarkMode={isDarkMode}
-                disabled={isLoading}
-              />
-
-              {formData.statusPagamento === 'PAGO' && (
+              <FormGrid>
                 <Input
-                  id="dataPagamento"
-                  label="Data de Pagamento"
-                  type="date"
-                  value={formData.dataPagamento}
-                  onChange={(e) => handleInputChange('dataPagamento', e.target.value)}
-                  error={errors.dataPagamento}
-                  icon="event_available"
+                  id="nomeTransacao"
+                  label="Nome da Transação"
+                  type="text"
+                  value={formData.nomeTransacao}
+                  onChange={(e) => handleInputChange('nomeTransacao', e.target.value)}
+                  error={errors.nomeTransacao}
+                  placeholder="Ex: Recebimento de projeto X"
                   required
                   $isDarkMode={isDarkMode}
                   disabled={isLoading}
                 />
-              )}
-            </FormGrid>
-          </FormSection>
+                <Input
+                  id="valor"
+                  label="Valor"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.valor}
+                  onChange={(e) => handleInputChange('valor', e.target.value)}
+                  error={errors.valor}
+                  placeholder="0,00"
+                  icon="attach_money"
+                  required
+                  $isDarkMode={isDarkMode}
+                  disabled={isLoading}
+                />
+                <Select
+                  id="tipo"
+                  label="Tipo"
+                  value={formData.tipo}
+                  onChange={(e) => handleInputChange('tipo', e.target.value)}
+                  options={typeOptions}
+                  error={errors.tipo}
+                  required
+                  $isDarkMode={isDarkMode}
+                  disabled={isLoading}
+                />
+                <Input
+                  id="dataTransacao"
+                  label="Data da Transação"
+                  type="date"
+                  value={formData.dataTransacao}
+                  onChange={(e) => handleInputChange('dataTransacao', e.target.value)}
+                  error={errors.dataTransacao}
+                  icon="event"
+                  required
+                  $isDarkMode={isDarkMode}
+                  disabled={isLoading}
+                />
+                <Select
+                  id="clienteId"
+                  label="Cliente"
+                  value={formData.clienteId}
+                  onChange={(e) => handleInputChange('clienteId', e.target.value)}
+                  options={clientOptions}
+                  error={errors.clienteId}
+                  required
+                  $isDarkMode={isDarkMode}
+                  disabled={isLoading || !clients.length}
+                  placeholder="Selecione um cliente"
+                />
+              </FormGrid>
+            </FormSection>
 
-          <FormActions>
-            <CancelButton
-              type="button"
-              onClick={handleCancel}
-              $isDarkMode={isDarkMode}
-              disabled={isLoading}
-            >
-              Cancelar
-            </CancelButton>
-            <SaveButton
-              type="submit"
-              $isDarkMode={isDarkMode}
-              disabled={isLoading}
-            >
-              {isLoading
-                ? 'Salvando...'
-                : isEditing
-                ? 'Salvar Alterações'
-                : 'Salvar Transação'}
-            </SaveButton>
-          </FormActions>
-        </form>
+            <FormActions>
+              <CancelButton type="button" onClick={() => navigate('/financeiro/transacoes')} $isDarkMode={isDarkMode} disabled={isLoading}>
+                Cancelar
+              </CancelButton>
+              <SaveButton type="submit" $isDarkMode={isDarkMode} disabled={isLoading}>
+                {isLoading ? 'Salvando...' : (isEditing ? 'Salvar Alterações' : 'Salvar Transação')}
+              </SaveButton>
+            </FormActions>
+          </form>
+        )}
       </FormContent>
     </FormContainer>
   );

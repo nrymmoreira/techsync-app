@@ -4,7 +4,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import Navbar from "../../Navbar/Navbar";
 import Button from "../../Button/Button";
 import PieChart from "../../Charts/PieChart/PieChart";
-import { authService } from "../../../services/api";
+import { financialService } from "../../../services/api";
 import {
   DashboardContainer,
   DashboardContent,
@@ -32,7 +32,6 @@ import {
   TransactionDescription,
   TransactionDate,
   TransactionAmount,
-  TransactionStatus,
   EmptyState,
   EmptyStateIcon,
   EmptyStateTitle,
@@ -50,7 +49,7 @@ const FinancialDashboard = () => {
     const fetchTransactions = async () => {
       try {
         setLoading(true);
-        const data = await authService.getAllBudgets();
+        const data = await financialService.getAllTransactions();
         setTransactions(data || []);
         setError(null);
       } catch (err) {
@@ -67,56 +66,39 @@ const FinancialDashboard = () => {
   const formatCurrency = (value) =>
     value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "PAGO":
-        return "success";
-      case "PENDENTE":
-        return "warning";
-      case "VENCIDO":
-        return "error";
-      default:
-        return "info";
-    }
-  };
-
   const financialMetrics = useMemo(() => {
     if (!transactions || transactions.length === 0) {
-      return {
-        receitasPagas: 0,
-        lucroLiquido: 0,
-        aReceber: 0,
-        margemLucro: 0,
-      };
+      return { totalEntradas: 0, totalSaidas: 0, lucroLiquido: 0, margemLucro: 0 };
     }
 
-    const receitasPagas = transactions
-      .filter((t) => t.status === "pago")
+    const totalEntradas = transactions
+      .filter((t) => t.tipo === "ENTRADA")
       .reduce((acc, t) => acc + t.valor, 0);
 
-    const lucroLiquido = receitasPagas ;
-
-    const aReceber = transactions
-      .filter((t) => t.status === "PENDENTE")
+    const totalSaidas = transactions
+      .filter((t) => t.tipo === "SAIDA")
       .reduce((acc, t) => acc + t.valor, 0);
 
-    const margemLucro = receitasPagas > 0 ? (lucroLiquido / receitasPagas) * 100 : 0;
+    const lucroLiquido = totalEntradas - totalSaidas;
+    const margemLucro = totalEntradas > 0 ? (lucroLiquido / totalEntradas) * 100 : 0;
 
-    return { receitasPagas, lucroLiquido, aReceber, margemLucro };
+    return { totalEntradas, totalSaidas, lucroLiquido, margemLucro };
   }, [transactions]);
 
-  const receitasPorProjeto = useMemo(() => {
+  const receitasPorCliente = useMemo(() => {
     if (!transactions) return [];
-    const porProjeto = transactions.reduce((acc, curr) => {
-      const projetoNome = curr.cliente.nome;
-      if (!acc[projetoNome]) {
-        acc[projetoNome] = 0;
-      }
-      acc[projetoNome] += curr.valor;
-      return acc;
-    }, {});
+    const porCliente = transactions
+      .filter(t => t.tipo === 'ENTRADA')
+      .reduce((acc, curr) => {
+        const clienteNome = curr.cliente.nome;
+        if (!acc[clienteNome]) {
+          acc[clienteNome] = 0;
+        }
+        acc[clienteNome] += curr.valor;
+        return acc;
+      }, {});
 
-    return Object.entries(porProjeto).map(([name, value]) => ({ name, value }));
+    return Object.entries(porCliente).map(([name, value]) => ({ name, value }));
   }, [transactions]);
 
   const recentTransactions = transactions.slice(0, 5);
@@ -138,7 +120,7 @@ const FinancialDashboard = () => {
             <div>
               <PageTitle $isDarkMode={isDarkMode}>Dashboard Financeiro</PageTitle>
               <PageDescription $isDarkMode={isDarkMode}>
-                Acompanhe receitas e a saúde financeira dos seus projetos
+                Acompanhe as entradas, saídas e a saúde financeira da sua empresa.
               </PageDescription>
             </div>
             <HeaderActions>
@@ -176,25 +158,25 @@ const FinancialDashboard = () => {
           <>
             <MetricsGrid>
               <MetricCard $isDarkMode={isDarkMode}>
-                <MetricIcon className="material-symbols-outlined" $color="success">
-                  trending_up
-                </MetricIcon>
+                <MetricIcon className="material-symbols-outlined" $color="success">trending_up</MetricIcon>
                 <MetricContent>
-                  <MetricValue $isDarkMode={isDarkMode}>
-                    {formatCurrency(financialMetrics.receitasPagas)}
-                  </MetricValue>
-                  <MetricLabel $isDarkMode={isDarkMode}>Receitas Recebidas</MetricLabel>
+                  <MetricValue $isDarkMode={isDarkMode}>{formatCurrency(financialMetrics.totalEntradas)}</MetricValue>
+                  <MetricLabel $isDarkMode={isDarkMode}>Total de Entradas</MetricLabel>
                 </MetricContent>
               </MetricCard>
 
               <MetricCard $isDarkMode={isDarkMode}>
-                <MetricIcon className="material-symbols-outlined" $color="primary">
-                  account_balance_wallet
-                </MetricIcon>
+                <MetricIcon className="material-symbols-outlined" $color="error">trending_down</MetricIcon>
                 <MetricContent>
-                  <MetricValue $isDarkMode={isDarkMode}>
-                    {formatCurrency(financialMetrics.lucroLiquido)}
-                  </MetricValue>
+                  <MetricValue $isDarkMode={isDarkMode}>{formatCurrency(financialMetrics.totalSaidas)}</MetricValue>
+                  <MetricLabel $isDarkMode={isDarkMode}>Total de Saídas</MetricLabel>
+                </MetricContent>
+              </MetricCard>
+
+              <MetricCard $isDarkMode={isDarkMode}>
+                <MetricIcon className="material-symbols-outlined" $color="primary">account_balance_wallet</MetricIcon>
+                <MetricContent>
+                  <MetricValue $isDarkMode={isDarkMode}>{formatCurrency(financialMetrics.lucroLiquido)}</MetricValue>
                   <MetricLabel $isDarkMode={isDarkMode}>Lucro Líquido</MetricLabel>
                   <MetricTrend $isPositive={financialMetrics.margemLucro >= 0} $isDarkMode={isDarkMode}>
                     <span className="material-symbols-outlined">
@@ -204,26 +186,14 @@ const FinancialDashboard = () => {
                   </MetricTrend>
                 </MetricContent>
               </MetricCard>
-
-              <MetricCard $isDarkMode={isDarkMode}>
-                <MetricIcon className="material-symbols-outlined" $color="warning">
-                  schedule
-                </MetricIcon>
-                <MetricContent>
-                  <MetricValue $isDarkMode={isDarkMode}>
-                    {formatCurrency(financialMetrics.aReceber)}
-                  </MetricValue>
-                  <MetricLabel $isDarkMode={isDarkMode}>A Receber</MetricLabel>
-                </MetricContent>
-              </MetricCard>
             </MetricsGrid>
 
             <ChartsSection>
               <ChartCard $isDarkMode={isDarkMode}>
                 <ChartTitle $isDarkMode={isDarkMode}>Receitas por Cliente</ChartTitle>
                 <ChartContent>
-                  {receitasPorProjeto.length > 0 ? (
-                    <PieChart data={receitasPorProjeto} isDarkMode={isDarkMode} />
+                  {receitasPorCliente.length > 0 ? (
+                    <PieChart data={receitasPorCliente} isDarkMode={isDarkMode} />
                   ) : (
                     <div>Nenhuma receita para exibir.</div>
                   )}
@@ -237,14 +207,11 @@ const FinancialDashboard = () => {
                     {recentTransactions.map((t) => (
                       <TransactionItem key={t.id} $isDarkMode={isDarkMode}>
                         <TransactionInfo>
-                          <TransactionDescription $isDarkMode={isDarkMode}>{t.nome}</TransactionDescription>
+                          <TransactionDescription $isDarkMode={isDarkMode}>{t.nomeTransacao}</TransactionDescription>
                           <TransactionDate $isDarkMode={isDarkMode}>
-                            {new Date(t.createdAt).toLocaleDateString("pt-BR")}
+                            {new Date(t.dataTransacao).toLocaleDateString("pt-BR")}
                           </TransactionDate>
                         </TransactionInfo>
-                        <TransactionStatus $isDarkMode={isDarkMode} $status={getStatusVariant(t.status)}>
-                          {t.status}
-                        </TransactionStatus>
                         <TransactionAmount $isDarkMode={isDarkMode} $type={t.tipo}>
                           {formatCurrency(t.valor)}
                         </TransactionAmount>

@@ -55,19 +55,6 @@ const Chat = () => {
     "Como gerenciar projetos?",
   ];
 
-  const predefinedAnswers = {
-    "Como criar um novo cliente?":
-      "Para criar um novo cliente, vá até a seção 'Clientes' no menu principal e clique em 'Adicionar Cliente'. Preencha os dados obrigatórios como nome, CNPJ e telefone.",
-    "Como gerar um orçamento?":
-      "Para gerar um orçamento, acesse 'Orçamentos' no menu e clique em 'Novo Orçamento'. Selecione o cliente, adicione os serviços e valores, e clique em 'Gerar PDF'.",
-    "Como alterar meu perfil?":
-      "Vá até 'Perfil' no menu do usuário (canto superior direito). Lá você pode editar seus dados pessoais e informações da empresa.",
-    "Como exportar relatórios?":
-      "Esta funcionalidade estará disponível em breve. Você poderá exportar relatórios de clientes, orçamentos e projetos em PDF.",
-    "Como gerenciar projetos?":
-      "O módulo de gerenciamento de projetos está em desenvolvimento e estará disponível em breve na plataforma.",
-  };
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };

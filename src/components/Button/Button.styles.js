@@ -96,6 +96,19 @@ export const StyledButton = styled.button`
             transform: translateY(0);
           }
         `;
+      case "icon":
+        return `
+          background: transparent;
+          border: none;
+          padding: 0.5rem;
+          border-radius: 50%;
+          color: ${props.$color ? theme.colors[props.$color] : theme.colors.textSecondary};
+
+          &:hover:not(:disabled) {
+            background: ${theme.colors.surfaceHover};
+            color: ${props.$color ? theme.colors[props.$color] : theme.colors.textPrimary};
+          }
+        `;
       case "primary":
       default:
         return `

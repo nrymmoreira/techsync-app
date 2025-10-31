@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../../../contexts/ThemeContext";
 import Navbar from "../../Navbar/Navbar";
 import Button from "../../Button/Button";
 import Select from "../../Select/Select";
+import Modal from "../../Modal/Modal"; 
+import { financialService } from "../../../services/api";
 import {
   TransactionsContainer,
   TransactionsContent,
@@ -20,79 +22,75 @@ import {
   TableHeaderCell,
   TableBody,
   TransactionRow,
-  TransactionInfo,
-  TransactionDescription,
-  TransactionCategory,
   TransactionAmount,
-  TransactionStatus,
   EmptyState,
   EmptyStateIcon,
   EmptyStateTitle,
   EmptyStateDescription,
+  ActionButtons,
 } from "./TransactionsList.styles";
-import { authService } from "../../../services/api";
 
 const TransactionsList = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [transactionToDelete, setTransactionToDelete] = useState(null);
 
-  useEffect(() => {
-    async function fetchTransactions() {
-      try {
-        const data = await authService.getAllBudgets();
-        setTransactions(data);
-      } catch (error) {
-        console.error(error);
-      }
+  const fetchTransactions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await financialService.getAllTransactions();
+      setTransactions(data || []);
+      setError(null);
+    } catch (err) {
+      setError("Erro ao buscar as transações.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-
-    fetchTransactions();
   }, []);
 
-  const getStatusVariant = (status) => {
-    switch (status) {
-      case "PAGO":
-        return "success";
-      case "PENDENTE":
-        return "warning";
-      case "VENCIDO":
-        return "error";
-      default:
-        return "info";
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  const handleDeleteClick = (transaction) => {
+    setTransactionToDelete(transaction);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!transactionToDelete) return;
+    try {
+      await financialService.deleteTransaction(transactionToDelete.id);
+      setShowDeleteModal(false);
+      setTransactionToDelete(null);
+      fetchTransactions(); // Re-fetch transactions after deletion
+    } catch (err) {
+      console.error("Erro ao deletar transação:", err);
+      setError("Erro ao deletar a transação.");
     }
   };
 
   const filteredTransactions = transactions.filter((transaction) => {
     const searchTermLower = searchTerm.toLowerCase();
     const matchesSearch = (
-      (transaction.nome && transaction.nome.toLowerCase().includes(searchTermLower)) ||
-      (transaction.projeto?.nome && transaction.projeto.nome.toLowerCase().includes(searchTermLower)) ||
-      (transaction.cliente?.nome && transaction.cliente.nome.toLowerCase().includes(searchTermLower))
+      transaction.nomeTransacao.toLowerCase().includes(searchTermLower) ||
+      transaction.cliente.nome.toLowerCase().includes(searchTermLower)
     );
-
     const matchesType = typeFilter === "all" || transaction.tipo === typeFilter;
-
-    const matchesStatus =
-      statusFilter === "all" || transaction.status === statusFilter;
-
-    return matchesSearch && matchesType && matchesStatus;
+    return matchesSearch && matchesType;
   });
 
   const typeOptions = [
     { value: "all", label: "Todos os tipos" },
-    { value: "RECEITA", label: "Receitas" },
-    { value: "DESPESA", label: "Despesas" },
-  ];
-
-  const statusOptions = [
-    { value: "all", label: "Todos os status" },
-    { value: "PAGO", label: "Pago" },
-    { value: "PENDENTE", label: "Pendente" },
-    { value: "VENCIDO", label: "Vencido" },
+    { value: "ENTRADA", label: "Entrada" },
+    { value: "SAIDA", label: "Saída" },
   ];
 
   return (
@@ -102,11 +100,9 @@ const TransactionsList = () => {
         <TransactionsHeader>
           <HeaderContent>
             <div>
-              <PageTitle $isDarkMode={isDarkMode}>
-                Transações Financeiras
-              </PageTitle>
+              <PageTitle $isDarkMode={isDarkMode}>Transações Financeiras</PageTitle>
               <PageDescription $isDarkMode={isDarkMode}>
-                Gerencie todas as receitas e despesas da sua empresa
+                Gerencie todas as entradas e saídas da sua empresa
               </PageDescription>
             </div>
             <HeaderActions>
@@ -135,105 +131,94 @@ const TransactionsList = () => {
         <FiltersSection>
           <SearchInput
             type="text"
-            placeholder="Buscar por descrição, projeto ou cliente..."
+            placeholder="Buscar por nome da transação ou cliente..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             $isDarkMode={isDarkMode}
           />
-
           <div style={{ flex: "0 0 auto", minWidth: "180px" }}>
             <Select
               id="typeFilter"
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               options={typeOptions}
-              placeholder="Filtrar por tipo"
-              $isDarkMode={isDarkMode}
-            />
-          </div>
-
-          <div style={{ flex: "0 0 auto", minWidth: "180px" }}>
-            <Select
-              id="statusFilter"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              options={statusOptions}
-              placeholder="Filtrar por status"
               $isDarkMode={isDarkMode}
             />
           </div>
         </FiltersSection>
 
-        <TableContainer $isDarkMode={isDarkMode}>
-          <TransactionsTable $isDarkMode={isDarkMode}>
-            <TableHeader $isDarkMode={isDarkMode}>
-              <TransactionRow $isDarkMode={isDarkMode}>
-                <TableHeaderCell>Projeto/Cliente</TableHeaderCell>
-                <TableHeaderCell>Data de Vencimento</TableHeaderCell>
-                <TableHeaderCell>Status</TableHeaderCell>
-                <TableHeaderCell style={{ textAlign: "right" }}>
-                  Valor
-                </TableHeaderCell>
-              </TransactionRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTransactions.map((transaction) => (
-                <TransactionRow
-                  key={transaction.id}
-                  onClick={() =>
-                    navigate(`/financeiro/transacao/${transaction.id}`)
-                  }
-                  $isDarkMode={isDarkMode}
-                >
-                  <td>
-                    <TransactionCategory $isDarkMode={isDarkMode}>
-                      {transaction.projeto?.nome || transaction.cliente?.nome}
-                    </TransactionCategory>
-                  </td>
-                  <td>
-                    {new Date(transaction.createdAt).toLocaleDateString(
-                      "pt-BR"
-                    )}
-                  </td>
-                  <td>
-                    <TransactionStatus
-                      $isDarkMode={isDarkMode}
-                      $status={getStatusVariant(transaction.status)}
-                    >
-                      {transaction.status}
-                    </TransactionStatus>
-                  </td>
-                  <td>
-                    <TransactionAmount
-                      $isDarkMode={isDarkMode}
-                      $type={transaction.tipo}
-                    >
-                      {transaction.valor.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                    </TransactionAmount>
-                  </td>
-                </TransactionRow>
-              ))}
-            </TableBody>
-          </TransactionsTable>
-        </TableContainer>
+        {loading ? (
+          <p>Carregando...</p>
+        ) : error ? (
+          <p>{error}</p>
+        ) : (
+          <TableContainer $isDarkMode={isDarkMode}>
+            <TransactionsTable $isDarkMode={isDarkMode}>
+              <TableHeader $isDarkMode={isDarkMode}>
+                <tr>
+                  <TableHeaderCell>Nome da Transação</TableHeaderCell>
+                  <TableHeaderCell>Cliente</TableHeaderCell>
+                  <TableHeaderCell>Data</TableHeaderCell>
+                  <TableHeaderCell style={{ textAlign: "right" }}>Valor</TableHeaderCell>
+                  <TableHeaderCell>Ações</TableHeaderCell>
+                </tr>
+              </TableHeader>
+              <TableBody>
+                {filteredTransactions.map((transaction) => (
+                  <TransactionRow key={transaction.id} $isDarkMode={isDarkMode}>
+                    <td>{transaction.nomeTransacao}</td>
+                    <td>{transaction.cliente.nome}</td>
+                    <td>{new Date(transaction.dataTransacao).toLocaleDateString("pt-BR")}</td>
+                    <td>
+                      <TransactionAmount $isDarkMode={isDarkMode} $type={transaction.tipo}>
+                        {transaction.valor.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </TransactionAmount>
+                    </td>
+                    <td>
+                      <ActionButtons>
+                        <Button variant="icon" onClick={() => navigate(`/financeiro/transacao/${transaction.id}`)} $isDarkMode={isDarkMode}>
+                          <span className="material-symbols-outlined">edit</span>
+                        </Button>
+                        <Button variant="icon" onClick={() => handleDeleteClick(transaction)} $isDarkMode={isDarkMode} $color="error">
+                          <span className="material-symbols-outlined">delete</span>
+                        </Button>
+                      </ActionButtons>
+                    </td>
+                  </TransactionRow>
+                ))}
+              </TableBody>
+            </TransactionsTable>
+          </TableContainer>
+        )}
 
-        {filteredTransactions.length === 0 && (
+        {!loading && !error && filteredTransactions.length === 0 && (
           <EmptyState $isDarkMode={isDarkMode}>
-            <EmptyStateIcon className="material-symbols-outlined">
-              search_off
-            </EmptyStateIcon>
-            <EmptyStateTitle $isDarkMode={isDarkMode}>
-              Nenhuma transação encontrada
-            </EmptyStateTitle>
+            <EmptyStateIcon className="material-symbols-outlined">search_off</EmptyStateIcon>
+            <EmptyStateTitle $isDarkMode={isDarkMode}>Nenhuma transação encontrada</EmptyStateTitle>
             <EmptyStateDescription $isDarkMode={isDarkMode}>
               Tente ajustar seus filtros ou cadastre uma nova transação.
             </EmptyStateDescription>
           </EmptyState>
         )}
       </TransactionsContent>
+
+      {showDeleteModal && (
+        <Modal 
+          isOpen={showDeleteModal} 
+          onClose={() => setShowDeleteModal(false)} 
+          title="Confirmar Exclusão"
+          $isDarkMode={isDarkMode}
+        >
+          <p>Deseja realmente excluir a transação "{transactionToDelete?.nomeTransacao}"?</p>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)} $isDarkMode={isDarkMode}>Cancelar</Button>
+            <Button variant="error" onClick={confirmDelete} $isDarkMode={isDarkMode}>Excluir</Button>
+          </div>
+        </Modal>
+      )}
     </TransactionsContainer>
   );
 };
