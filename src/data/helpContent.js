@@ -1,3 +1,11 @@
+/*
+  helpContent copied from central-ajuda-crm/lib/help-content.ts
+  Notes:
+  - Image/assets (if needed) are stored under /public/faq-assets
+  - No image paths were found in the original content; to reference an image in an article/question,
+    include the path '/faq-assets/<filename.ext>' in the `answer` HTML/markdown.
+*/
+
 export const helpContent = {
   clientes: {
     title: "Clientes",

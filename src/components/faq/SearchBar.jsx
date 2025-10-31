@@ -71,6 +71,8 @@ export default function SearchBar() {
           onChange={(e) => setQuery(e.target.value)}
           icon={<Search size={18} />}
           style={{ flex: 1 }}
+          $hasClear={!!query}
+          $isDarkMode={isDarkMode}
         />
 
         {query && (

@@ -7,15 +7,7 @@ import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
 import helpContent from "../../data/helpContent";
 
-const Page = styled.div`
-  padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
-`;
-
-const Container = styled.div`
-  max-width: var(--faq-container-max-width, 980px);
-  margin: 0 auto;
-  padding: 0 16px;
-`;
+import { Page, Container, HeaderTitle, HeaderDesc } from "./faq.styles";
 
 function useQuery() {
   const { search } = useLocation();
@@ -58,8 +50,8 @@ export default function SearchResults() {
     <Layout>
       <Page $isDarkMode={isDarkMode}>
       <Container>
-        <h2 style={{ color: theme.colors.textPrimary }}>Resultados da busca</h2>
-        <p style={{ color: theme.colors.textSecondary }}>Busca: <strong>{q}</strong></p>
+        <HeaderTitle $isDarkMode={isDarkMode}>Resultados da busca</HeaderTitle>
+        <HeaderDesc $isDarkMode={isDarkMode}>Busca: <strong>{q}</strong></HeaderDesc>
 
         {results.length === 0 ? (
           <p style={{ color: theme.colors.textPrimary }}>Nenhum resultado encontrado.</p>

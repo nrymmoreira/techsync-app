@@ -5,18 +5,11 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { getTheme } from "../../styles/themes";
 import Layout from "../Layout/Layout";
 import helpContent from "../../data/helpContent";
+import { Page, Container, HeaderTitle, HeaderDesc, SearchWrapper, Breadcrumbs } from "./faq.styles";
 import { ChevronRight } from "lucide-react";
 import SearchBar from "./SearchBar";
 
-const Page = styled.div`
-  padding: var(--faq-page-vertical, 32px) var(--faq-page-horizontal, 24px);
-`;
-
-const Container = styled.div`
-  max-width: var(--faq-container-max-width, 980px);
-  margin: 0 auto;
-  padding: 0 16px;
-`;
+// Page and Container provided by ./faq.styles
 
 export default function Article() {
   const { category, article } = useParams();
@@ -55,29 +48,30 @@ export default function Article() {
     <Layout>
       <Page $isDarkMode={isDarkMode}>
       <Container>
-        <div className="mb-8">
+        <SearchWrapper>
           <SearchBar />
-        </div>
-        <nav style={{ marginBottom: 12, display: 'flex', gap: 8, alignItems: 'center', color: theme.colors.textSecondary }}>
-          <Link to="/" style={{ color: theme.colors.textSecondary }}>Home</Link>
+        </SearchWrapper>
+
+        <Breadcrumbs $isDarkMode={isDarkMode} aria-label="breadcrumb">
+          <Link to="/">Home</Link>
           <ChevronRight size={14} />
-          <Link to="/faq" style={{ color: theme.colors.textSecondary }}>FAQ</Link>
+          <Link to="/faq">FAQ</Link>
           <ChevronRight size={14} />
-          <Link to="/faq/base-conhecimento" style={{ color: theme.colors.textSecondary }}>Base de conhecimento</Link>
+          <Link to="/faq/base-conhecimento">Base de conhecimento</Link>
           <ChevronRight size={14} />
           <span style={{ color: theme.colors.textPrimary }}>{articleData.title}</span>
-        </nav>
+        </Breadcrumbs>
 
-        <h2 style={{ color: theme.colors.textPrimary }}>{articleData.title}</h2>
-        <p style={{ color: theme.colors.textSecondary }}>Categoria: {categoryData.title}</p>
+        <HeaderTitle $isDarkMode={isDarkMode}>{articleData.title}</HeaderTitle>
+        {/* <HeaderDesc $isDarkMode={isDarkMode}>Categoria: {categoryData.title}</HeaderDesc> */}
 
-        <article style={{ marginTop: 16 }}>
+        <article style={{ marginTop: 50 }}>
           <p style={{ color: theme.colors.textPrimary }}>{articleData.questions && articleData.questions.length > 0 ? articleData.questions[0].answer : 'Nenhum conteúdo disponível.'}</p>
         </article>
 
-        <section style={{ marginTop: 24 }}>
+        <section style={{ marginTop: 25 }}>
           <h3 style={{ color: theme.colors.textPrimary }}>Perguntas relacionadas</h3>
-          <div style={{ marginTop: 12, display: 'grid', gap: 12 }}>
+          <div style={{ marginTop: 22, display: 'grid', gap: 14 }}>
             {articleData.questions.map((q, idx) => (
               <Link key={idx} to={`/faq/base-conhecimento/${category}/${article}/${idx}`} style={{ textDecoration: 'none' }}>
                 <div style={{ padding: 16, borderRadius: 8, background: theme.colors.surface, border: `1px solid ${theme.colors.surfaceBorder}`, color: theme.colors.textPrimary }}>
