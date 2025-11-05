@@ -9,7 +9,6 @@ import LoginPage from "./components/LoginPage/LoginPage";
 import RegisterPage from "./components/RegisterPage/RegisterPage";
 import HomePage from "./components/HomePage/HomePage";
 import Perfil from "./components/Perfil/Perfil";
-import Configuracoes from "./components/Configuracoes/Configuracoes";
 import ClientsList from "./components/Clients/ClientsList/ClientsList";
 import ClientForm from "./components/Clients/ClientForm/ClientForm";
 import ClientDetail from "./components/Clients/ClientDetail/ClientDetail";
@@ -32,6 +31,7 @@ import Category from "./components/FAQ/Category";
 import Article from "./components/FAQ/Article";
 import Question from "./components/FAQ/Question";
 import ChatAssistant from "./components/FAQ/ChatAssistant";
+import Blockchain from "./components/blockchain/Blockchain";
 
 const isAuthenticated = () => {
   return localStorage.getItem("techsync-authenticated") === "true";
@@ -265,6 +265,7 @@ const AppContent = () => {
             </PrivateRoute>
           }
         />
+        <Route path="/blockchain" element={<Blockchain />} />
       </Routes>
 
       {/* Chat disponível em todas as páginas quando logado */}
